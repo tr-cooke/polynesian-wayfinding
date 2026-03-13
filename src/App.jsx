@@ -70,7 +70,7 @@ const STARS = [
 const ISLANDS = [
   { id: "hawaii",    name: "Hawaiʻi",          x: 380, y: 55,  module: 1, active: true,  label: "Module 1 · Star Compass" },
   { id: "marquesas", name: "Marquesas",         x: 530, y: 175, module: null, active: false },
-  { id: "tahiti",    name: "Tahiti · Raʻiatea", x: 385, y: 275, module: null, active: false },
+  { id: "tahiti",    name: "Tahiti · Raʻiatea", x: 385, y: 275, module: 2, active: true, label: "Module 2 · Sun Arc" },
   { id: "rarotonga", name: "Rarotonga",         x: 330, y: 315, module: 7,    active: false, label: "Final Voyage" },
   { id: "samoa",     name: "Sāmoa",            x: 245, y: 200, module: null, active: false },
   { id: "tonga",     name: "Tonga",             x: 210, y: 290, module: null, active: false },
@@ -126,6 +126,37 @@ const BAG_ITEMS = [
       { label: "Island Signs",    body: "Islands block (calm behind), refract (curves around sides), reflect (cross-chop in front). Range ~30-40 km for high islands." },
       { label: "Mau's Method",    body: "Lie in the hull and feel the swell direction through your whole body — separating swell from surface chop." },
     ],
+  },
+];
+
+/* ══════════════════════════════════════════════════════════════
+   SUN ARC DATA
+══════════════════════════════════════════════════════════════ */
+
+const SUN_SCENARIOS = [
+  {
+    id: "A", label: "Scenario A · Spring Equinox",
+    lat: 20, decl: 0, noonAlt: 70,
+    altOptions: [55, 63, 70, 78],
+    latOptions: [10, 20, 30, 40],
+  },
+  {
+    id: "B", label: "Scenario B · Winter Solstice",
+    lat: 20, decl: -23.5, noonAlt: 46.5,
+    altOptions: [35, 46.5, 58, 70],
+    latOptions: [10, 20, 30, 40],
+  },
+  {
+    id: "C", label: "Scenario C · Summer Solstice",
+    lat: 44, decl: 23.5, noonAlt: 69.5,
+    altOptions: [55, 62, 69.5, 77],
+    latOptions: [20, 30, 44, 55],
+  },
+  {
+    id: "D", label: "Scenario D · Autumn Equinox",
+    lat: 34, decl: 0, noonAlt: 56,
+    altOptions: [48, 56, 64, 72],
+    latOptions: [20, 34, 44, 55],
   },
 ];
 
@@ -575,6 +606,353 @@ function PaluPanel({ step, selHouse, selStar, hovHouse, hovStar, name, onBack, o
 }
 
 /* ══════════════════════════════════════════════════════════════
+   SKY ARC VIEW
+══════════════════════════════════════════════════════════════ */
+
+function SkyArc({ scenario, timeVal, step, selAlt, selLat, onTimeChange, onAltSelect, onLatSelect }) {
+  const SW = 560, SH = 300;
+  const horizY = SH - 32;
+  const zenithY = 26;
+  const eastX = 48, westX = SW - 48;
+  const centreX = (eastX + westX) / 2;
+
+  // Compute altitude (degrees) at a given minute offset from 6am
+  const altAt = mins => {
+    const ha = ((mins / 60) - 6) * 15 * Math.PI / 180;
+    const latR = scenario.lat * Math.PI / 180;
+    const declR = scenario.decl * Math.PI / 180;
+    return Math.asin(Math.max(-1, Math.min(1,
+      Math.sin(latR) * Math.sin(declR) + Math.cos(latR) * Math.cos(declR) * Math.cos(ha)
+    ))) * 180 / Math.PI;
+  };
+
+  const sunXY = mins => {
+    const alt = altAt(mins);
+    return {
+      x: eastX + (mins / 720) * (westX - eastX),
+      y: alt > 0 ? horizY - (alt / 90) * (horizY - zenithY) : horizY + 20,
+      alt,
+    };
+  };
+
+  // Arc path (above-horizon only)
+  const arcPts = [];
+  for (let i = 0; i <= 144; i++) {
+    const p = sunXY(i * 5);
+    if (p.alt > 0.3) arcPts.push(p);
+  }
+  const arcD = arcPts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+
+  const sun      = sunXY(step >= 2 ? 360 : timeVal);
+  const noon     = sunXY(360);
+  const isNearNoon = step === 1 && Math.abs(timeVal - 360) <= 10;
+
+  // Protractor arc — hand-drawn polyline to avoid SVG arc direction confusion
+  const pR = 44;
+  const protArcD = Array.from({ length: 22 }, (_, i) => {
+    const a = (i / 21) * scenario.noonAlt * Math.PI / 180;
+    return `${i === 0 ? "M" : "L"}${(centreX + pR * Math.cos(a)).toFixed(1)},${(horizY - pR * Math.sin(a)).toFixed(1)}`;
+  }).join(" ");
+
+  const fmtTime = m => `${Math.floor(m / 60) + 6}:${String(Math.floor(m % 60)).padStart(2, "0")}`;
+
+  const btnSty = (val, correct, isSel) => {
+    const right = isSel && val === correct;
+    const wrong = isSel && val !== correct;
+    return {
+      padding: "13px 6px", borderRadius: "6px", fontFamily: "Cinzel,serif",
+      fontSize: "15px", fontWeight: "700", cursor: "pointer",
+      border: `1px solid ${right ? "#FFD700" : wrong ? "#FF5533" : "#1A3A50"}`,
+      background: right ? "rgba(255,215,0,0.12)" : wrong ? "rgba(255,85,51,0.10)" : "rgba(255,255,255,0.03)",
+      color: right ? "#FFD700" : wrong ? "#FF6644" : "#4A7090",
+    };
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <svg viewBox={`0 0 ${SW} ${SH}`} style={{ width: "100%", borderRadius: "8px", background: "#050B1A" }}>
+        <defs>
+          <linearGradient id="skyG2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="#050B1A" />
+            <stop offset="65%"  stopColor="#091E38" />
+            <stop offset="100%" stopColor="#0E3A54" />
+          </linearGradient>
+          <filter id="sGlow">
+            <feGaussianBlur stdDeviation="5" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+        </defs>
+
+        <rect width={SW} height={SH} fill="url(#skyG2)" />
+
+        {/* Altitude reference lines */}
+        {[15, 30, 45, 60, 75].map(alt => {
+          const y = horizY - (alt / 90) * (horizY - zenithY);
+          return (
+            <g key={alt}>
+              <line x1={eastX - 4} y1={y} x2={westX + 4} y2={y}
+                stroke="#122840" strokeWidth="0.8" strokeDasharray="3,8" />
+              <text x={eastX - 8} y={y + 4} textAnchor="end"
+                fill="#1A3A58" fontSize="9" fontFamily="Cinzel,serif">{alt}°</text>
+            </g>
+          );
+        })}
+
+        {/* Ocean / horizon */}
+        <rect x={0} y={horizY} width={SW} height={SH - horizY} fill="#030810" />
+        <line x1={0} y1={horizY} x2={SW} y2={horizY} stroke="#1E6070" strokeWidth="1.5" />
+
+        {/* Cardinal labels */}
+        {[["EAST", eastX], ["SOUTH", centreX], ["WEST", westX]].map(([lbl, x]) => (
+          <text key={lbl} x={x} y={horizY - 5} textAnchor="middle"
+            fill="#1A5060" fontSize="8.5" fontFamily="Cinzel,serif">{lbl}</text>
+        ))}
+
+        {/* Zenith marker */}
+        <line x1={centreX - 10} y1={zenithY} x2={centreX + 10} y2={zenithY}
+          stroke="#1A2A40" strokeWidth="0.8" />
+        <text x={centreX} y={zenithY - 4} textAnchor="middle"
+          fill="#1A2840" fontSize="8" fontFamily="Cinzel,serif">ZENITH 90°</text>
+
+        {/* Sun arc path */}
+        {arcD && <path d={arcD} fill="none" stroke="#C87010" strokeWidth="1.4" opacity="0.4" strokeDasharray="5,6" />}
+
+        {/* Altitude measurement line + protractor — step 2+ */}
+        {step >= 2 && (
+          <g>
+            {/* Horizon baseline for protractor */}
+            <line x1={centreX} y1={horizY} x2={centreX + 60} y2={horizY}
+              stroke="#FFD060" strokeWidth="1" opacity="0.3" />
+            {/* Measurement line to sun */}
+            <line x1={centreX} y1={horizY} x2={noon.x} y2={noon.y}
+              stroke="#FFD060" strokeWidth="1.5" strokeDasharray="5,4" opacity="0.7" />
+            {/* Protractor arc */}
+            <path d={protArcD} fill="none" stroke="#FFD060" strokeWidth="1.2" opacity="0.5" />
+            {/* Angle label */}
+            <text x={noon.x + 12} y={noon.y - 6}
+              fill="#FFD060" fontSize="14" fontFamily="Cinzel,serif" fontWeight="700" opacity="0.95">
+              {step >= 3 ? `${scenario.noonAlt}°` : "?°"}
+            </text>
+          </g>
+        )}
+
+        {/* Sun */}
+        <g filter="url(#sGlow)">
+          <circle cx={sun.x} cy={sun.y} r={isNearNoon ? 11 : 8}
+            fill="#FFD060" opacity={isNearNoon ? 0.18 : 0.10} />
+          <circle cx={sun.x} cy={sun.y} r={isNearNoon ? 7 : 5} fill="#FFD060" />
+        </g>
+
+        {/* Noon lock label */}
+        {isNearNoon && (
+          <text x={centreX} y={zenithY + 18} textAnchor="middle"
+            fill="#FFD060" fontSize="9.5" fontFamily="Cinzel,serif" opacity="0.9">✦ LOCAL NOON</text>
+        )}
+
+        {/* Time display */}
+        {step === 1 && (
+          <text x={SW - 10} y={17} textAnchor="end"
+            fill="#2A6070" fontSize="11" fontFamily="Cinzel,serif">{fmtTime(timeVal)}</text>
+        )}
+      </svg>
+
+      {/* Time slider */}
+      {step === 1 && (
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <span style={{ fontFamily: "Cinzel,serif", fontSize: "9px", color: "#2A5060", width: "34px" }}>6:00</span>
+          <input type="range" min={0} max={720} step={1} value={timeVal}
+            onChange={e => onTimeChange(Number(e.target.value))}
+            style={{ flex: 1, accentColor: "#C8941A", cursor: "pointer" }} />
+          <span style={{ fontFamily: "Cinzel,serif", fontSize: "9px", color: "#2A5060", width: "34px", textAlign: "right" }}>18:00</span>
+        </div>
+      )}
+
+      {/* Altitude options */}
+      {step === 2 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ fontFamily: "Cinzel,serif", fontSize: "9px", color: "#3A6070", letterSpacing: "0.14em", textAlign: "center" }}>
+            WHAT IS THE SUN'S NOON ALTITUDE?
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "8px" }}>
+            {scenario.altOptions.map(alt => (
+              <button key={alt} onClick={() => onAltSelect(alt)}
+                style={btnSty(alt, scenario.noonAlt, selAlt === alt)}>
+                {alt}°
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Latitude options */}
+      {step === 3 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ fontFamily: "Cinzel,serif", fontSize: "9px", color: "#3A6070", letterSpacing: "0.14em", textAlign: "center" }}>
+            WHAT IS YOUR LATITUDE?
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "8px" }}>
+            {scenario.latOptions.map(lat => (
+              <button key={lat} onClick={() => onLatSelect(lat)}
+                style={btnSty(lat, scenario.lat, selLat === lat)}>
+                {lat}°N
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SUN ARC MODULE
+══════════════════════════════════════════════════════════════ */
+
+function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
+  const [step,    setStep]    = useState(1);
+  const [timeVal, setTimeVal] = useState(120);  // start at 8am
+  const [selAlt,  setSelAlt]  = useState(null);
+  const [selLat,  setSelLat]  = useState(null);
+
+  const sc = SUN_SCENARIOS[0];
+
+  const handleTimeChange = val => {
+    if (step !== 1) return;
+    setTimeVal(val);
+    if (Math.abs(val - 360) <= 10) {
+      setTimeout(() => setStep(s => s === 1 ? 2 : s), 700);
+    }
+  };
+
+  const handleAltSelect = alt => {
+    setSelAlt(alt);
+    if (alt === sc.noonAlt) setTimeout(() => setStep(3), 900);
+  };
+
+  const handleLatSelect = lat => {
+    setSelLat(lat);
+    if (lat === sc.lat) {
+      onComplete();
+      setTimeout(() => setStep(4), 900);
+    }
+  };
+
+  // Palu speech
+  let title = "", body = "";
+  if (step === 1) {
+    title = `E ${name}.`;
+    body = "You are six days out from Hawaiʻi. Cloud has hidden the stars for two nights. But Tama-nui-te-rā — the great sun — still crosses the sky. Drag the slider to find when he stands at his highest point.";
+  } else if (step === 2) {
+    if (selAlt && selAlt !== sc.noonAlt) {
+      title = "Look more carefully.";
+      body = `${selAlt}° would place the sun ${selAlt < sc.noonAlt ? "lower" : "higher"} than it stands. Count the 15° reference lines from the horizon, then choose again.`;
+    } else {
+      title = "There. Local noon.";
+      body = "The sun stands due south at his peak. Now read the angle between him and the horizon. Each dashed line marks 15°.";
+    }
+  } else if (step === 3) {
+    if (selLat && selLat !== sc.lat) {
+      title = "Check the arithmetic.";
+      body = `latitude = 90° − altitude = 90° − ${sc.noonAlt}° = ${90 - sc.noonAlt}°. Which answer is ${90 - sc.noonAlt}°N?`;
+    } else {
+      title = `${sc.noonAlt}°. That is it.`;
+      body = `The sun stands ${sc.noonAlt}° above the horizon at noon. At the equinox, no seasonal correction is needed. Latitude = 90° − altitude. Where are you standing on the ocean?`;
+    }
+  } else {
+    title = `${sc.lat}° north.`;
+    body = "You know exactly where you stand. No sextant, no instrument — only the angle of the sun and the knowledge of the season. Tama-nui-te-rā has spoken.";
+  }
+
+  const stepLabels = ["1 · Noon", "2 · Altitude", "3 · Latitude", "✦ Done"];
+
+  return (
+    <div style={{ width:"100%", height:"100%", background:"#04070E", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+
+      {/* Header */}
+      <div style={{ height:"44px", borderBottom:"1px solid #0E1826", background:"rgba(4,8,18,0.95)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>POLYNESIAN WAYFINDING</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#3A6070", letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
+      </div>
+
+      {/* Module bar */}
+      <div style={{ padding:"7px 22px", borderBottom:"1px solid #0E1826", background:"rgba(4,8,18,0.6)", flexShrink:0 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#D06030", letterSpacing:"0.16em" }}>MODULE 2 · TAMA-NUI-TE-RĀ</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#2A4858", marginLeft:"14px", letterSpacing:"0.1em" }}>THE SUN'S ARC · LATITUDE BY DAY</span>
+      </div>
+
+      {/* Body */}
+      <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
+
+        {/* Left panel */}
+        <div style={{ width:"260px", flexShrink:0, borderRight:"1px solid #0E1826", overflowY:"auto" }}>
+          <div style={{ display:"flex", flexDirection:"column", gap:"12px", padding:"18px", boxSizing:"border-box" }}>
+
+            {/* Nav buttons */}
+            <div style={{ display:"flex", gap:"8px" }}>
+              <button onClick={onBack} style={{ flex:1, background:"none", border:"1px solid #0E1826", borderRadius:"4px", color:"#2A4050", fontSize:"9px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"7px", cursor:"pointer" }}>← MAP</button>
+              <button onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":"#0E1826"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#2A4050", fontSize:"9px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"7px", cursor:"pointer" }}>
+                {unlocked.length > 0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
+              </button>
+            </div>
+
+            {/* Scenario card */}
+            <div style={{ background:"rgba(12,20,40,0.85)", border:"1px solid #1E3050", borderRadius:"7px", padding:"12px 14px" }}>
+              <div style={{ fontSize:"9px", letterSpacing:"0.18em", color:"#3A6070", fontFamily:"Cinzel,serif", marginBottom:"5px" }}>SCENARIO A · SPRING EQUINOX</div>
+              <div style={{ fontSize:"14px", color:"#C0DCF0", fontFamily:"Cinzel,serif", fontWeight:"700", marginBottom:"2px" }}>Mid-voyage · 20°N</div>
+              <div style={{ fontSize:"10.5px", color:"#507080", fontFamily:"Cinzel,serif" }}>March 20 · Observation 6am – 6pm</div>
+            </div>
+
+            {/* Step indicators */}
+            <div style={{ display:"flex", gap:"4px" }}>
+              {stepLabels.map((label, i) => {
+                const done = i + 1 < step, curr = i + 1 === step;
+                return (
+                  <div key={i} style={{ flex:1, textAlign:"center", padding:"5px 1px", fontSize:"7px", fontFamily:"Cinzel,serif", letterSpacing:"0.04em", background:curr?"rgba(208,96,48,0.18)":done?"rgba(26,120,110,0.18)":"rgba(255,255,255,0.03)", border:`1px solid ${curr?"#D06030":done?"#1A8870":"#1E3050"}`, borderRadius:"4px", color:curr?"#E07040":done?"#2BB5A0":"#3A5060" }}>
+                    {label}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Palu speech */}
+            <div style={{ background:"rgba(6,11,22,0.7)", border:"1px solid #161F34", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px", overflowY:"auto" }}>
+              <div style={{ fontSize:"9px", color:"#365060", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
+              <div style={{ fontSize:"14px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.45" }}>{title}</div>
+              <div style={{ fontSize:"12px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.65" }}>{body}</div>
+              {step === 1 && (
+                <div style={{ padding:"9px 12px", background:"rgba(18,55,80,0.4)", borderLeft:"2px solid #D06030", borderRadius:"0 4px 4px 0", fontSize:"11px", color:"#D08060", fontFamily:"Georgia,serif" }}>
+                  Drag the time slider below the sky to find noon.
+                </div>
+              )}
+              {step === 4 && (
+                <div style={{ padding:"11px", background:"rgba(208,96,48,0.10)", border:"1px solid rgba(208,96,48,0.28)", borderRadius:"6px", textAlign:"center", fontFamily:"Cinzel,serif", fontSize:"10px", color:"#D06030", letterSpacing:"0.09em" }}>
+                  ☀ SUN ARC ADDED TO YOUR BAG ☀
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+
+        {/* Right: sky view */}
+        <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"20px 24px", overflow:"hidden" }}>
+          <div style={{ width:"min(100%, 640px)" }}>
+            <SkyArc
+              scenario={sc} timeVal={timeVal} step={step}
+              selAlt={selAlt} selLat={selLat}
+              onTimeChange={handleTimeChange}
+              onAltSelect={handleAltSelect}
+              onLatSelect={handleLatSelect}
+            />
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
    WELCOME SCREEN
 ══════════════════════════════════════════════════════════════ */
 
@@ -683,7 +1061,7 @@ export default function App() {
       <NavigatorsBag open={bagOpen} onClose={() => setBagOpen(false)} unlocked={unlocked} />
 
       {screen === "map" && (
-        <VoyageMap name={name} onNavigate={m => m === 1 && setScreen("compass")} unlocked={unlocked} onOpenBag={() => setBagOpen(true)} onReset={handleReset} />
+        <VoyageMap name={name} onNavigate={m => { if (m===1) setScreen("compass"); if (m===2) setScreen("sunarc"); }} unlocked={unlocked} onOpenBag={() => setBagOpen(true)} onReset={handleReset} />
       )}
 
       {screen === "compass" && (
@@ -710,6 +1088,15 @@ export default function App() {
             </div>
           </div>
         </div>
+      )}
+      {screen === "sunarc" && (
+        <SunArcModule
+          name={name}
+          onBack={() => setScreen("map")}
+          onOpenBag={() => setBagOpen(true)}
+          unlocked={unlocked}
+          onComplete={() => unlock("sun_arc")}
+        />
       )}
     </>
   );
