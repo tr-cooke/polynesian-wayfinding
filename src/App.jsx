@@ -242,84 +242,71 @@ const WIND_SCENARIO = {
    BIRD DATA
 ══════════════════════════════════════════════════════════════ */
 
+const BIRD_TYPE_META = {
+  land:      { fill:"#00C896", faint:"rgba(0,200,150,0.12)",  label:"Land signal bird",  explain:"Nests on shore — follow it toward land" },
+  trap:      { fill:"#FF6B4A", faint:"rgba(255,107,74,0.12)", label:"Pelagic trap",       explain:"Lives at sea — following it leads nowhere" },
+  carrier:   { fill:"#FFB830", faint:"rgba(255,184,48,0.12)", label:"Carrier tool",       explain:"Brought aboard — release to find land" },
+  migratory: { fill:"#48CAE4", faint:"rgba(72,202,228,0.12)", label:"Migratory bird",     explain:"Seasonal direction signal, not land proximity" },
+};
+
 const BIRDS = [
   {
-    id: "white_tern",
-    name: "Manu-o-kū",
-    latin: "Gygis alba",
-    label: "White Tern",
-    range: 200,
-    type: "land",       // land = reliable land signal
-    color: "#E8E8D8",
-    wingSpan: 34,
+    id: "white_tern", name: "Manu-o-kū", latin: "Gygis alba", label: "White Tern",
+    range: 200, type: "land", color: "#00C896",
     desc: "Brilliant white, delicate. Flies up to 200 km from its nesting island. At dawn, flying away from a point means land is behind it. In the evening, follow it home.",
-    signal: "LAND WITHIN 200 KM",
-    signalColor: "#2AB870",
+    signal: "LAND WITHIN 200 KM", signalColor: "#00C896",
+    photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Gygis_alba_05.JPG/400px-Gygis_alba_05.JPG",
+    photoCredit: "Wikimedia Commons · CC BY-SA 3.0",
   },
   {
-    id: "noddy",
-    name: "Noio",
-    latin: "Anous minutus",
-    label: "Black Noddy Tern",
-    range: 65,
-    type: "land",
-    color: "#2A3028",
-    wingSpan: 26,
+    id: "noddy", name: "Noio", latin: "Anous minutus", label: "Black Noddy Tern",
+    range: 65, type: "land", color: "#00C896",
     desc: "Dark brown, smaller. Rarely ventures beyond 65 km from its nesting island. Sighting means you are very close. Multiple noddies circling means land is just below the horizon.",
-    signal: "LAND WITHIN 65 KM",
-    signalColor: "#30D080",
+    signal: "LAND WITHIN 65 KM", signalColor: "#00C896",
+    photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Anous_minutus_by_Gregg_Yan_02.jpg/400px-Anous_minutus_by_Gregg_Yan_02.jpg",
+    photoCredit: "Gregg Yan · Wikimedia Commons · CC BY-SA 3.0",
   },
   {
-    id: "iwa_pelagic",
-    name: "ʻIwa",
-    latin: "Fregata minor",
-    label: "Frigatebird (pelagic)",
-    range: null,
-    type: "trap",       // trap = unreliable, do not follow
-    color: "#1A1A28",
-    wingSpan: 52,
+    id: "iwa_pelagic", name: "ʻIwa", latin: "Fregata minor", label: "Frigatebird (pelagic)",
+    range: null, type: "trap", color: "#FF6B4A",
     desc: "Long forked tail, hooked beak. Sleeps on the open ocean for weeks without landing. A frigatebird over open water tells you nothing about land. Do not follow it.",
-    signal: "NO LAND SIGNAL",
-    signalColor: "#C04030",
+    signal: "NO LAND SIGNAL — IGNORE", signalColor: "#FF6B4A",
+    photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Fregata_minor-juvenile_male_soaring.jpg/400px-Fregata_minor-juvenile_male_soaring.jpg",
+    photoCredit: "Wikimedia Commons · Public Domain",
   },
   {
-    id: "iwa_carrier",
-    name: "ʻIwa (carried)",
-    latin: "Fregata minor",
-    label: "Carrier Frigatebird",
-    range: null,
-    type: "carrier",    // carrier = strategic tool, kept in cage
-    color: "#1A1A28",
-    wingSpan: 52,
+    id: "iwa_carrier", name: "ʻIwa (carried)", latin: "Fregata minor", label: "Carrier Frigatebird",
+    range: null, type: "carrier", color: "#FFB830",
     desc: "The same bird — but kept in a cage on the waka. Release it when you suspect land is near. If it circles and returns to the canoe, no land is close. If it flies away and does not return, it has found land and is flying toward it.",
-    signal: "RELEASE WHEN LAND SUSPECTED",
-    signalColor: "#C8941A",
+    signal: "RELEASE WHEN LAND SUSPECTED", signalColor: "#FFB830",
+    photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Fregata_minor-juvenile_male_soaring.jpg/400px-Fregata_minor-juvenile_male_soaring.jpg",
+    photoCredit: "Wikimedia Commons · Public Domain",
   },
   {
-    id: "golden_plover",
-    name: "Kōlea",
-    latin: "Pluvialis fulva",
-    label: "Pacific Golden Plover",
-    range: null,
-    type: "migratory",  // migratory = directional signal, not land proximity
-    color: "#8A7030",
-    wingSpan: 28,
+    id: "golden_plover", name: "Kōlea", latin: "Pluvialis fulva", label: "Pacific Golden Plover",
+    range: null, type: "migratory", color: "#48CAE4",
     desc: "Migrates annually between Alaska and Hawaiʻi — 4,800 km non-stop. Flocks flying in formation give a directional bearing, not a proximity signal. They are flying toward a specific destination — watch which way.",
-    signal: "DIRECTIONAL BEARING ONLY",
-    signalColor: "#C8941A",
+    signal: "DIRECTIONAL BEARING ONLY", signalColor: "#48CAE4",
+    photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Pacific_golden_plover_%28Pluvialis_fulva%29_%2823444429066%29.jpg/400px-Pacific_golden_plover_%28Pluvialis_fulva%29_%2823444429066%29.jpg",
+    photoCredit: "Wikimedia Commons · CC BY 2.0",
+    migration: {
+      south: { from:{ name:"Alaska", x:80,  y:32  }, to:{ name:"Hawaiʻi", x:176, y:178 }, ctrl:{ x:30,  y:120 }, label:"Southbound Aug–Oct" },
+      north: { from:{ name:"Hawaiʻi", x:188, y:172 }, to:{ name:"Alaska",  x:92,  y:38  }, ctrl:{ x:230, y:88  }, label:"Northbound Apr–May" },
+      note: "4,800 km non-stop over open ocean",
+    },
   },
   {
-    id: "long_tailed_cuckoo",
-    name: "Koekoea",
-    latin: "Urodynamis taitensis",
-    label: "Long-tailed Cuckoo",
-    range: null,
-    type: "migratory",
-    color: "#5A4820",
-    wingSpan: 22,
+    id: "long_tailed_cuckoo", name: "Koekoea", latin: "Urodynamis taitensis", label: "Long-tailed Cuckoo",
+    range: null, type: "migratory", color: "#48CAE4",
     desc: "Migrates from Aotearoa to the tropical Pacific in autumn — and back in spring. Polynesian navigators used its seasonal appearance as a calendar. Follow its spring flight toward Aotearoa.",
-    signal: "SEASONAL CALENDAR SIGNAL",
-    signalColor: "#C8941A",
+    signal: "SEASONAL CALENDAR SIGNAL", signalColor: "#48CAE4",
+    photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Long-tailed_Cuckoo.jpg/400px-Long-tailed_Cuckoo.jpg",
+    photoCredit: "J. G. Keulemans · Wikimedia Commons · Public Domain",
+    migration: {
+      south: { from:{ name:"Aotearoa", x:60,  y:186 }, to:{ name:"Tropical Pacific", x:196, y:52  }, ctrl:{ x:20,  y:100 }, label:"Northbound Sep–Nov (to Aotearoa)" },
+      north: { from:{ name:"Tropical Pacific", x:208, y:60  }, to:{ name:"Aotearoa",  x:72,  y:194 }, ctrl:{ x:236, y:140 }, label:"Southbound Feb–Apr (to Pacific)" },
+      note: "2,500–6,000 km across open ocean",
+    },
   },
 ];
 
@@ -1999,51 +1986,148 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
    BIRD MODULE
 ══════════════════════════════════════════════════════════════ */
 
-// SVG bird silhouette — schematic shape keyed by bird id
 function BirdSilhouette({ birdId, color, size = 48 }) {
-  const s = size;
+  const h = size * 0.6;
+  // Each silhouette on a 60x36 viewBox — distinct wing shape + tail per species
   const shapes = {
-    white_tern:      `M${s*.5},${s*.35} C${s*.3},${s*.2} ${s*.05},${s*.38} ${s*.05},${s*.5} C${s*.05},${s*.38} ${s*.3},${s*.55} ${s*.5},${s*.48} C${s*.7},${s*.55} ${s*.95},${s*.38} ${s*.95},${s*.5} C${s*.95},${s*.38} ${s*.7},${s*.2} ${s*.5},${s*.35}Z M${s*.5},${s*.35} L${s*.5},${s*.72}`,
-    noddy:           `M${s*.5},${s*.3} C${s*.28},${s*.18} ${s*.05},${s*.4} ${s*.08},${s*.52} C${s*.08},${s*.4} ${s*.3},${s*.58} ${s*.5},${s*.5} C${s*.7},${s*.58} ${s*.92},${s*.4} ${s*.92},${s*.52} C${s*.95},${s*.4} ${s*.72},${s*.18} ${s*.5},${s*.3}Z M${s*.5},${s*.5} L${s*.42},${s*.75} M${s*.5},${s*.5} L${s*.58},${s*.75}`,
-    iwa_pelagic:     `M${s*.5},${s*.28} C${s*.25},${s*.15} ${s*.02},${s*.38} ${s*.04},${s*.52} C${s*.04},${s*.38} ${s*.28},${s*.56} ${s*.5},${s*.46} C${s*.72},${s*.56} ${s*.96},${s*.38} ${s*.96},${s*.52} C${s*.98},${s*.38} ${s*.75},${s*.15} ${s*.5},${s*.28}Z M${s*.5},${s*.46} L${s*.38},${s*.82} M${s*.5},${s*.46} L${s*.62},${s*.82}`,
-    iwa_carrier:     `M${s*.5},${s*.28} C${s*.25},${s*.15} ${s*.02},${s*.38} ${s*.04},${s*.52} C${s*.04},${s*.38} ${s*.28},${s*.56} ${s*.5},${s*.46} C${s*.72},${s*.56} ${s*.96},${s*.38} ${s*.96},${s*.52} C${s*.98},${s*.38} ${s*.75},${s*.15} ${s*.5},${s*.28}Z M${s*.5},${s*.46} L${s*.38},${s*.82} M${s*.5},${s*.46} L${s*.62},${s*.82}`,
-    golden_plover:   `M${s*.5},${s*.32} C${s*.35},${s*.22} ${s*.12},${s*.4} ${s*.15},${s*.52} C${s*.15},${s*.4} ${s*.35},${s*.58} ${s*.5},${s*.52} C${s*.65},${s*.58} ${s*.85},${s*.4} ${s*.85},${s*.52} C${s*.88},${s*.4} ${s*.65},${s*.22} ${s*.5},${s*.32}Z M${s*.5},${s*.52} L${s*.5},${s*.72}`,
-    long_tailed_cuckoo: `M${s*.5},${s*.3} C${s*.35},${s*.2} ${s*.15},${s*.38} ${s*.18},${s*.5} C${s*.18},${s*.38} ${s*.38},${s*.55} ${s*.5},${s*.48} C${s*.62},${s*.55} ${s*.82},${s*.38} ${s*.82},${s*.5} C${s*.85},${s*.38} ${s*.65},${s*.2} ${s*.5},${s*.3}Z M${s*.5},${s*.48} L${s*.5},${s*.88}`,
+    // White tern — long swept-back wings like a swift, tiny body, forked tail
+    white_tern:
+      `<path d="M2,16 C10,4 22,14 30,16 C38,14 50,4 58,16" strokeWidth="2" fill="none" strokeLinecap="round"/>
+       <ellipse cx="30" cy="16" rx="2.5" ry="2" fill="currentColor"/>
+       <line x1="28" y1="18" x2="25" y2="26" strokeWidth="1.6" strokeLinecap="round"/>
+       <line x1="32" y1="18" x2="35" y2="26" strokeWidth="1.6" strokeLinecap="round"/>`,
+    // Noddy — broader rounder wings, heavier body, wedge tail (no fork)
+    noddy:
+      `<path d="M3,17 C10,7 20,15 30,17 C40,15 50,7 57,17" strokeWidth="2.4" fill="none" strokeLinecap="round"/>
+       <ellipse cx="30" cy="17" rx="3.2" ry="2.8" fill="currentColor"/>
+       <line x1="30" y1="20" x2="30" y2="29" strokeWidth="2.2" strokeLinecap="round"/>`,
+    // ʻIwa — bent-M kink at wrist, deeply forked long tail
+    iwa_pelagic:
+      `<path d="M0,18 C6,8 13,20 20,16 C24,13 30,18 36,16 C43,20 50,8 60,18" strokeWidth="2" fill="none" strokeLinecap="round"/>
+       <ellipse cx="30" cy="17" rx="2.5" ry="2" fill="currentColor"/>
+       <line x1="27" y1="19" x2="22" y2="30" strokeWidth="1.8" strokeLinecap="round"/>
+       <line x1="33" y1="19" x2="38" y2="30" strokeWidth="1.8" strokeLinecap="round"/>`,
+    iwa_carrier:
+      `<path d="M0,18 C6,8 13,20 20,16 C24,13 30,18 36,16 C43,20 50,8 60,18" strokeWidth="2" fill="none" strokeLinecap="round"/>
+       <ellipse cx="30" cy="17" rx="2.5" ry="2" fill="currentColor"/>
+       <line x1="27" y1="19" x2="22" y2="30" strokeWidth="1.8" strokeLinecap="round"/>
+       <line x1="33" y1="19" x2="38" y2="30" strokeWidth="1.8" strokeLinecap="round"/>`,
+    // Kōlea — stubby compact shorebird wings, fat round body, very short straight tail
+    golden_plover:
+      `<path d="M8,16 C14,9 22,15 30,16 C38,15 46,9 52,16" strokeWidth="2.4" fill="none" strokeLinecap="round"/>
+       <ellipse cx="30" cy="16" rx="4.2" ry="3.4" fill="currentColor"/>
+       <line x1="30" y1="19" x2="30" y2="24" strokeWidth="2.2" strokeLinecap="round"/>`,
+    // Koekoea — medium wings, tail nearly as long as the body with chevron tip
+    long_tailed_cuckoo:
+      `<path d="M5,15 C12,7 20,14 30,15 C40,14 48,7 55,15" strokeWidth="2.2" fill="none" strokeLinecap="round"/>
+       <ellipse cx="30" cy="15" rx="3" ry="2.5" fill="currentColor"/>
+       <line x1="30" y1="18" x2="30" y2="34" strokeWidth="2.2" strokeLinecap="round"/>
+       <path d="M27,30 L30,34 L33,30" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>`,
   };
   const d = shapes[birdId] || shapes.noddy;
   return (
-    <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
-      <path d={d} fill={color} stroke={color} strokeWidth="1" strokeLinejoin="round" opacity="0.9" />
+    <svg width={size} height={h} viewBox="0 0 60 36" style={{ color, filter:`drop-shadow(0 0 6px ${color}66)` }}>
+      <g stroke="currentColor">{/* eslint-disable-next-line react/no-danger */}
+        <g dangerouslySetInnerHTML={{ __html: d }} />
+      </g>
     </svg>
   );
 }
 
-// Range circle diagram
 function RangeDiagram({ bird }) {
-  const W = 180, H = 100;
-  const cx = 90, cy = 75;
-  const maxR = 78;
-  const ranges = [{ r: maxR, label: "200 km", color: "#1A5050" }, { r: maxR * 0.325, label: "65 km", color: "#1A7060" }];
+  const W = 320, H = 180, cx = 160, cy = 95;
+  const r200 = 78, r65 = Math.round(r200 * 65 / 200);
+  const pal = BIRD_TYPE_META[bird.type] || BIRD_TYPE_META.land;
+  const is200 = bird.range === 200;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", opacity: 0.85 }}>
-      {ranges.map((ring, i) => (
-        <g key={i}>
-          <circle cx={cx} cy={cy} r={ring.r} fill="none" stroke={ring.color} strokeWidth="0.8" strokeDasharray="3,5" />
-          <text x={cx + ring.r + 3} y={cy + 4} fill={ring.color} fontSize="7" fontFamily="Cinzel,serif">{ring.label}</text>
-        </g>
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", background:"rgba(3,12,8,0.7)", borderRadius:"6px" }}>
+      {Array.from({length:5},(_,i) => <line key={i} x1={0} y1={20+i*38} x2={W} y2={20+i*38} stroke="#0A1E14" strokeWidth="0.5"/>)}
+      {Array.from({length:8},(_,i) => <line key={i} x1={20+i*42} y1={0} x2={20+i*42} y2={H} stroke="#0A1E14" strokeWidth="0.5"/>)}
+
+      <circle cx={cx} cy={cy} r={r200}
+        fill={is200 ? "rgba(0,200,150,0.07)" : "none"}
+        stroke={is200 ? pal.fill : "#1A4030"}
+        strokeWidth={is200 ? 1.8 : 0.8}
+        strokeDasharray={is200 ? "none" : "4,6"} />
+      <text x={cx} y={cy - r200 - 6} textAnchor="middle"
+        fill={is200 ? pal.fill : "#1A4030"} fontSize="9" fontFamily="Cinzel,serif">200 km</text>
+
+      <circle cx={cx} cy={cy} r={r65}
+        fill={!is200 ? "rgba(0,200,150,0.14)" : "none"}
+        stroke={!is200 ? pal.fill : "#1A4030"}
+        strokeWidth={!is200 ? 1.8 : 0.8}
+        strokeDasharray={!is200 ? "none" : "3,5"} />
+      <text x={cx} y={cy - r65 - 5} textAnchor="middle"
+        fill={!is200 ? pal.fill : "#1A4030"} fontSize="9" fontFamily="Cinzel,serif">65 km</text>
+
+      <circle cx={cx} cy={cy} r={7} fill="#0E2818" stroke="#2A5040" strokeWidth="1.5"/>
+      <text x={cx} y={cy + 4} textAnchor="middle" fill="#3A8060" fontSize="6.5" fontFamily="Cinzel,serif">ISLAND</text>
+
+      {[["N",cx,10],["S",cx,H-4],["W",8,cy+4],["E",W-8,cy+4]].map(([l,x,y])=>(
+        <text key={l} x={x} y={y} textAnchor="middle" fill="#1A4030" fontSize="8" fontFamily="Cinzel,serif">{l}</text>
       ))}
-      {/* Island dot */}
-      <circle cx={cx} cy={cy} r={4} fill="#2A5040" stroke="#3A7050" strokeWidth="1" />
-      <text x={cx} y={cy - 8} textAnchor="middle" fill="#2A5040" fontSize="7" fontFamily="Cinzel,serif">ISLAND</text>
-      {/* Active range for this bird */}
-      {bird.range && (
-        <circle cx={cx} cy={cy}
-          r={bird.range === 200 ? maxR : maxR * 0.325}
-          fill={bird.range === 200 ? "rgba(42,184,112,0.08)" : "rgba(48,208,128,0.12)"}
-          stroke={bird.range === 200 ? "#2AB870" : "#30D080"}
-          strokeWidth="1.4" />
-      )}
     </svg>
+  );
+}
+
+function MigrationMap({ migration, color }) {
+  const { south, north, note } = migration;
+  const bezPt = (x0,y0,cx,cy,x1,y1,t) => {
+    const mt=1-t;
+    return { x:mt*mt*x0+2*mt*t*cx+t*t*x1, y:mt*mt*y0+2*mt*t*cy+t*t*y1 };
+  };
+  const arrow = (x0,y0,cx0,cy0,x1,y1,sz=10) => {
+    const p0=bezPt(x0,y0,cx0,cy0,x1,y1,0.85);
+    const p1=bezPt(x0,y0,cx0,cy0,x1,y1,0.95);
+    const dx=p1.x-p0.x, dy=p1.y-p0.y, len=Math.sqrt(dx*dx+dy*dy);
+    const ux=dx/len, uy=dy/len;
+    return `${x1.toFixed(1)},${y1.toFixed(1)} ${(x1-ux*sz-uy*sz*0.45).toFixed(1)},${(y1-uy*sz+ux*sz*0.45).toFixed(1)} ${(x1-ux*sz+uy*sz*0.45).toFixed(1)},${(y1-uy*sz-ux*sz*0.45).toFixed(1)}`;
+  };
+  return (
+    <div style={{ background:"rgba(4,14,10,0.7)", border:"1px solid #1A3828", borderRadius:"8px", padding:"14px 16px" }}>
+      <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A6050", letterSpacing:"0.16em", marginBottom:"10px" }}>MIGRATION ROUTES</div>
+      <svg viewBox="0 0 260 224" style={{ width:"100%", display:"block" }}>
+        <rect width="260" height="224" fill="#030C08"/>
+        {Array.from({length:8},(_,i)=><line key={i} x1={0} y1={i*32} x2={260} y2={i*32} stroke="#0A1E14" strokeWidth="0.5"/>)}
+        {Array.from({length:8},(_,i)=><line key={i} x1={i*38} y1={0} x2={i*38} y2={224} stroke="#0A1E14" strokeWidth="0.5"/>)}
+
+        {/* Southbound — solid long-dash, full opacity */}
+        <path d={`M${south.from.x},${south.from.y} Q${south.ctrl.x},${south.ctrl.y} ${south.to.x},${south.to.y}`}
+          fill="none" stroke={color} strokeWidth="2" strokeDasharray="9,5" opacity="0.9"/>
+        <polygon points={arrow(south.from.x,south.from.y,south.ctrl.x,south.ctrl.y,south.to.x,south.to.y)}
+          fill={color} opacity="0.95"/>
+
+        {/* Northbound — dotted short-dash, lighter */}
+        <path d={`M${north.from.x},${north.from.y} Q${north.ctrl.x},${north.ctrl.y} ${north.to.x},${north.to.y}`}
+          fill="none" stroke={color} strokeWidth="1.6" strokeDasharray="2,6" opacity="0.55"/>
+        <polygon points={arrow(north.from.x,north.from.y,north.ctrl.x,north.ctrl.y,north.to.x,north.to.y,9)}
+          fill={color} opacity="0.6"/>
+
+        <circle cx={south.from.x} cy={south.from.y} r={5} fill={color} opacity="0.95"/>
+        <circle cx={south.to.x}   cy={south.to.y}   r={5} fill={color} opacity="0.7"/>
+        <text x={south.from.x} y={south.from.y - 10} textAnchor={south.from.x < 130 ? "start" : "middle"}
+          fill={color} fontSize="10" fontFamily="Cinzel,serif" opacity="0.95">{south.from.name}</text>
+        <text x={south.to.x}   y={south.to.y   - 10} textAnchor={south.to.x > 130 ? "end" : "middle"}
+          fill={color} fontSize="10" fontFamily="Cinzel,serif" opacity="0.75">{south.to.name}</text>
+      </svg>
+      <div style={{ display:"flex", flexDirection:"column", gap:"5px", marginTop:"8px" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:"10px", fontSize:"10px", color, fontFamily:"Cinzel,serif" }}>
+          <svg width="36" height="10" viewBox="0 0 36 10">
+            <line x1="0" y1="5" x2="26" y2="5" stroke={color} strokeWidth="2" strokeDasharray="9,5"/>
+            <polygon points="36,5 26,2 26,8" fill={color}/>
+          </svg>
+          {south.label}
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:"10px", fontSize:"10px", color, fontFamily:"Cinzel,serif", opacity:0.6 }}>
+          <svg width="36" height="10" viewBox="0 0 36 10">
+            <line x1="0" y1="5" x2="26" y2="5" stroke={color} strokeWidth="1.6" strokeDasharray="2,6"/>
+            <polygon points="36,5 26,2 26,8" fill={color}/>
+          </svg>
+          {north.label}
+        </div>
+        <div style={{ fontSize:"9.5px", color:"#2A6050", marginTop:"2px", fontFamily:"Cinzel,serif" }}>{note}</div>
+      </div>
+    </div>
   );
 }
 
@@ -2199,65 +2283,111 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
             <div style={{ flex:1, display:"flex", overflow:"hidden" }}>
               {/* Bird list */}
               <div style={{ width:"200px", flexShrink:0, borderRight:"1px solid #0A1E18", overflowY:"auto", padding:"12px 8px" }}>
-                {BIRDS.map((bird, i) => (
-                  <div key={bird.id} onClick={() => setActiveCard(i)}
-                    style={{ padding:"10px 12px", marginBottom:"4px", borderRadius:"6px", cursor:"pointer",
-                      border:`1px solid ${activeCard===i?bird.color+"66":"#0A1818"}`,
-                      background:activeCard===i?`${bird.color}12`:"rgba(255,255,255,0.02)" }}>
-                    <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-                      <BirdSilhouette birdId={bird.id} color={bird.color} size={28} />
-                      <div>
-                        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", fontWeight:"700", color:activeCard===i?"#D0C8A8":"#2A4038" }}>{bird.name}</div>
-                        <div style={{ fontFamily:"Cinzel,serif", fontSize:"8px", color:activeCard===i?bird.signalColor:"#1A3028", letterSpacing:"0.06em", marginTop:"1px" }}>
-                          {bird.type === "land" ? `▲ ${bird.range}km` : bird.type === "trap" ? "✕ NO SIGNAL" : bird.type === "carrier" ? "◆ TOOL" : "→ BEARING"}
+                {BIRDS.map((bird, i) => {
+                  const pal = BIRD_TYPE_META[bird.type] || BIRD_TYPE_META.land;
+                  return (
+                    <div key={bird.id} onClick={() => setActiveCard(i)}
+                      style={{ padding:"10px 12px", marginBottom:"4px", borderRadius:"6px", cursor:"pointer",
+                        border:`1px solid ${activeCard===i ? pal.fill+"66" : "#0A1818"}`,
+                        background:activeCard===i ? `${pal.fill}10` : "rgba(255,255,255,0.02)" }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+                        <BirdSilhouette birdId={bird.id} color={activeCard===i ? pal.fill : "#2A5040"} size={28} />
+                        <div>
+                          <div style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", fontWeight:"700", color:activeCard===i ? "#D0C8A8" : "#2A4038" }}>{bird.name}</div>
+                          <div style={{ fontFamily:"Cinzel,serif", fontSize:"8px", color:activeCard===i ? pal.fill : "#1A3028", letterSpacing:"0.06em", marginTop:"1px" }}>
+                            {pal.label}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Bird detail card */}
               {(() => {
                 const bird = BIRDS[activeCard];
+                const pal  = BIRD_TYPE_META[bird.type] || BIRD_TYPE_META.land;
                 return (
-                  <div style={{ flex:1, padding:"24px 28px", overflowY:"auto", display:"flex", flexDirection:"column", gap:"16px" }}>
+                  <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column" }}>
 
-                    {/* Header */}
-                    <div style={{ display:"flex", alignItems:"flex-start", gap:"18px" }}>
-                      <div style={{ flexShrink:0, padding:"12px", background:"rgba(255,255,255,0.03)", borderRadius:"10px", border:`1px solid ${bird.color}22` }}>
-                        <BirdSilhouette birdId={bird.id} color={bird.color} size={56} />
-                      </div>
-                      <div>
-                        <div style={{ fontFamily:"Cinzel,serif", fontSize:"20px", fontWeight:"700", color:"#D0C0A0", lineHeight:"1.2" }}>{bird.name}</div>
-                        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A4038", letterSpacing:"0.06em", marginTop:"3px" }}>{bird.label}</div>
-                        <div style={{ fontFamily:"Georgia,serif", fontSize:"10px", color:"#1A3028", fontStyle:"italic", marginTop:"2px" }}>{bird.latin}</div>
-                        <div style={{ marginTop:"8px", display:"inline-block", padding:"4px 10px", borderRadius:"4px", fontFamily:"Cinzel,serif", fontSize:"9px", letterSpacing:"0.1em", background:`${bird.signalColor}18`, border:`1px solid ${bird.signalColor}44`, color:bird.signalColor }}>
-                          {bird.signal}
+                    {/* Top row: left column + right column */}
+                    <div style={{ display:"flex", borderBottom:"1px solid #0A2018" }}>
+
+                      {/* Left column — silhouette + thumbnail */}
+                      <div style={{ width:"110px", flexShrink:0, borderRight:"1px solid #0A2018", background:"#07110A", display:"flex", flexDirection:"column" }}>
+                        <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"16px 8px" }}>
+                          <BirdSilhouette birdId={bird.id} color={pal.fill} size={80} />
+                        </div>
+                        <div style={{ overflow:"hidden", borderTop:"1px solid #0A2018", height:"100px" }}>
+                          {bird.photo && (
+                            <img src={bird.photo} alt={bird.label}
+                              style={{ width:"100%", height:"100px", objectFit:"cover", objectPosition:"center 25%", display:"block" }}
+                              onError={e => { e.target.style.display = "none"; }} />
+                          )}
                         </div>
                       </div>
+
+                      {/* Right column — text */}
+                      <div style={{ flex:1, padding:"16px 18px", display:"flex", flexDirection:"column", gap:"10px" }}>
+                        <div>
+                          <div style={{ fontFamily:"Cinzel,serif", fontSize:"18px", fontWeight:"700", color:"#E8D8A8", lineHeight:"1.2" }}>{bird.name}</div>
+                          <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A6050", letterSpacing:"0.05em", marginTop:"2px" }}>{bird.label}</div>
+                          <div style={{ fontFamily:"Georgia,serif", fontSize:"10px", color:"#1A3828", fontStyle:"italic", marginTop:"1px" }}>{bird.latin}</div>
+                        </div>
+
+                        {/* Type badge + explanation */}
+                        <div style={{ display:"flex", flexDirection:"column", gap:"4px" }}>
+                          <div style={{ display:"inline-flex", alignItems:"center", gap:"7px", padding:"5px 11px", borderRadius:"5px", background:pal.faint, border:`1px solid ${pal.fill}44`, alignSelf:"flex-start" }}>
+                            <span style={{ width:"7px", height:"7px", borderRadius:"50%", background:pal.fill, flexShrink:0, display:"inline-block" }} />
+                            <span style={{ fontFamily:"Cinzel,serif", fontSize:"8.5px", letterSpacing:"0.14em", color:pal.fill }}>{pal.label.toUpperCase()}</span>
+                          </div>
+                          <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A6050", paddingLeft:"2px" }}>{pal.explain}</div>
+                        </div>
+
+                        <div style={{ fontFamily:"Georgia,serif", fontSize:"12px", color:"#7AC8B0", lineHeight:"1.7", fontStyle:"italic", borderLeft:`2px solid ${pal.fill}55`, paddingLeft:"12px" }}>
+                          {bird.desc}
+                        </div>
+
+                        <div style={{ fontFamily:"Cinzel,serif", fontSize:"8.5px", letterSpacing:"0.12em", color:pal.fill, paddingTop:"4px", borderTop:"1px solid #0A2018" }}>
+                          {bird.signal}
+                        </div>
+
+                        {bird.type === "carrier" && (
+                          <div style={{ padding:"10px 13px", background:"rgba(255,184,48,0.08)", border:"1px solid #FFB83033", borderRadius:"6px" }}>
+                            <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#FFB830", letterSpacing:"0.1em", marginBottom:"4px" }}>◆ FINAL VOYAGE TOOL</div>
+                            <div style={{ fontFamily:"Georgia,serif", fontSize:"11px", color:"#A08040", lineHeight:"1.6", fontStyle:"italic" }}>
+                              You will carry one in the Final Voyage. Timing the release is everything — too early and it circles back. Too late and the moment has passed.
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Description */}
-                    <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#6A9888", lineHeight:"1.7", fontStyle:"italic", borderLeft:`2px solid ${bird.color}44`, paddingLeft:"14px" }}>
-                      {bird.desc}
-                    </div>
+                    {/* Full photo */}
+                    {bird.photo && (
+                      <div style={{ borderBottom:"1px solid #0A2018", overflow:"hidden" }}>
+                        <img src={bird.photo} alt={bird.label}
+                          style={{ width:"100%", display:"block", maxHeight:"200px", objectFit:"cover", objectPosition:"center 25%" }}
+                          onError={e => { e.target.parentNode.style.display = "none"; }} />
+                        <div style={{ padding:"5px 12px", fontFamily:"Cinzel,serif", fontSize:"7.5px", color:"#2A5040", letterSpacing:"0.1em", background:"rgba(4,14,10,0.9)" }}>
+                          {bird.photoCredit}
+                        </div>
+                      </div>
+                    )}
 
-                    {/* Range diagram — land birds only */}
+                    {/* Range diagram (land birds) */}
                     {bird.type === "land" && (
-                      <div style={{ background:"rgba(4,14,10,0.7)", border:"1px solid #0A2018", borderRadius:"8px", padding:"12px 16px" }}>
-                        <div style={{ fontFamily:"Cinzel,serif", fontSize:"8.5px", color:"#1A4030", letterSpacing:"0.14em", marginBottom:"8px" }}>RANGE FROM NESTING ISLAND</div>
+                      <div style={{ padding:"14px 18px", borderBottom:"1px solid #0A2018" }}>
+                        <div style={{ fontFamily:"Cinzel,serif", fontSize:"8.5px", color:"#2A6050", letterSpacing:"0.16em", marginBottom:"8px" }}>RANGE FROM NESTING ISLAND</div>
                         <RangeDiagram bird={bird} />
                       </div>
                     )}
 
-                    {/* Carrier frigatebird tip */}
-                    {bird.type === "carrier" && (
-                      <div style={{ padding:"12px 14px", background:"rgba(200,148,26,0.08)", border:"1px solid #C8941A33", borderRadius:"6px" }}>
-                        <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#C8941A", letterSpacing:"0.1em", marginBottom:"5px" }}>◆ FINAL VOYAGE TOOL</div>
-                        <div style={{ fontFamily:"Georgia,serif", fontSize:"11.5px", color:"#8A7840", lineHeight:"1.6", fontStyle:"italic" }}>
-                          You will carry one in the Final Voyage. Timing the release is everything — too early and it circles back. Too late and the moment has passed.
-                        </div>
+                    {/* Migration map (migratory birds) */}
+                    {bird.migration && (
+                      <div style={{ padding:"14px 18px" }}>
+                        <MigrationMap migration={bird.migration} color={pal.fill} />
                       </div>
                     )}
 
@@ -2301,7 +2431,11 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
                   ))}
                   {/* Bird silhouette large in scene */}
                   <g transform={`translate(${currentBird?.type==="carrier"?240:200}, ${currentBird?.type==="carrier"?95:75}) scale(2.2)`} filter="url(#birdGlow)">
-                    <BirdSilhouette birdId={currentBird?.id||"noddy"} color={currentBird?.color||"#2A3028"} size={40}/>
+                    <BirdSilhouette
+                      birdId={currentBird?.id || "noddy"}
+                      color={BIRD_TYPE_META[currentBird?.type]?.fill || "#00C896"}
+                      size={40}
+                    />
                   </g>
                   {/* Context text */}
                   <text x="260" y="170" textAnchor="middle" fill="#1A4030"
