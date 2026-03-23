@@ -1,323 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { HOUSES, STARS, JOURNEY_ORDER, getJourneyStep, ISLANDS, VOYAGE_ROADS, SEA_ROADS, TRIANGLE, BAG_ITEMS, SUN_SCENARIOS, SWELL_SCENARIOS, WIND_MAP_W, WIND_MAP_H, latLonToXY, WIND_BELTS, WIND_SCENARIO, BIRD_TYPE_META, BIRDS, BIRD_SIGHTINGS, VOYAGE_NODES, VOYAGE_WAYPOINTS, BRIDGE_CONTENT, MODULE_CONTENT, CLOUD_SIGNS, STORY_PAGES } from './data.jsx';
 
-/* ══════════════════════════════════════════════════════════════
-   DATA
-══════════════════════════════════════════════════════════════ */
-
-const HOUSES = [
-  { angle: 0,      name: "Ākau",            q: "card" },
-  { angle: 11.25,  name: "Haka-Koʻolau",    q: "ko"   },
-  { angle: 22.5,   name: "Nāleo-Koʻolau",   q: "ko"   },
-  { angle: 33.75,  name: "Nālani-Koʻolau",  q: "ko"   },
-  { angle: 45,     name: "Manu-Koʻolau",    q: "ko"   },
-  { angle: 56.25,  name: "Noio-Koʻolau",    q: "ko"   },
-  { angle: 67.5,   name: "ʻĀina-Koʻolau",   q: "ko"   },
-  { angle: 78.75,  name: "Lā-Koʻolau",      q: "ko"   },
-  { angle: 90,     name: "Hikina",           q: "card" },
-  { angle: 101.25, name: "Lā-Malanai",       q: "ma"   },
-  { angle: 112.5,  name: "ʻĀina-Malanai",    q: "ma"   },
-  { angle: 123.75, name: "Noio-Malanai",     q: "ma"   },
-  { angle: 135,    name: "Manu-Malanai",     q: "ma"   },
-  { angle: 146.25, name: "Nālani-Malanai",   q: "ma"   },
-  { angle: 157.5,  name: "Nāleo-Malanai",    q: "ma"   },
-  { angle: 168.75, name: "Haka-Malanai",     q: "ma"   },
-  { angle: 180,    name: "Hema",             q: "card" },
-  { angle: 191.25, name: "Haka-Kona",        q: "kona" },
-  { angle: 202.5,  name: "Nāleo-Kona",       q: "kona" },
-  { angle: 213.75, name: "Nālani-Kona",      q: "kona" },
-  { angle: 225,    name: "Manu-Kona",        q: "kona" },
-  { angle: 236.25, name: "Noio-Kona",        q: "kona" },
-  { angle: 247.5,  name: "ʻĀina-Kona",       q: "kona" },
-  { angle: 258.75, name: "Lā-Kona",          q: "kona" },
-  { angle: 270,    name: "Komohana",         q: "card" },
-  { angle: 281.25, name: "Lā-Hoʻolua",       q: "ho"   },
-  { angle: 292.5,  name: "ʻĀina-Hoʻolua",    q: "ho"   },
-  { angle: 303.75, name: "Noio-Hoʻolua",     q: "ho"   },
-  { angle: 315,    name: "Manu-Hoʻolua",     q: "ho"   },
-  { angle: 326.25, name: "Nālani-Hoʻolua",   q: "ho"   },
-  { angle: 337.5,  name: "Nāleo-Hoʻolua",    q: "ho"   },
-  { angle: 348.75, name: "Haka-Hoʻolua",     q: "ho"   },
-];
-
-const STARS = [
-  {
-    id: "hokule_a", name: "Hōkūleʻa", western: "Arcturus",
-    angle: 67.5, r: 7, color: "#FFD060", correct: true,
-    desc: "Zenith star of Hawaiʻi. Rises in ʻĀina-Koʻolau — just north of east. As the waka moves south toward Tahiti, Hōkūleʻa rises on your port side all night.",
-  },
-  {
-    id: "tawera", name: "Tāwera", western: "Venus",
-    angle: 78.75, r: 10, color: "#FFE840", correct: false,
-    desc: "The morning star. Also rises in Koʻolau — but Venus drifts nightly. Reliable only for short windows, not a 14-day voyage.",
-  },
-  {
-    id: "takurua", name: "Takurua", western: "Sirius",
-    angle: 101.25, r: 8, color: "#A0C8FF", correct: false,
-    desc: "Brightest star in the sky. Rises in Lā-Malanai — south of east. Not useful for this heading; it would be ahead of you.",
-  },
-  {
-    id: "atutahi", name: "Atutahi", western: "Canopus",
-    angle: 146.25, r: 6, color: "#FFFCE0", correct: false,
-    desc: "Deep south anchor. Rises in Nālani-Malanai, far south of east. Use it to check latitude — not as an eastern guide star.",
-  },
-  {
-    id: "matau", name: "Te Matau ā Māui", western: "Antares",
-    angle: 112.5, r: 6, color: "#FF7050", correct: false,
-    desc: "Māui's fishhook (Scorpius). Rises in ʻĀina-Malanai — wrong quadrant for our heading south.",
-  },
-];
-
-const ISLANDS = [
-  { id: "hawaii",    name: "Hawaiʻi",          x: 380, y: 55,  module: 1, active: true,  label: "Module 1 · Star Compass" },
-  { id: "marquesas", name: "Marquesas",         x: 530, y: 175, module: null, active: false },
-  { id: "tahiti",    name: "Tahiti · Raʻiatea", x: 385, y: 275, module: 2, active: true, label: "Module 2 · Sun Arc" },
-  { id: "rarotonga", name: "Rarotonga",         x: 330, y: 315, module: 7,    active: false, label: "Final Voyage" },
-  { id: "samoa",     name: "Sāmoa",            x: 245, y: 200, module: 3, active: true, label: "Module 3 · Ocean Swells" },
-  { id: "tonga",     name: "Tonga",             x: 210, y: 290, module: 4, active: true, label: "Module 4 · Wind Patterns" },
-  { id: "fiji",      name: "Fiji",              x: 168, y: 255, module: 5, active: true, label: "Module 5 · Bird Guide" },
-  { id: "aotearoa",  name: "Aotearoa",          x: 118, y: 430, module: null, active: false },
-  { id: "rapanui",   name: "Rapa Nui",          x: 640, y: 390, module: null, active: false },
-];
-
-const SEA_ROADS = [
-  { from: "hawaii",    to: "tahiti",   name: "Ke-ala-i-kahiki" },
-  { from: "rarotonga", to: "aotearoa", name: "Ara-i-te-uru"    },
-];
-
-const TRIANGLE = ["hawaii", "rapanui", "aotearoa"];
-
-const BAG_ITEMS = [
-  {
-    id: "star_compass", name: "Star Compass", hawaiian: "Ka Pā Hōkū",
-    unlockedBy: "module1", icon: "✦", color: "#C8941A",
-    content: [
-      { label: "32 Houses",       body: "The horizon is divided into 32 houses, each 11.25° apart. Four quadrants: Koʻolau (NE), Malanai (SE), Kona (SW), Hoʻolua (NW)." },
-      { label: "Hōkūleʻa",        body: "Arcturus. Zenith star of Hawaiʻi. Rises in ʻĀina-Koʻolau. Hold it on your port side heading south to Tahiti." },
-      { label: "Tāwera",          body: "Venus as morning star. Rises in Koʻolau but drifts nightly — use for short-window orientation only." },
-      { label: "Takurua",         body: "Sirius. Brightest in the sky. Rises in Lā-Malanai (SE). Latitude checker, not a heading star." },
-      { label: "Atutahi",         body: "Canopus. Southern anchor. Never sets south of 20°S — use to confirm you are in the deep south." },
-      { label: "Te Matau ā Māui", body: "Scorpius. Māui's fishhook. Story star — rises Malanai, not useful for north-south headings." },
-    ],
-  },
-  {
-    id: "bird_guide", name: "Bird Guide", hawaiian: "Ngā Manu",
-    unlockedBy: "module5", icon: "🐦", color: "#2A9A70",
-    content: [
-      { label: "Manu-o-kū",        body: "White tern. Land-based. Flies up to 200 km from shore. Morning: follow toward land. Evening: follow home." },
-      { label: "Noio",              body: "Noddy tern. Land-based. Up to 65 km. Closer signal than white tern." },
-      { label: "ʻIwa (pelagic)",    body: "Frigatebird at sea. Sleeps on the ocean for weeks. Following it leads nowhere." },
-      { label: "ʻIwa (carried)",    body: "Carried in a cage. Release when land is suspected — it flies toward land or returns to the canoe." },
-    ],
-  },
-  {
-    id: "sun_arc", name: "Sun Arc", hawaiian: "Tama-nui-te-rā",
-    unlockedBy: "module2", icon: "☀", color: "#D06030",
-    content: [
-      { label: "Latitude Rule", body: "At local noon: latitude = 90° minus sun altitude, adjusted for season (±23.5° at solstices)." },
-      { label: "Equinox",       body: "March 20 / Sep 23: sun rises due east, sets due west. Noon altitude = 90° minus latitude exactly." },
-      { label: "When Reliable", body: "Use sun for bearing only when low — sunrise and sunset. High midday sun gives no directional information." },
-    ],
-  },
-  {
-    id: "wind_reader", name: "Wind Reader", hawaiian: "Hau me Matagi",
-    unlockedBy: "module4", icon: "≋", color: "#4A70C0",
-    content: [
-      { label: "Trade winds",   body: "NE trades blow 5°–30°N; SE trades blow 5°–30°S. Both reliable and steady — the backbone of Polynesian voyaging." },
-      { label: "ITCZ",          body: "The doldrums belt near the equator. Calms, squalls, unpredictable. Cross it fast, don't linger." },
-      { label: "Aim upwind",    body: "Always aim east of your destination. The trades will carry you west. Arrive upwind and you can always fall off; arrive downwind and you cannot return." },
-      { label: "El Niño shift", body: "In El Niño years the ITCZ shifts south and SE trades weaken. The crossing window changes — depart earlier in the season." },
-    ],
-  },
-  {
-    id: "wave_reader", name: "Wave Reader", hawaiian: "Te Moana",
-    unlockedBy: "module3", icon: "〰", color: "#2070B0",
-    content: [
-      { label: "Swells vs Waves", body: "Swells are long-period, deep-source, travel straight for days. Wind-waves are local and unreliable." },
-      { label: "Island Signs",    body: "Islands block (calm behind), refract (curves around sides), reflect (cross-chop in front). Range ~30-40 km for high islands." },
-      { label: "Mau's Method",    body: "Lie in the hull and feel the swell direction through your whole body — separating swell from surface chop." },
-    ],
-  },
-];
-
-/* ══════════════════════════════════════════════════════════════
-   SUN ARC DATA
-══════════════════════════════════════════════════════════════ */
-
-const SUN_SCENARIOS = [
-  {
-    id: "A", label: "Scenario A · Spring Equinox",
-    lat: 20, decl: 0, noonAlt: 70,
-    altOptions: [55, 63, 70, 78],
-    latOptions: [10, 20, 30, 40],
-  },
-  {
-    id: "B", label: "Scenario B · Winter Solstice",
-    lat: 20, decl: -23.5, noonAlt: 46.5,
-    altOptions: [35, 46.5, 58, 70],
-    latOptions: [10, 20, 30, 40],
-  },
-  {
-    id: "C", label: "Scenario C · Summer Solstice",
-    lat: 44, decl: 23.5, noonAlt: 69.5,
-    altOptions: [55, 62, 69.5, 77],
-    latOptions: [20, 30, 44, 55],
-  },
-  {
-    id: "D", label: "Scenario D · Autumn Equinox",
-    lat: 34, decl: 0, noonAlt: 56,
-    altOptions: [48, 56, 64, 72],
-    latOptions: [20, 34, 44, 55],
-  },
-];
-
-/* ══════════════════════════════════════════════════════════════
-   SWELL DATA
-══════════════════════════════════════════════════════════════ */
-
-// swellFromDeg: compass bearing the swell travels FROM (so lines move toward opposite)
-// hullAngle: degrees off the bow the swell should strike for correct heading
-// correctDir / correctHeading: button labels for steps 1 & 2
-const SWELL_SCENARIOS = [
-  {
-    id: "A",
-    label: "Scenario A · Trade Swell",
-    swellFromDeg: 135,       // swell FROM SE — classic South Pacific trade swell
-    swellLabel: "Southeast",
-    swellPeriod: 14,         // seconds (long-period = ocean swell)
-    windFromDeg: 70,         // wind FROM NE — trade winds
-    heading: 180,            // canoe heading south
-    hullAngle: 135,          // swell hits port quarter (left-rear) — correct for south heading
-    dirOptions: ["Northeast", "Southeast", "Southwest", "Northwest"],
-    correctDir: "Southeast",
-    headingOptions: [135, 160, 180, 200],
-    correctHeading: 180,
-    interferenceType: "block", // island effect to identify in step 3
-  },
-];
-
-/* ══════════════════════════════════════════════════════════════
-   WIND DATA
-══════════════════════════════════════════════════════════════ */
-
-// Pacific wind map — schematic, not cartographic
-// Viewport: 140°W–160°E longitude, 35°N–35°S latitude → mapped to 760×500 SVG
-const WIND_MAP_W = 700, WIND_MAP_H = 440;
-
-// Convert lat/lon to SVG coords (rough linear mapping)
-const latLonToXY = (lat, lon) => ({
-  x: ((lon + 180) / 80) * WIND_MAP_W * 0.72 + 30,   // longitude range ~110° wide
-  y: ((35 - lat) / 70) * WIND_MAP_H,                 // latitude 35N to 35S
-});
-
-// Wind belt definitions  — y in SVG coords
-const WIND_BELTS = {
-  normal: [
-    { name: "NE Trades",   latTop: 30, latBot: 8,   color: "#1A4A80", dir: 225, label: "NE TRADE WINDS" },
-    { name: "ITCZ",        latTop: 8,  latBot: 2,   color: "#2A2A18", dir: null, label: "ITCZ · DOLDRUMS" },
-    { name: "SE Trades",   latTop: 2,  latBot: -28, color: "#1A5050", dir: 315, label: "SE TRADE WINDS" },
-  ],
-  elnino: [
-    { name: "NE Trades",   latTop: 30, latBot: 5,   color: "#1A4A80", dir: 225, label: "NE TRADE WINDS" },
-    { name: "ITCZ",        latTop: 5,  latBot: -5,  color: "#2A2A18", dir: null, label: "ITCZ (EL NIÑO — SHIFTED SOUTH)" },
-    { name: "SE Trades",   latTop: -5, latBot: -28, color: "#1A5050", dir: 315, label: "SE TRADE WINDS (WEAKENED)" },
-  ],
-};
-
-// Scenario: Rarotonga (21°S) → Aotearoa (37°S)  — SE trades, aim upwind (east)
-const WIND_SCENARIO = {
-  depart:  { name: "Rarotonga", lat: -21, lon: -160 },
-  arrive:  { name: "Aotearoa",  lat: -37, lon: -174 },
-  // bearing options — correct is ~190° (aim slightly east of south, trades push you west)
-  bearingOptions: [160, 175, 190, 210],
-  correctBearing: 190,
-  correctLabel: "SSE — aim east of Aotearoa",
-  windName: "SE Trade Wind",
-  // El Niño question
-  elNinoEffect: "weaken",
-  elNinoOptions: ["Shift the ITCZ south", "Strengthen the SE trades", "Push the waka east", "Make the crossing shorter"],
-  correctElNino: "Shift the ITCZ south",
-};
-
-/* ══════════════════════════════════════════════════════════════
-   BIRD DATA
-══════════════════════════════════════════════════════════════ */
-
-const BIRD_TYPE_META = {
-  land:      { fill:"#00C896", faint:"rgba(0,200,150,0.12)",  label:"Land signal bird",  explain:"Nests on shore — follow it toward land" },
-  trap:      { fill:"#FF6B4A", faint:"rgba(255,107,74,0.12)", label:"Pelagic trap",       explain:"Lives at sea — following it leads nowhere" },
-  carrier:   { fill:"#FFB830", faint:"rgba(255,184,48,0.12)", label:"Carrier tool",       explain:"Brought aboard — release to find land" },
-  migratory: { fill:"#48CAE4", faint:"rgba(72,202,228,0.12)", label:"Migratory bird",     explain:"Seasonal direction signal, not land proximity" },
-};
-
-const BIRDS = [
-  {
-    id: "white_tern", name: "Manu-o-kū", latin: "Gygis alba", label: "White Tern",
-    range: 200, type: "land", color: "#00C896",
-    desc: "Brilliant white, delicate. Flies up to 200 km from its nesting island. At dawn, flying away from a point means land is behind it. In the evening, follow it home.",
-    signal: "LAND WITHIN 200 KM", signalColor: "#00C896",
-    photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Gygis_alba_05.JPG/400px-Gygis_alba_05.JPG",
-    photoCredit: "Wikimedia Commons · CC BY-SA 3.0",
-  },
-  {
-    id: "noddy", name: "Noio", latin: "Anous minutus", label: "Black Noddy Tern",
-    range: 65, type: "land", color: "#00C896",
-    desc: "Dark brown, smaller. Rarely ventures beyond 65 km from its nesting island. Sighting means you are very close. Multiple noddies circling means land is just below the horizon.",
-    signal: "LAND WITHIN 65 KM", signalColor: "#00C896",
-    photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Anous_minutus_by_Gregg_Yan_02.jpg/400px-Anous_minutus_by_Gregg_Yan_02.jpg",
-    photoCredit: "Gregg Yan · Wikimedia Commons · CC BY-SA 3.0",
-  },
-  {
-    id: "iwa_pelagic", name: "ʻIwa", latin: "Fregata minor", label: "Frigatebird (pelagic)",
-    range: null, type: "trap", color: "#FF6B4A",
-    desc: "Long forked tail, hooked beak. Sleeps on the open ocean for weeks without landing. A frigatebird over open water tells you nothing about land. Do not follow it.",
-    signal: "NO LAND SIGNAL — IGNORE", signalColor: "#FF6B4A",
-    photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Fregata_minor-juvenile_male_soaring.jpg/400px-Fregata_minor-juvenile_male_soaring.jpg",
-    photoCredit: "Wikimedia Commons · Public Domain",
-  },
-  {
-    id: "iwa_carrier", name: "ʻIwa (carried)", latin: "Fregata minor", label: "Carrier Frigatebird",
-    range: null, type: "carrier", color: "#FFB830",
-    desc: "The same bird — but kept in a cage on the waka. Release it when you suspect land is near. If it circles and returns to the canoe, no land is close. If it flies away and does not return, it has found land and is flying toward it.",
-    signal: "RELEASE WHEN LAND SUSPECTED", signalColor: "#FFB830",
-    photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Fregata_minor-juvenile_male_soaring.jpg/400px-Fregata_minor-juvenile_male_soaring.jpg",
-    photoCredit: "Wikimedia Commons · Public Domain",
-  },
-  {
-    id: "golden_plover", name: "Kōlea", latin: "Pluvialis fulva", label: "Pacific Golden Plover",
-    range: null, type: "migratory", color: "#48CAE4",
-    desc: "Migrates annually between Alaska and Hawaiʻi — 4,800 km non-stop. Flocks flying in formation give a directional bearing, not a proximity signal. They are flying toward a specific destination — watch which way.",
-    signal: "DIRECTIONAL BEARING ONLY", signalColor: "#48CAE4",
-    photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Pacific_golden_plover_%28Pluvialis_fulva%29_%2823444429066%29.jpg/400px-Pacific_golden_plover_%28Pluvialis_fulva%29_%2823444429066%29.jpg",
-    photoCredit: "Wikimedia Commons · CC BY 2.0",
-    migration: {
-      south: { from:{ name:"Alaska", x:80,  y:32  }, to:{ name:"Hawaiʻi", x:176, y:178 }, ctrl:{ x:30,  y:120 }, label:"Southbound Aug–Oct" },
-      north: { from:{ name:"Hawaiʻi", x:188, y:172 }, to:{ name:"Alaska",  x:92,  y:38  }, ctrl:{ x:230, y:88  }, label:"Northbound Apr–May" },
-      note: "4,800 km non-stop over open ocean",
-    },
-  },
-  {
-    id: "long_tailed_cuckoo", name: "Koekoea", latin: "Urodynamis taitensis", label: "Long-tailed Cuckoo",
-    range: null, type: "migratory", color: "#48CAE4",
-    desc: "Migrates from Aotearoa to the tropical Pacific in autumn — and back in spring. Polynesian navigators used its seasonal appearance as a calendar. Follow its spring flight toward Aotearoa.",
-    signal: "SEASONAL CALENDAR SIGNAL", signalColor: "#48CAE4",
-    photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Long-tailed_Cuckoo.jpg/400px-Long-tailed_Cuckoo.jpg",
-    photoCredit: "J. G. Keulemans · Wikimedia Commons · Public Domain",
-    migration: {
-      south: { from:{ name:"Aotearoa", x:60,  y:186 }, to:{ name:"Tropical Pacific", x:196, y:52  }, ctrl:{ x:20,  y:100 }, label:"Northbound Sep–Nov (to Aotearoa)" },
-      north: { from:{ name:"Tropical Pacific", x:208, y:60  }, to:{ name:"Aotearoa",  x:72,  y:194 }, ctrl:{ x:236, y:140 }, label:"Southbound Feb–Apr (to Pacific)" },
-      note: "2,500–6,000 km across open ocean",
-    },
-  },
-];
-
-// Classification challenge — shown in step 2
-const BIRD_SIGHTINGS = [
-  { birdId: "white_tern",      context: "Dawn. Two white birds flying northeast.",       correct: "land" },
-  { birdId: "iwa_pelagic",     context: "Midday. A large dark bird circling overhead.",  correct: "ignore" },
-  { birdId: "noddy",           context: "Late afternoon. Dark terns flying low, south.", correct: "land" },
-  { birdId: "golden_plover",   context: "Dawn. A flock of speckled birds heading north.",correct: "bearing" },
-  { birdId: "iwa_carrier",     context: "The cage stirs. You feel land is near.",        correct: "release" },
-];
 
 /* ══════════════════════════════════════════════════════════════
    HELPERS
@@ -335,6 +18,166 @@ const wedge = (deg, r, cx = 300, cy = 300, half = 5.625) => {
 
 const dirName = a =>
   ["north","northeast","east","southeast","south","southwest","west","northwest"][Math.round(a / 45) % 8];
+
+/* ══════════════════════════════════════════════════════════════
+   BRIDGE SCREEN — arrival narrative shown after each module
+══════════════════════════════════════════════════════════════ */
+
+function BridgeScreen({ moduleNum, name, unlocked, onReturn }) {
+  const b     = BRIDGE_CONTENT[moduleNum];
+  const m     = MODULE_CONTENT[moduleNum];
+  const accent = m.accent;
+  const [lineIdx, setLineIdx] = useState(0);
+  const [showStory, setShowStory] = useState(false);
+  const [showBag,   setShowBag]   = useState(false);
+  const [showReturn, setShowReturn] = useState(false);
+
+  // Stagger: lines reveal one by one, then story, then bag, then button
+  useEffect(() => {
+    const t1 = setTimeout(() => setLineIdx(1), 800);
+    const t2 = setTimeout(() => setLineIdx(2), 2400);
+    const t3 = setTimeout(() => setLineIdx(3), 4000);
+    const t4 = setTimeout(() => setShowStory(true), 5200);
+    const t5 = setTimeout(() => setShowBag(true),   6400);
+    const t6 = setTimeout(() => setShowReturn(true), 7200);
+    return () => [t1,t2,t3,t4,t5,t6].forEach(clearTimeout);
+  }, []);
+
+  const handleSkip = () => {
+    setLineIdx(3); setShowStory(true); setShowBag(true); setShowReturn(true);
+  };
+
+  const stars = Array.from({length:50},(_,i)=>({ x:((i*137+41)%97)/97*100, y:((i*79+23)%89)/89*100, r:i%7===0?1.1:0.5, op:0.06+(i%5)*0.05 }));
+
+  return (
+    <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", flexDirection:"column", overflow:"hidden", position:"relative" }}>
+
+      {/* Header */}
+      <div style={{ height:"44px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0, zIndex:2 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+        <button onClick={handleSkip} style={{ background:"none", border:`1px solid ${accent}22`, borderRadius:"5px", padding:"5px 14px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:`${accent}88`, letterSpacing:"0.1em" }}>SKIP ↓</button>
+      </div>
+
+      {/* Star field */}
+      <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none", zIndex:0 }}>
+        {stars.map((s,i)=><circle key={i} cx={`${s.x}%`} cy={`${s.y}%`} r={s.r} fill={accent} opacity={s.op}/>)}
+      </svg>
+
+      {/* Content */}
+      <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0, zIndex:1 }}>
+
+        {/* Left — Palu speaks */}
+        <div style={{ width:"340px", flexShrink:0, borderRight:`1px solid ${accent}18`, overflowY:"auto", display:"flex", flexDirection:"column" }}>
+          <div style={{ padding:"28px 24px", display:"flex", flexDirection:"column", gap:"20px", flex:1 }}>
+
+            {/* Arrival tag */}
+            <div style={{ display:"flex", alignItems:"center", gap:"12px" }}>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.2em", opacity:0.7 }}>ARRIVED · {b.destination.toUpperCase()}</div>
+              <div style={{ flex:1, height:"1px", background:`linear-gradient(to right, ${accent}44, transparent)` }}/>
+            </div>
+
+            {/* Scene icon */}
+            <div style={{ fontSize:"52px", lineHeight:1, filter:`drop-shadow(0 0 20px ${accent}44)` }}>{b.arrivalScene}</div>
+
+            {/* Palu lines — stagger in */}
+            <div style={{ display:"flex", flexDirection:"column", gap:"14px" }}>
+              {b.paluLines.map((line, i) => {
+                const text = line.replace("{{name}}", name);
+                return (
+                  <div key={i} style={{
+                    fontFamily:"Georgia,serif", fontSize:"14px", color:"#A8C8C0", lineHeight:"1.72", fontStyle:"italic",
+                    borderLeft:`2px solid ${accent}55`, paddingLeft:"14px",
+                    opacity: i < lineIdx ? 1 : 0,
+                    transform: i < lineIdx ? "translateY(0)" : "translateY(8px)",
+                    transition:"opacity 0.6s ease, transform 0.6s ease",
+                  }}>
+                    "{text}"
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Bridge line — teaser for next module */}
+            {showReturn && (
+              <div style={{
+                padding:"12px 14px", background:`${accent}0E`, border:`1px solid ${accent}33`, borderRadius:"6px",
+                fontFamily:"Cinzel,serif", fontSize:"11px", color:accent, lineHeight:"1.6", letterSpacing:"0.03em",
+                opacity:1, transition:"opacity 0.5s",
+              }}>
+                {b.bridgeLine}
+              </div>
+            )}
+
+            {/* Return button */}
+            {showReturn && (
+              <button onClick={onReturn} style={{
+                padding:"13px", borderRadius:"6px", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700",
+                letterSpacing:"0.14em", cursor:"pointer", border:`1px solid ${accent}`,
+                background:`${accent}18`, color:accent,
+              }}>
+                RETURN TO THE OCEAN →
+              </button>
+            )}
+
+          </div>
+        </div>
+
+        {/* Right — story + bag reveal */}
+        <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column", gap:"0" }}>
+
+          {/* Cultural story card */}
+          <div style={{
+            padding:"28px 32px 24px",
+            opacity: showStory ? 1 : 0,
+            transform: showStory ? "translateY(0)" : "translateY(16px)",
+            transition:"opacity 0.7s ease, transform 0.7s ease",
+          }}>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"12px", opacity:0.7 }}>NAVIGATOR'S KNOWLEDGE</div>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"16px", fontWeight:"700", color:"#E8D8A8", marginBottom:"16px", lineHeight:"1.3" }}>{b.storyTitle}</div>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", lineHeight:"1.8", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"18px", marginBottom:"12px" }}>
+              {b.story}
+            </div>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:`${accent}66`, letterSpacing:"0.1em" }}>— {b.storyCitation}</div>
+          </div>
+
+          {/* Divider */}
+          {showBag && <div style={{ height:"1px", background:`${accent}18`, margin:"0 32px" }}/>}
+
+          {/* Bag items revealed */}
+          <div style={{
+            padding:"24px 32px 32px",
+            opacity: showBag ? 1 : 0,
+            transform: showBag ? "translateY(0)" : "translateY(16px)",
+            transition:"opacity 0.7s ease, transform 0.7s ease",
+          }}>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"14px", opacity:0.7 }}>ADDED TO YOUR BAG</div>
+            <div style={{ display:"flex", flexDirection:"column", gap:"10px", marginBottom:"16px" }}>
+              {b.bagItems.map(itemId => {
+                const item = BAG_ITEMS.find(bi => bi.id === itemId);
+                if (!item) return null;
+                return (
+                  <div key={itemId} style={{ display:"flex", alignItems:"center", gap:"14px", padding:"11px 14px", background:`${item.color}10`, border:`1px solid ${item.color}33`, borderRadius:"8px" }}>
+                    <span style={{ fontSize:"22px", flexShrink:0 }}>{item.icon}</span>
+                    <div>
+                      <div style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#D0C8A8" }}>{item.name}</div>
+                      <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:`${item.color}99`, letterSpacing:"0.06em", marginTop:"2px" }}>{item.hawaiian}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#5A8090", lineHeight:"1.7", fontStyle:"italic" }}>
+              {b.bagNote}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 
 /* ══════════════════════════════════════════════════════════════
    NAVIGATOR'S BAG
@@ -420,26 +263,57 @@ function VoyageMap({ name, onNavigate, unlocked, onOpenBag, onReset }) {
   const [waveOffset, setWaveOffset] = useState(0);
   const W = 760, H = 500;
 
-  const tri    = TRIANGLE.map(id => ISLANDS.find(i => i.id === id));
   const getIsl = id => ISLANDS.find(i => i.id === id);
 
-  // Animate waves
+  // Progression: which journey step are we on?
+  const completionItems = ["star_compass","sun_arc","wave_reader","wind_reader","bird_guide","cloud_reader"];
+  const completedCount = completionItems.filter(id => unlocked.includes(id)).length;
+  // nextModuleNum = module number of next destination to complete (1-6, or 7 for final)
+  const nextModuleNum = completedCount < 6 ? completedCount + 1 : 7;
+
+  const isCompleted = (island) => {
+    if (island.isHome) return completedCount === 6; // Tonga return completed after module 6
+    if (island.module === null) return false;
+    if (island.module === 0) return true; // home always "done"
+    return island.module < nextModuleNum;
+  };
+  const isCurrent = (island) => island.module === nextModuleNum;
+  const isLocked  = (island) => {
+    if (island.isHome && island.module === 6) return nextModuleNum !== 6;
+    if (island.module === null || island.module === 0) return false;
+    return island.module > nextModuleNum;
+  };
+  const isClickable = (island) => isCurrent(island) || (isCompleted(island) && island.module > 0 && !(island.isHome && completedCount < 6));
+
+  // Dynamic sea roads — show only roads we've already travelled
+  const visibleRoads = VOYAGE_ROADS.filter(r => completedCount >= r.unlockAfterStep);
+
   useEffect(() => {
     let frame;
-    const tick = () => {
-      setWaveOffset(o => (o + 0.5) % W);
-      frame = requestAnimationFrame(tick);
-    };
+    const tick = () => { setWaveOffset(o => (o + 0.5) % W); frame = requestAnimationFrame(tick); };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
   }, []);
+
+  // Star compass rose positions — 8 houses
+  const roseHouses = [
+    { label:"Ākau",      angle:0,   abbr:"N"   },
+    { label:"Koʻolau",   angle:45,  abbr:"NE"  },
+    { label:"Hikina",    angle:90,  abbr:"E"   },
+    { label:"Malanai",   angle:135, abbr:"SE"  },
+    { label:"Hema",      angle:180, abbr:"S"   },
+    { label:"Kona",      angle:225, abbr:"SW"  },
+    { label:"Komohana",  angle:270, abbr:"W"   },
+    { label:"Hoʻolua",   angle:315, abbr:"NW"  },
+  ];
+  const RCX = W - 52, RCY = 52, RR = 32;
 
   return (
     <div style={{ width: "100%", height: "100%", background: "#051C2C", display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
       {/* Header */}
       <div style={{ height: "44px", borderBottom: "1px solid #0A2A3A", background: "rgba(4,14,22,0.97)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 22px", flexShrink: 0 }}>
-        <span style={{ fontFamily: "Cinzel,serif", fontSize: "12px", fontWeight: "700", color: "#C8941A", letterSpacing: "0.12em" }}>POLYNESIAN WAYFINDING</span>
+        <span style={{ fontFamily: "Cinzel,serif", fontSize: "12px", fontWeight: "700", color: "#C8941A", letterSpacing: "0.12em" }}>OCEAN ADVENTURE</span>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <span style={{ fontFamily: "Cinzel,serif", fontSize: "10.5px", color: "#1AA090", letterSpacing: "0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
           <button onClick={onOpenBag} style={{ background: unlocked.length > 0 ? "rgba(200,148,26,0.14)" : "rgba(255,255,255,0.03)", border: `1px solid ${unlocked.length > 0 ? "#C8941A66" : "#0A2A3A"}`, borderRadius: "5px", padding: "5px 12px", cursor: "pointer", fontFamily: "Cinzel,serif", fontSize: "10px", color: unlocked.length > 0 ? "#C8941A" : "#1A6070", letterSpacing: "0.08em" }}>
@@ -460,17 +334,11 @@ function VoyageMap({ name, onNavigate, unlocked, onOpenBag, onReset }) {
                 <stop offset="55%"  stopColor="#073550" />
                 <stop offset="100%" stopColor="#030F1E" />
               </radialGradient>
-              <filter id="goldGlow">
-                <feGaussianBlur stdDeviation="5" result="b" />
-                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-              </filter>
-              <filter id="islandShadow">
-                <feGaussianBlur stdDeviation="2.5" result="b" />
-                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-              </filter>
+              <filter id="goldGlow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <filter id="homeGlow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <filter id="islandShadow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             </defs>
 
-            {/* Ocean base */}
             <rect width={W} height={H} fill="url(#oceanC)" />
 
             {/* Animated wave lines */}
@@ -482,35 +350,30 @@ function VoyageMap({ name, onNavigate, unlocked, onOpenBag, onReset }) {
                 const dy = amp * Math.sin((x + waveOffset + i * 45) * Math.PI / 210);
                 return j === 0 ? `M0,${(y + dy).toFixed(1)}` : `Q${(x - 47).toFixed(0)},${(y + dy + (j % 2 ? amp : -amp)).toFixed(1)} ${x},${(y + dy).toFixed(1)}`;
               }).join(" ");
-              return (
-                <path key={i} d={d} fill="none"
-                  stroke="#1A8090" strokeWidth="0.65"
-                  opacity={0.13 + (i % 5) * 0.055} />
-              );
+              return <path key={i} d={d} fill="none" stroke="#1A8090" strokeWidth="0.65" opacity={0.13 + (i % 5) * 0.055} />;
             })}
 
-            {/* Sparse lat lines for orientation */}
+            {/* Lat lines */}
             {[100, 200, 300, 400].map(y => (
-              <line key={y} x1={0} y1={y} x2={W} y2={y}
-                stroke="#1E9090" strokeWidth="0.5" strokeDasharray="4,14" opacity="0.2" />
+              <line key={y} x1={0} y1={y} x2={W} y2={y} stroke="#1E9090" strokeWidth="0.5" strokeDasharray="4,14" opacity="0.2" />
             ))}
 
-            {/* Polynesian Triangle */}
-            <polygon points={tri.map(i => `${i.x},${i.y}`).join(" ")}
-              fill="rgba(20,160,180,0.06)" stroke="#209090"
-              strokeWidth="1.2" strokeDasharray="7,11" />
+            {/* Polynesian Triangle (faint) */}
+            <polygon points={TRIANGLE.map(id => { const i = getIsl(id); return i ? `${i.x},${i.y}` : ""; }).join(" ")}
+              fill="rgba(20,160,180,0.04)" stroke="#209090" strokeWidth="1" strokeDasharray="7,11" opacity="0.4" />
 
-            {/* Named sea roads */}
-            {SEA_ROADS.map(road => {
+            {/* Voyage sea roads — shown only once travelled */}
+            {visibleRoads.map(road => {
               const f = getIsl(road.from), t = getIsl(road.to);
-              const mx = (f.x + t.x) / 2, my = (f.y + t.y) / 2;
+              if (!f || !t) return null;
+              const mx = (f.x + t.x) / 2 + 8, my = (f.y + t.y) / 2 - 10;
               return (
                 <g key={road.name}>
                   <line x1={f.x} y1={f.y} x2={t.x} y2={t.y}
-                    stroke="#20C0A0" strokeWidth="1" strokeDasharray="6,9" opacity="0.45" />
-                  <text x={mx + 6} y={my - 9} textAnchor="middle"
-                    fill="#18A090" fontSize="8.5" fontFamily="Cinzel,serif" opacity="0.8"
-                    style={{ letterSpacing: "0.09em" }}>
+                    stroke="#20C0A0" strokeWidth="1.2" strokeDasharray="6,8" opacity="0.5" />
+                  <text x={mx} y={my} textAnchor="middle"
+                    fill="#18A090" fontSize="8" fontFamily="Cinzel,serif" opacity="0.7"
+                    style={{ letterSpacing: "0.08em" }}>
                     {road.name}
                   </text>
                 </g>
@@ -519,56 +382,103 @@ function VoyageMap({ name, onNavigate, unlocked, onOpenBag, onReset }) {
 
             {/* Islands */}
             {ISLANDS.map(island => {
-              const isHov    = hovIsland === island.id;
-              const isActive = island.active;
-              const isGold   = isHov || isActive;
-              const dotR     = isActive ? 6 : 4;
+              const hov      = hovIsland === island.id;
+              const home     = island.isHome && island.module === 0 || island.isHome;
+              const completed = isCompleted(island);
+              const current  = isCurrent(island);
+              const locked   = isLocked(island);
+              const clickable = isClickable(island);
+
+              // Visual style
+              let dotFill   = "#1A8090";
+              let dotStroke = "#0A6070";
+              let dotR      = 5;
+              let nameColor = "#1AA0A0";
+              let nameWeight = "400";
+              let opacity   = 1;
+
+              if (island.isHome && island.module !== 6) {
+                // Tonga home base — always distinct
+                dotFill = "#C8941A"; dotStroke = "#E8B830"; dotR = 9; nameColor = "#F0D870"; nameWeight = "700";
+              } else if (current) {
+                dotFill = "#E8C060"; dotStroke = "#C8941A"; dotR = 7; nameColor = "#F0D870"; nameWeight = "700";
+              } else if (completed) {
+                dotFill = "#2AB870"; dotStroke = "#1A9050"; dotR = 6; nameColor = "#60D8A0"; nameWeight = "600";
+              } else if (locked) {
+                dotFill = "#0A3040"; dotStroke = "#0A2030"; dotR = 4; nameColor = "#1A4050"; opacity = 0.55;
+              }
+              if (hov && clickable) { dotR += 2; dotFill = "#F0D870"; }
 
               return (
                 <g key={island.id}
-                  style={{ cursor: isActive ? "pointer" : "default" }}
-                  onClick={() => isActive && island.module && onNavigate(island.module)}
+                  style={{ cursor: clickable ? "pointer" : "default", opacity }}
+                  onClick={() => clickable && island.module && onNavigate(island.module)}
                   onMouseEnter={() => setHovIsland(island.id)}
                   onMouseLeave={() => setHovIsland(null)}>
 
-                  {/* Gold pulse ring — shows on hover for ALL islands, always on for active */}
-                  {isGold && (
-                    <circle cx={island.x} cy={island.y} r={dotR + 16}
-                      fill="none" stroke="#D4A030"
-                      strokeWidth={isHov ? 1.4 : 1}
-                      opacity={isHov ? 0.65 : 0.28} />
+                  {/* Pulse ring — current destination */}
+                  {current && (
+                    <circle cx={island.x} cy={island.y} r={dotR + 14}
+                      fill="none" stroke="#C8941A"
+                      strokeWidth={hov ? 1.6 : 1.2}
+                      opacity={hov ? 0.7 : 0.35} />
+                  )}
+
+                  {/* Home harbour icon — anchor shape for Tonga */}
+                  {island.isHome && (
+                    <g>
+                      <circle cx={island.x} cy={island.y} r={16}
+                        fill="rgba(200,148,26,0.12)" stroke="#C8941A55" strokeWidth="1" />
+                      {/* Anchor icon */}
+                      <line x1={island.x} y1={island.y - 9} x2={island.x} y2={island.y + 9} stroke="#C8941A" strokeWidth="2" strokeLinecap="round"/>
+                      <line x1={island.x - 6} y1={island.y - 6} x2={island.x + 6} y2={island.y - 6} stroke="#C8941A" strokeWidth="2" strokeLinecap="round"/>
+                      <path d={`M${island.x - 7},${island.y + 6} Q${island.x - 9},${island.y + 10} ${island.x},${island.y + 10} Q${island.x + 9},${island.y + 10} ${island.x + 7},${island.y + 6}`}
+                        fill="none" stroke="#C8941A" strokeWidth="1.5" strokeLinecap="round"/>
+                    </g>
                   )}
 
                   {/* Island dot */}
-                  <circle cx={island.x} cy={island.y} r={dotR}
-                    fill={isGold ? "#E8C060" : "#1A8090"}
-                    stroke={isGold ? "#C8941A" : "#0A6070"}
-                    strokeWidth={isGold ? 1.8 : 0.8}
-                    filter={isGold ? "url(#goldGlow)" : "url(#islandShadow)"} />
+                  {!island.isHome && (
+                    <circle cx={island.x} cy={island.y} r={dotR}
+                      fill={dotFill} stroke={dotStroke}
+                      strokeWidth={current ? 2 : 1.2}
+                      filter={current ? "url(#goldGlow)" : "url(#islandShadow)"} />
+                  )}
+
+                  {/* Completed checkmark */}
+                  {completed && !island.isHome && (
+                    <text x={island.x + dotR + 3} y={island.y + 4} fill="#2AB870" fontSize="9" fontFamily="Cinzel,serif">✓</text>
+                  )}
 
                   {/* Island name */}
-                  <text x={island.x} y={island.y - dotR - 8}
+                  <text x={island.x} y={island.y - (island.isHome ? 20 : dotR + 8)}
                     textAnchor="middle"
-                    fill={isGold ? "#F0D870" : "#1AA0A0"}
-                    fontSize={isActive ? "10.5" : "9"}
-                    fontFamily="Cinzel,serif"
-                    fontWeight={isActive ? "700" : "400"}
+                    fill={nameColor}
+                    fontSize={current || island.isHome ? "11" : completed ? "10" : "9"}
+                    fontFamily="Cinzel,serif" fontWeight={nameWeight}
                     style={{ pointerEvents: "none" }}>
-                    {island.name}
+                    {island.name}{island.isHome ? " ⚓" : ""}
                   </text>
 
-                  {/* Hover module label */}
-                  {isHov && island.label && (
+                  {/* HOME label under Tonga */}
+                  {island.isHome && (
+                    <text x={island.x} y={island.y + 26}
+                      textAnchor="middle" fill="#9A7010" fontSize="8" fontFamily="Cinzel,serif"
+                      letterSpacing="0.12em" style={{ pointerEvents:"none" }}>HOME</text>
+                  )}
+
+                  {/* Hover tooltip */}
+                  {hov && island.label && (
                     <g>
-                      <rect x={island.x - 62} y={island.y + dotR + 7}
-                        width="124" height="22" rx="3"
-                        fill="#041220" stroke="#C8941A55" strokeWidth="1" />
-                      <text x={island.x} y={island.y + dotR + 22}
-                        textAnchor="middle" fill="#C8941A"
-                        fontSize="8.5" fontFamily="Cinzel,serif"
-                        letterSpacing="0.08em"
+                      <rect x={island.x - 70} y={island.y + (island.isHome ? 18 : dotR + 7)}
+                        width="140" height="20" rx="3"
+                        fill="#041220" stroke={current ? "#C8941A55" : completed ? "#2AB87055" : "#1A304055"} strokeWidth="1" />
+                      <text x={island.x} y={island.y + (island.isHome ? 32 : dotR + 21)}
+                        textAnchor="middle"
+                        fill={current ? "#C8941A" : completed ? "#2AB870" : "#1A6070"}
+                        fontSize="8" fontFamily="Cinzel,serif" letterSpacing="0.06em"
                         style={{ pointerEvents: "none" }}>
-                        {island.label}
+                        {locked ? "🔒 COMPLETE PREVIOUS STOP" : island.label}
                       </text>
                     </g>
                   )}
@@ -576,16 +486,50 @@ function VoyageMap({ name, onNavigate, unlocked, onOpenBag, onReset }) {
               );
             })}
 
-            {/* Chart label */}
-            <text x={14} y={H - 12} fill="#1A7080" fontSize="8.5"
+            {/* Star compass rose — top right — historically accurate orientation tool */}
+            <g transform={`translate(${RCX},${RCY})`}>
+              <circle cx={0} cy={0} r={RR + 4} fill="rgba(4,12,22,0.85)" stroke="#1A4050" strokeWidth="1"/>
+              <circle cx={0} cy={0} r={RR} fill="none" stroke="#1A3A50" strokeWidth="0.5"/>
+              {roseHouses.map(h => {
+                const rad = (h.angle - 90) * Math.PI / 180;
+                const x1 = Math.cos(rad) * 8, y1 = Math.sin(rad) * 8;
+                const x2 = Math.cos(rad) * RR, y2 = Math.sin(rad) * RR;
+                const tx = Math.cos(rad) * (RR + 12), ty = Math.sin(rad) * (RR + 12);
+                const isCard = h.angle % 90 === 0;
+                return (
+                  <g key={h.angle}>
+                    <line x1={x1} y1={y1} x2={x2} y2={y2}
+                      stroke={isCard ? "#4A8090" : "#2A5060"} strokeWidth={isCard ? 1 : 0.6}/>
+                    <text x={tx} y={ty + 3} textAnchor="middle" dominantBaseline="middle"
+                      fill={isCard ? "#6AAAB8" : "#2A6070"} fontSize={isCard ? "6.5" : "5.5"}
+                      fontFamily="Cinzel,serif">
+                      {h.label}
+                    </text>
+                  </g>
+                );
+              })}
+              <circle cx={0} cy={0} r={5} fill="#0A2030" stroke="#3A7080" strokeWidth="1"/>
+              <text x={0} y={-RR - 18} textAnchor="middle" fill="#1A5060" fontSize="5.5" fontFamily="Cinzel,serif" letterSpacing="0.1em">STAR COMPASS</text>
+            </g>
+
+            {/* Progress display */}
+            <text x={14} y={H - 28} fill="#1A7080" fontSize="8.5"
               fontFamily="Cinzel,serif" style={{ letterSpacing: "0.12em" }}>
               KA MOANA NUI · THE GREAT OCEAN
             </text>
+            <text x={14} y={H - 12} fill={completedCount === 6 ? "#2AB870" : "#C8941A"} fontSize="9"
+              fontFamily="Cinzel,serif" style={{ letterSpacing: "0.10em" }}>
+              {completedCount === 0 ? "VOYAGE BEGINS · SĀMOA AWAITS"
+                : completedCount === 6 ? "VOYAGE COMPLETE · READY FOR FINAL JOURNEY"
+                : `${completedCount} OF 6 LEGS COMPLETE`}
+            </text>
           </svg>
 
-          {/* Instruction */}
-          <div style={{ position: "absolute", bottom: "24px", right: "24px", background: "rgba(3,12,22,0.88)", border: "1px solid #0A3040", borderRadius: "6px", padding: "9px 14px", fontFamily: "Cinzel,serif", fontSize: "10px", color: "#1A8090", letterSpacing: "0.08em" }}>
-            CLICK A GLOWING ISLAND TO BEGIN
+          {/* Legend */}
+          <div style={{ position: "absolute", bottom: "24px", right: "24px", background: "rgba(3,12,22,0.92)", border: "1px solid #0A3040", borderRadius: "6px", padding: "10px 14px", fontFamily: "Cinzel,serif", fontSize: "9px", display:"flex", flexDirection:"column", gap:"5px" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:"7px", color:"#C8941A" }}><div style={{ width:"8px", height:"8px", borderRadius:"50%", background:"#E8C060", border:"1.5px solid #C8941A" }}/> NEXT DESTINATION</div>
+            <div style={{ display:"flex", alignItems:"center", gap:"7px", color:"#60D8A0" }}><div style={{ width:"8px", height:"8px", borderRadius:"50%", background:"#2AB870", border:"1.5px solid #1A9050" }}/> COMPLETED · REVISIT</div>
+            <div style={{ display:"flex", alignItems:"center", gap:"7px", color:"#1A4050" }}><div style={{ width:"8px", height:"8px", borderRadius:"50%", background:"#0A3040", border:"1.5px solid #0A2030" }}/> LOCKED</div>
           </div>
         </div>
       </div>
@@ -600,7 +544,7 @@ function VoyageMap({ name, onNavigate, unlocked, onOpenBag, onReset }) {
 function CompassDial({ step, selHouse, selStar, hovHouse, hovStar, onHouseClick, onHouseHover, onStarClick, onStarHover }) {
   const CX = 300, CY = 300, R = 258, RI = 55;
   const qFill = { ko: "rgba(200,120,20,0.10)", ma: "rgba(160,145,15,0.08)", kona: "rgba(15,95,155,0.11)", ho: "rgba(90,35,170,0.08)", card: "transparent" };
-  const correctHouse = selHouse && Math.abs(selHouse.angle - 180) < 6;
+  const correctHouse = selHouse && Math.abs(selHouse.angle - 22.5) < 6;
   const selC = ok => ok ? "#FFD700" : "#FF5533";
 
   return (
@@ -690,35 +634,622 @@ function CompassDial({ step, selHouse, selStar, hovHouse, hovStar, onHouseClick,
    PALU PANEL
 ══════════════════════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════════════
+   MODULE NARRATIVE CONTENT
+══════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════
+   BRIDGE CONTENT — arrival narrative per module
+══════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════
+   FINAL VOYAGE — MODULE 7
+══════════════════════════════════════════════════════════════ */
+
+
+function VoyageMap7({ nodeIdx, wakaPos }) {
+  const W = 560, H = 500;
+  const path = VOYAGE_WAYPOINTS;
+
+  // Build the route path string
+  const routeD = path.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+
+  // Latitude reference lines (rough)
+  const latLines = [
+    { y: 75,  label: "21°S (Tonga)" },
+    { y: 170, label: "30°S" },
+    { y: 290, label: "37°S" },
+    { y: 430, label: "43°S (Aotearoa)" },
+  ];
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:"100%", maxHeight:"calc(100vh - 130px)" }}>
+      <defs>
+        <radialGradient id="voy7ocean" cx="40%" cy="40%" r="70%">
+          <stop offset="0%" stopColor="#0A4A65"/>
+          <stop offset="60%" stopColor="#063550"/>
+          <stop offset="100%" stopColor="#030F1E"/>
+        </radialGradient>
+        <filter id="wakaGlow">
+          <feGaussianBlur stdDeviation="4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="nodeGlow">
+          <feGaussianBlur stdDeviation="3" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <rect width={W} height={H} fill="url(#voy7ocean)"/>
+
+      {/* Wave texture */}
+      {Array.from({length:20},(_,i) => {
+        const y = 20 + i * 24;
+        return <line key={i} x1={0} y1={y} x2={W} y2={y} stroke="#1A8090" strokeWidth="0.5" opacity={0.08 + (i%4)*0.03}/>;
+      })}
+
+      {/* Lat reference lines */}
+      {latLines.map(l => (
+        <g key={l.y}>
+          <line x1={0} y1={l.y} x2={W} y2={l.y} stroke="#1E9090" strokeWidth="0.6" strokeDasharray="4,12" opacity="0.25"/>
+          <text x={W-8} y={l.y-4} textAnchor="end" fill="#1A7080" fontSize="8" fontFamily="Cinzel,serif" opacity="0.7">{l.label}</text>
+        </g>
+      ))}
+
+      {/* Kermadec Islands (rough position ~30°S) */}
+      <circle cx={350} cy={178} r={4} fill="#1A6060" stroke="#2A8080" strokeWidth="1" opacity="0.6"/>
+      <text x={356} y={176} fill="#1A6060" fontSize="8" fontFamily="Cinzel,serif" opacity="0.6">Kermadec Is.</text>
+
+      {/* Completed route — segments sailed */}
+      {path.slice(0, nodeIdx + 1).map((p, i) => {
+        if (i === 0) return null;
+        const prev = path[i - 1];
+        return (
+          <line key={i} x1={prev.x} y1={prev.y} x2={p.x} y2={p.y}
+            stroke="#20C0A0" strokeWidth="1.8" strokeDasharray="6,6" opacity="0.6"/>
+        );
+      })}
+
+      {/* Upcoming route — faint dotted */}
+      {path.slice(nodeIdx + 1).map((p, i) => {
+        const prev = path[nodeIdx + i];
+        return (
+          <line key={i} x1={prev.x} y1={prev.y} x2={p.x} y2={p.y}
+            stroke="#1A4050" strokeWidth="1" strokeDasharray="3,8" opacity="0.4"/>
+        );
+      })}
+
+      {/* Node markers */}
+      {VOYAGE_NODES.map((node, i) => {
+        const wp = path[i + 1]; // waypoint AFTER this node completes
+        const done = i < nodeIdx;
+        const current = i === nodeIdx - 1 || (nodeIdx === 0 && i === 0);
+        return (
+          <g key={node.id}>
+            <circle cx={path[i].x} cy={path[i].y} r={done ? 6 : current ? 8 : 5}
+              fill={done ? "#2AB870" : current ? "#C8941A" : "#0A3040"}
+              stroke={done ? "#1A9050" : current ? "#E8C060" : "#1A4050"}
+              strokeWidth={current ? 2 : 1}
+              filter={current ? "url(#nodeGlow)" : undefined}
+              opacity={done ? 1 : current ? 1 : 0.5}/>
+            {done && (
+              <text x={path[i].x} y={path[i].y + 4} textAnchor="middle"
+                fill="#FFFFFF" fontSize="7" fontFamily="Cinzel,serif">✓</text>
+            )}
+            {!done && (
+              <text x={path[i].x + 10} y={path[i].y + 4}
+                fill={current ? "#C8941A" : "#1A4050"} fontSize="8" fontFamily="Cinzel,serif">
+                {node.day}
+              </text>
+            )}
+          </g>
+        );
+      })}
+
+      {/* Tonga label */}
+      <circle cx={path[0].x} cy={path[0].y} r={7} fill="#C8941A" stroke="#E8B830" strokeWidth="1.5"/>
+      <text x={path[0].x} y={path[0].y - 12} textAnchor="middle" fill="#F0D870" fontSize="10" fontFamily="Cinzel,serif" fontWeight="700">Tonga ⚓</text>
+
+      {/* Aotearoa label */}
+      <circle cx={path[7].x} cy={path[7].y} r={nodeIdx >= 7 ? 8 : 5}
+        fill={nodeIdx >= 7 ? "#2AB870" : "#0A3040"}
+        stroke={nodeIdx >= 7 ? "#1A9050" : "#1A4050"} strokeWidth="1.5" opacity={nodeIdx >= 7 ? 1 : 0.5}/>
+      <text x={path[7].x + 14} y={path[7].y + 4} fill={nodeIdx >= 7 ? "#60D8A0" : "#1A5060"} fontSize="10" fontFamily="Cinzel,serif" fontWeight="700">Aotearoa</text>
+
+      {/* Waka — animated position */}
+      <g transform={`translate(${wakaPos.x}, ${wakaPos.y})`} filter="url(#wakaGlow)">
+        <ellipse cx={0} cy={0} rx={10} ry={3} fill="#1A3028" stroke="#4A8060" strokeWidth="1.5"/>
+        <circle cx={0} cy={0} r={2.5} fill="#C8941A"/>
+        <line x1={-8} y1={-2} x2={8} y2={-2} stroke="#3A5040" strokeWidth="1"/>
+      </g>
+
+      {/* Chart label */}
+      <text x={12} y={H-10} fill="#1A7080" fontSize="8" fontFamily="Cinzel,serif" letterSpacing="0.12em">
+        TONGA → AOTEAROA · THE FINAL VOYAGE
+      </text>
+    </svg>
+  );
+}
+
+function FinalVoyageModule({ name, onBack, onOpenBag, unlocked }) {
+  const [nodeIdx,    setNodeIdx]   = useState(0);   // which node we're on (0-5)
+  const [phase,      setPhase]     = useState("sailing"); // sailing | question | hint | landfall | certificate
+  const [selAnswer,  setSelAnswer] = useState(null);
+  const [wakaPos,    setWakaPos]   = useState(VOYAGE_WAYPOINTS[0]);
+  const [animating,  setAnimating] = useState(false);
+
+  const node = VOYAGE_NODES[nodeIdx];
+  const completedAll = nodeIdx >= VOYAGE_NODES.length;
+
+  // Animate waka toward next waypoint
+  const advanceWaka = (fromIdx, toIdx, onDone) => {
+    const from = VOYAGE_WAYPOINTS[fromIdx];
+    const to   = VOYAGE_WAYPOINTS[toIdx];
+    const steps = 40;
+    let step = 0;
+    setAnimating(true);
+    const timer = setInterval(() => {
+      step++;
+      const t = step / steps;
+      const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // ease in-out
+      setWakaPos({ x: from.x + (to.x - from.x) * ease, y: from.y + (to.y - from.y) * ease });
+      if (step >= steps) {
+        clearInterval(timer);
+        setWakaPos(to);
+        setAnimating(false);
+        onDone();
+      }
+    }, 40);
+  };
+
+  const handleAnswer = optId => {
+    if (animating) return;
+    const opt = node.options.find(o => o.id === optId);
+    setSelAnswer(optId);
+    if (opt.correct) {
+      setTimeout(() => {
+        const nextNodeIdx = nodeIdx + 1;
+        advanceWaka(nodeIdx, nextNodeIdx, () => {
+          if (nextNodeIdx >= VOYAGE_NODES.length) {
+            // All done — advance to landfall
+            advanceWaka(nextNodeIdx, nextNodeIdx + 1, () => setPhase("landfall"));
+          } else {
+            setNodeIdx(nextNodeIdx);
+            setSelAnswer(null);
+            setPhase("sailing");
+          }
+        });
+        setPhase("advancing");
+      }, 1200);
+    } else {
+      setPhase("hint");
+    }
+  };
+
+  const handleRetry = () => { setSelAnswer(null); setPhase("sailing"); };
+
+  // Landfall screen
+  if (phase === "landfall") return (
+    <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+      <div style={{ height:"44px", borderBottom:"1px solid #2A503022", background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+      </div>
+      <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"32px" }}>
+        <div style={{ maxWidth:"620px", width:"100%", display:"flex", flexDirection:"column", gap:"28px" }}>
+          <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:"#2AB870", letterSpacing:"0.2em" }}>LANDFALL · AOTEAROA</div>
+          <div style={{ fontFamily:"Cinzel,serif", fontSize:"36px", fontWeight:"900", color:"#60D8A0", lineHeight:"1.1" }}>
+            He ao! He ao tea!
+          </div>
+          <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#6AA890", fontStyle:"italic", lineHeight:"1.4" }}>
+            A cloud! A white cloud!
+          </div>
+          <div style={{ width:"60px", height:"1px", background:"linear-gradient(to right, #2AB870, transparent)" }}/>
+          <div style={{ display:"flex", flexDirection:"column", gap:"14px" }}>
+            {[
+              `The mountains of Aotearoa appeared on the horizon just as the terns said they would. The chiefs stood at the bow and wept — they had not believed it possible.`,
+              `You brought them safely. Six skills. Six days at sea. The stars, the sun, the swell, the wind, the birds, and the clouds — each one held true.`,
+              `The people of Aotearoa came down to the shore. They had heard of the great forest fungus spreading through their native trees, and their leaders were glad to meet with ours. Perhaps, between our peoples, there will be a way forward.`,
+              `And somewhere back in Tonga, Palu Hemi is still there — his notes folded in the waka — waiting to hear what you found.`,
+            ].map((line, i) => (
+              <div key={i} style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#8ABCB0", lineHeight:"1.75", fontStyle:"italic",
+                borderLeft:"2px solid #2AB87044", paddingLeft:"16px" }}>
+                {line}
+              </div>
+            ))}
+          </div>
+          <button onClick={() => setPhase("certificate")} style={{
+            alignSelf:"flex-start", padding:"13px 32px", borderRadius:"6px", cursor:"pointer",
+            fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.14em",
+            border:"1px solid #2AB870", background:"rgba(42,184,112,0.12)", color:"#2AB870",
+          }}>
+            RECEIVE YOUR CERTIFICATE →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Certificate screen
+  if (phase === "certificate") {
+    const today = new Date().toLocaleDateString("en-NZ", { year:"numeric", month:"long", day:"numeric" });
+    return (
+      <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+        <div style={{ height:"44px", borderBottom:"1px solid #C8941A22", background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0 }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+          <button onClick={onBack} style={{ background:"none", border:"1px solid #C8941A33", borderRadius:"5px", padding:"5px 14px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:"#C8941A88", letterSpacing:"0.1em" }}>← RETURN TO OCEAN</button>
+        </div>
+        <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px", overflowY:"auto" }}>
+          <div style={{ maxWidth:"560px", width:"100%", border:"1px solid #C8941A44", borderRadius:"12px", padding:"40px 44px", background:"rgba(8,14,24,0.95)", display:"flex", flexDirection:"column", alignItems:"center", gap:"20px", textAlign:"center" }}>
+
+            {/* Top ornament */}
+            <div style={{ display:"flex", alignItems:"center", gap:"12px", width:"100%" }}>
+              <div style={{ flex:1, height:"1px", background:"linear-gradient(to right, transparent, #C8941A66)" }}/>
+              <span style={{ color:"#C8941A", fontSize:"16px" }}>✦</span>
+              <div style={{ flex:1, height:"1px", background:"linear-gradient(to left, transparent, #C8941A66)" }}/>
+            </div>
+
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#C8941A", letterSpacing:"0.3em", opacity:0.8 }}>
+              OCEAN ADVENTURE · A POLYNESIAN VOYAGING EXPERIENCE
+            </div>
+
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"13px", color:"#7AACBE", letterSpacing:"0.1em" }}>
+              This certifies that
+            </div>
+
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"40px", fontWeight:"900", color:"#E8D8A8", lineHeight:"1.1" }}>
+              {name}
+            </div>
+
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#6AA8A0", fontStyle:"italic" }}>
+              has completed the voyage from Tonga to Aotearoa
+            </div>
+
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"18px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.08em" }}>
+              Wayfinder of Ka Moana Nui
+            </div>
+
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#4A8080", fontStyle:"italic", lineHeight:"1.7", maxWidth:"420px" }}>
+              Demonstrating mastery of the star compass, sun arc, ocean swells, wind patterns, bird signs, and the clouds and sea signs of the Pacific Ocean — navigating 1,900 km of open ocean without instruments.
+            </div>
+
+            {/* Skills row */}
+            <div style={{ display:"flex", gap:"8px", flexWrap:"wrap", justifyContent:"center", margin:"4px 0" }}>
+              {["✦ Stars","☀ Sun","〰 Swells","≋ Wind","🐦 Birds","☁ Clouds"].map(s => (
+                <div key={s} style={{ padding:"4px 11px", border:"1px solid #C8941A33", borderRadius:"20px",
+                  fontFamily:"Cinzel,serif", fontSize:"9px", color:"#C8941A", letterSpacing:"0.08em" }}>{s}</div>
+              ))}
+            </div>
+
+            <div style={{ width:"100%", height:"1px", background:"linear-gradient(to right, transparent, #C8941A44, transparent)" }}/>
+
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:"#2AB870", letterSpacing:"0.06em" }}>
+              He ao! He ao tea! · A cloud! A white cloud!
+            </div>
+
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"12px", color:"#3A6050", fontStyle:"italic" }}>
+              {today}
+            </div>
+
+            {/* Bottom ornament */}
+            <div style={{ display:"flex", alignItems:"center", gap:"12px", width:"100%" }}>
+              <div style={{ flex:1, height:"1px", background:"linear-gradient(to right, transparent, #C8941A66)" }}/>
+              <span style={{ color:"#C8941A", fontSize:"16px" }}>✦</span>
+              <div style={{ flex:1, height:"1px", background:"linear-gradient(to left, transparent, #C8941A66)" }}/>
+            </div>
+
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#1A3028", letterSpacing:"0.12em" }}>
+              Palu Hemi · Tongatapu · Master Navigator
+            </div>
+
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main voyage screen — map + question
+  const accent = "#48CAE4";
+
+  return (
+    <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+
+      {/* Header */}
+      <div style={{ height:"44px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+        <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em", opacity:0.8 }}>HAUMĀNA · {name.toUpperCase()}</span>
+          <button onClick={onOpenBag} style={{ background:"rgba(200,148,26,0.10)", border:"1px solid #C8941A55", borderRadius:"5px", padding:"5px 12px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", color:"#C8941A", letterSpacing:"0.08em" }}>✦ BAG ({unlocked.length})</button>
+        </div>
+      </div>
+
+      {/* Module bar */}
+      <div style={{ padding:"7px 22px", borderBottom:`1px solid ${accent}18`, background:"rgba(4,8,18,0.6)", flexShrink:0 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em", opacity:0.8 }}>FINAL VOYAGE · TONGA → AOTEAROA</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#1A2A40", marginLeft:"14px", letterSpacing:"0.1em" }}>
+          {completedAll ? "LANDFALL" : `${node.day.toUpperCase()} · ${node.skill.toUpperCase()}`}
+        </span>
+      </div>
+
+      {/* Body */}
+      <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
+
+        {/* Left — node card */}
+        <div style={{ width:"320px", flexShrink:0, borderRight:`1px solid ${accent}18`, overflowY:"auto", display:"flex", flexDirection:"column" }}>
+          <div style={{ padding:"20px 18px", display:"flex", flexDirection:"column", gap:"14px", flex:1 }}>
+
+            {/* Nav */}
+            <div style={{ display:"flex", gap:"8px" }}>
+              <button onClick={onBack} style={{ flex:1, background:"none", border:`1px solid ${accent}22`, borderRadius:"4px", color:"#2A3A50", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
+            </div>
+
+            {/* Progress dots */}
+            <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
+              {VOYAGE_NODES.map((_,i) => (
+                <div key={i} style={{ width:i < nodeIdx ? "14px" : "8px", height:"8px", borderRadius:"4px",
+                  background: i < nodeIdx ? "#2AB870" : i === nodeIdx ? accent : "#1A2840",
+                  transition:"all 0.3s" }}/>
+              ))}
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A3A50", marginLeft:"4px" }}>
+                {nodeIdx}/{VOYAGE_NODES.length}
+              </div>
+            </div>
+
+            {/* Palu's note */}
+            <div style={{ background:"rgba(4,10,20,0.7)", border:`1px solid ${accent}18`, borderRadius:"7px", padding:"14px" }}>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:`${accent}88`, letterSpacing:"0.14em", marginBottom:"8px" }}>PALU'S NOTES</div>
+              <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#7AACBE", lineHeight:"1.7", fontStyle:"italic" }}>
+                {phase === "hint"
+                  ? node.hint
+                  : phase === "advancing"
+                  ? node.correct
+                  : node.setup}
+              </div>
+            </div>
+
+            {/* Question */}
+            {phase !== "advancing" && (
+              <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#8ABCB0", lineHeight:"1.65", fontStyle:"italic",
+                borderLeft:`2px solid ${accent}44`, paddingLeft:"12px" }}>
+                {node.question}
+              </div>
+            )}
+
+            {/* Answer options */}
+            {(phase === "sailing" || phase === "hint") && (
+              <div style={{ display:"flex", flexDirection:"column", gap:"7px" }}>
+                {node.options.map(opt => {
+                  const chosen = selAnswer === opt.id;
+                  const right  = chosen && opt.correct;
+                  const wrong  = chosen && !opt.correct;
+                  return (
+                    <button key={opt.id} onClick={() => handleAnswer(opt.id)} style={{
+                      padding:"11px 12px", borderRadius:"6px", cursor:"pointer", textAlign:"left",
+                      fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"600", lineHeight:"1.4",
+                      border:`1px solid ${right ? "#2AB870" : wrong ? "#FF5533" : selAnswer ? "#0A1828" : `${accent}33`}`,
+                      background: right ? "rgba(42,184,112,0.12)" : wrong ? "rgba(255,85,51,0.08)" : "rgba(255,255,255,0.02)",
+                      color: right ? "#2AB870" : wrong ? "#FF6644" : selAnswer ? "#1A2840" : accent,
+                      transition:"all 0.2s",
+                    }}>
+                      {opt.text}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Hint retry */}
+            {phase === "hint" && (
+              <button onClick={handleRetry} style={{
+                padding:"10px", borderRadius:"6px", cursor:"pointer",
+                fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em",
+                border:`1px solid ${accent}55`, background:`${accent}0E`, color:accent,
+              }}>
+                TRY AGAIN →
+              </button>
+            )}
+
+            {/* Advancing state — waka moving */}
+            {phase === "advancing" && (
+              <div style={{ display:"flex", alignItems:"center", gap:"10px", padding:"10px 14px",
+                background:"rgba(42,184,112,0.08)", border:"1px solid #2AB87033", borderRadius:"6px" }}>
+                <div style={{ width:"8px", height:"8px", borderRadius:"50%", background:"#2AB870",
+                  animation:"none", opacity:0.9 }}/>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2AB870", letterSpacing:"0.1em" }}>
+                  SAILING...
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+
+        {/* Right — voyage map */}
+        <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"16px", background:"rgba(4,8,14,0.3)" }}>
+          <VoyageMap7 nodeIdx={nodeIdx} wakaPos={wakaPos} />
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+
+
+/* ══════════════════════════════════════════════════════════════
+   SHARED MODULE INTRO SCREEN
+══════════════════════════════════════════════════════════════ */
+
+function ModuleIntroScreen({ moduleNum, name, onBegin, onBack }) {
+  const content = MODULE_CONTENT[moduleNum];
+  const mod = {
+    1: { num:"01", title:"The Star Compass",   sub:"Tonga → Sāmoa · Nāleo-Koʻolau · Mānaiakalani" },
+    2: { num:"02", title:"The Sun's Arc",       sub:"Sāmoa → Tahiti · Latitude by day · Tama-nui-te-rā" },
+    3: { num:"03", title:"Ocean Swells",        sub:"Tahiti → Marquesas · Te Moana · NNE crossing" },
+    4: { num:"04", title:"Wind Patterns",       sub:"Marquesas → Hawaiʻi · Cross the ITCZ · Hau me Matagi" },
+    5: { num:"05", title:"The Bird Guide",      sub:"Hawaiʻi → Fiji · Ngā Manu · Read what flies" },
+    6: { num:"06", title:"Clouds & Sea Signs",  sub:"Fiji → Tonga · Kapua me te Moana · Coming home" },
+  }[moduleNum];
+
+  const accent = content.accent;
+  const stars = Array.from({length:60},(_,i)=>({ x:((i*137+41)%97)/97*100, y:((i*79+23)%89)/89*100, r:i%7===0?1.3:i%3===0?0.8:0.4, op:0.1+(i%5)*0.07 }));
+
+  return (
+    <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", flexDirection:"column", overflow:"hidden", position:"relative" }}>
+
+      {/* Header */}
+      <div style={{ height:"44px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0, zIndex:2 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+        <button onClick={onBack} style={{ background:"none", border:`1px solid ${accent}33`, borderRadius:"5px", padding:"5px 14px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.1em", opacity:0.7 }}>← MAP</button>
+      </div>
+
+      {/* Star field */}
+      <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none", zIndex:0 }}>
+        {stars.map((s,i)=><circle key={i} cx={`${s.x}%`} cy={`${s.y}%`} r={s.r} fill={accent} opacity={s.op}/>)}
+      </svg>
+
+      {/* Content — centred */}
+      <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", zIndex:1, padding:"32px 40px" }}>
+        <div style={{ maxWidth:"660px", width:"100%", display:"flex", flexDirection:"column", gap:"32px" }}>
+
+          {/* Module tag */}
+          <div style={{ display:"flex", alignItems:"center", gap:"16px" }}>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:accent, letterSpacing:"0.2em", opacity:0.7 }}>MODULE {mod.num}</div>
+            <div style={{ flex:1, height:"1px", background:`linear-gradient(to right, ${accent}44, transparent)` }}/>
+          </div>
+
+          {/* Title */}
+          <div>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"38px", fontWeight:"900", color:"#E8D8A8", lineHeight:"1.1", marginBottom:"8px" }}>{mod.title}</div>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"12px", color:accent, letterSpacing:"0.14em", opacity:0.7 }}>{mod.sub}</div>
+          </div>
+
+          {/* Divider */}
+          <div style={{ width:"60px", height:"1px", background:`linear-gradient(to right, ${accent}, transparent)` }}/>
+
+          {/* Quote */}
+          <div style={{ borderLeft:`2px solid ${accent}55`, paddingLeft:"22px" }}>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"17px", color:"#B0C8C0", lineHeight:"1.75", fontStyle:"italic" }}>
+              "{content.intro.quote}"
+            </div>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.1em", marginTop:"12px", opacity:0.65 }}>
+              — {content.intro.attribution}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div style={{ display:"flex", gap:"12px", alignItems:"center", paddingTop:"8px" }}>
+            <button onClick={onBegin} style={{ padding:"14px 36px", background:`linear-gradient(135deg, ${accent}22, ${accent}11)`, border:`1px solid ${accent}`, borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:accent, letterSpacing:"0.14em" }}>
+              BEGIN LEARNING →
+            </button>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A3A50", letterSpacing:"0.1em" }}>E {name.toUpperCase()} · HAUMĀNA</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SHARED MODULE LEARN SCREEN
+══════════════════════════════════════════════════════════════ */
+
+function ModuleLearnScreen({ moduleNum, name, onReady, onBack, onOpenBag, unlocked, children }) {
+  const content = MODULE_CONTENT[moduleNum];
+  const accent  = content.accent;
+  const { title, concepts } = content.learn;
+
+  return (
+    <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+
+      {/* Header */}
+      <div style={{ height:"44px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em", opacity:0.8 }}>HAUMĀNA · {name.toUpperCase()}</span>
+      </div>
+
+      {/* Module bar */}
+      <div style={{ padding:"7px 22px", borderBottom:`1px solid ${accent}18`, background:"rgba(4,8,18,0.6)", flexShrink:0 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em", opacity:0.8 }}>MODULE {String(moduleNum).padStart(2,"0")} · LEARNING</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#2A3A50", marginLeft:"14px", letterSpacing:"0.1em" }}>{title.toUpperCase()}</span>
+      </div>
+
+      {/* Body */}
+      <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
+
+        {/* Left — concept list */}
+        <div style={{ width:"320px", flexShrink:0, borderRight:`1px solid ${accent}18`, overflowY:"auto", background:"rgba(4,8,14,0.6)" }}>
+          <div style={{ padding:"22px 20px", display:"flex", flexDirection:"column", gap:"16px" }}>
+
+            {/* Nav */}
+            <div style={{ display:"flex", gap:"8px" }}>
+              <button onClick={onBack} style={{ flex:1, background:"none", border:`1px solid ${accent}22`, borderRadius:"4px", color:"#2A3A50", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
+              <button onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":accent+"22"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#2A3A50", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>
+                {unlocked.length>0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
+              </button>
+            </div>
+
+            {/* Section label */}
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.18em", opacity:0.7 }}>CORE CONCEPTS</div>
+
+            {/* Concept cards */}
+            {concepts.map((c,i) => (
+              <div key={i} style={{ borderLeft:`2px solid ${accent}55`, paddingLeft:"14px", display:"flex", flexDirection:"column", gap:"6px" }}>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#D0C8A8", letterSpacing:"0.04em" }}>{c.heading}</div>
+                <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#7AACBE", lineHeight:"1.7", fontStyle:"italic" }}>{c.body}</div>
+              </div>
+            ))}
+
+            {/* Ready button */}
+            <div style={{ paddingTop:"8px", borderTop:`1px solid ${accent}18` }}>
+              <button onClick={onReady} style={{ width:"100%", padding:"14px", borderRadius:"6px", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.14em", cursor:"pointer", border:`1px solid ${accent}`, background:`${accent}14`, color:accent }}>
+                I UNDERSTAND — BEGIN ACTIVITY →
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Right — visual/illustration */}
+        <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"28px 32px", background:"rgba(4,8,14,0.3)" }}>
+          {children}
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+
 function PaluPanel({ step, selHouse, selStar, hovHouse, hovStar, name, onBack, onOpenBag, unlocked }) {
-  const correctHouse = selHouse && Math.abs(selHouse.angle - 180) < 6;
+  const correctHouse = selHouse && Math.abs(selHouse.angle - 22.5) < 6;
   const correctStar  = selStar?.correct;
 
   let title = "", body = "";
   if (step === 3) {
-    title = "Hōkūleʻa. The star of joy.";
-    body  = `It rises in ʻĀina-Koʻolau — just north of true east. As the waka moves south toward Tahiti, Hōkūleʻa rises on your port side all night. You hold this in your mind, ${name}. The voyage begins.`;
+    title = "Mānaiakalani. Vega — our guide to Sāmoa.";
+    body  = `It rises in Nāleo-Koʻolau — just north-northeast. Keep it on your starboard bow through the night and you hold your heading. You carry this knowledge now, ${name}. Let us set sail.`;
   } else if (step === 2) {
     if (selStar && !correctStar) {
       title = `${selStar.name}.`;
-      body  = selStar.desc + " Look for the zenith star of Hawaiʻi.";
+      body  = selStar.desc + " We need a star rising in Nāleo-Koʻolau for our NNE heading.";
     } else if (hovStar) {
       title = hovStar.name;
       body  = `${hovStar.western} — ${hovStar.desc}`;
     } else {
-      title = "Hema is locked.";
-      body  = "Five stars are visible tonight. One rises in Koʻolau and sits at Hawaiʻiʻs zenith. Hover each — then choose.";
+      title = "Find the right star.";
+      body  = "Sāmoa lies NNE — in the Nāleo-Koʻolau house. Five stars are visible tonight. Which one rises in that house? Hover each — then choose.";
     }
   } else {
     if (!selHouse) {
       title = `E ${name}.`;
-      body  = "You stand on the pola of the waka at midnight, June 21st. Tahiti lies 4,400 km to the south. Click the house on the compass that shows your heading.";
+      body  = "You stand on the pola of the waka at midnight. Sāmoa lies to the north-northeast — roughly 800 km across open ocean. Click the house on the compass that shows your heading.";
     } else if (!correctHouse) {
       title = `${selHouse.name}.`;
-      body  = `That house faces ${dirName(selHouse.angle)}. Tahiti lies south — Hema. Try again.`;
+      body  = `That house faces ${dirName(selHouse.angle)}. Sāmoa lies NNE of Tonga — the Nāleo-Koʻolau house, at about 22.5°. Try again.`;
     } else {
-      title = "Hema. You have it.";
-      body  = "South. True Hema. Your heading is locked.";
+      title = "Nāleo-Koʻolau. You have it.";
+      body  = "North-northeast. Your heading is locked. Now find the star that rises in this house.";
     }
   }
 
@@ -733,9 +1264,9 @@ function PaluPanel({ step, selHouse, selStar, hovHouse, hovStar, name, onBack, o
       </div>
 
       <div style={{ background: "rgba(12,20,40,0.85)", border: "1px solid #1E3050", borderRadius: "7px", padding: "12px 14px" }}>
-        <div style={{ fontSize: "9px", letterSpacing: "0.18em", color: "#3A6070", fontFamily: "Cinzel,serif", marginBottom: "5px" }}>SCENARIO A · SUMMER SOLSTICE</div>
-        <div style={{ fontSize: "14px", color: "#C0DCF0", fontFamily: "Cinzel,serif", fontWeight: "700", marginBottom: "2px" }}>Hawaiʻi → Tahiti</div>
-        <div style={{ fontSize: "10.5px", color: "#507080", fontFamily: "Cinzel,serif" }}>June 21 · Midnight · 20°N</div>
+        <div style={{ fontSize: "9px", letterSpacing: "0.18em", color: "#3A6070", fontFamily: "Cinzel,serif", marginBottom: "5px" }}>TONGA → SĀMOA</div>
+        <div style={{ fontSize: "14px", color: "#C0DCF0", fontFamily: "Cinzel,serif", fontWeight: "700", marginBottom: "2px" }}>Night 1 · Departure</div>
+        <div style={{ fontSize: "10.5px", color: "#507080", fontFamily: "Cinzel,serif" }}>Midnight · Tongatapu · 21°S</div>
       </div>
 
       <div style={{ display: "flex", gap: "4px" }}>
@@ -746,9 +1277,9 @@ function PaluPanel({ step, selHouse, selStar, hovHouse, hovStar, name, onBack, o
       </div>
 
       <div style={{ flex: 1, background: "rgba(6,11,22,0.7)", border: "1px solid #161F34", borderRadius: "7px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px", minHeight: 0, overflowY: "auto" }}>
-        <div style={{ fontSize: "9px", color: "#365060", fontFamily: "Cinzel,serif", letterSpacing: "0.14em" }}>THE PALU SPEAKS</div>
-        <div style={{ fontSize: "14px", color: "#D0A838", fontFamily: "Cinzel,serif", fontWeight: "700", lineHeight: "1.45" }}>{title}</div>
-        <div style={{ fontSize: "12px", color: "#7AACBE", fontFamily: "Georgia,serif", fontStyle: "italic", lineHeight: "1.65" }}>{body}</div>
+        <div style={{ fontSize: "11px", color: "#365060", fontFamily: "Cinzel,serif", letterSpacing: "0.14em" }}>THE PALU SPEAKS</div>
+        <div style={{ fontSize: "17px", color: "#D0A838", fontFamily: "Cinzel,serif", fontWeight: "700", lineHeight: "1.4" }}>{title}</div>
+        <div style={{ fontSize: "14px", color: "#7AACBE", fontFamily: "Georgia,serif", fontStyle: "italic", lineHeight: "1.7" }}>{body}</div>
         {step === 2 && !selStar && !hovStar && (
           <div style={{ padding: "9px 12px", background: "rgba(18,55,80,0.4)", borderLeft: "2px solid #1A7A6E", borderRadius: "0 4px 4px 0", fontSize: "11px", color: "#5AABB8", fontFamily: "Georgia,serif" }}>Hover over the glowing stars — then click to choose.</div>
         )}
@@ -967,12 +1498,60 @@ function SkyArc({ scenario, timeVal, step, selAlt, selLat, confirming, onTimeCha
    SUN ARC MODULE
 ══════════════════════════════════════════════════════════════ */
 
-function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
+function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }) {
+  const [phase,       setPhase]      = useState("intro");
   const [step,        setStep]       = useState(1);
   const [timeVal,     setTimeVal]    = useState(120);
   const [selAlt,      setSelAlt]     = useState(null);
   const [selLat,      setSelLat]     = useState(null);
   const [confirming,  setConfirming] = useState(false);
+
+  if (phase === "intro") return (
+    <ModuleIntroScreen moduleNum={2} name={name}
+      onBegin={() => setPhase("learn")}
+      onBack={onBack} />
+  );
+  if (phase === "learn") return (
+    <ModuleLearnScreen moduleNum={2} name={name}
+      onReady={() => setPhase("activity")}
+      onBack={onBack} onOpenBag={onOpenBag} unlocked={unlocked}>
+      <div style={{ width:"min(100%,520px)", display:"flex", flexDirection:"column", gap:"16px" }}>
+        <svg viewBox="0 0 520 240" style={{ width:"100%", borderRadius:"8px", background:"#050B1A" }}>
+          <defs>
+            <linearGradient id="learnSkyG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#050B1A"/><stop offset="100%" stopColor="#0E3A54"/>
+            </linearGradient>
+          </defs>
+          <rect width="520" height="240" fill="url(#learnSkyG)"/>
+          <rect x="0" y="195" width="520" height="45" fill="#030810"/>
+          <line x1="0" y1="195" x2="520" y2="195" stroke="#1E6070" strokeWidth="1.5"/>
+          {/* Reference arcs at different latitudes */}
+          {[{alt:70,col:"#D06030",lbl:"20°N (equinox)"},{alt:46.5,col:"#8A4820",lbl:"20°N (winter)"}].map((s,i)=>(
+            <g key={i}>
+              <path d={`M40,195 Q260,${195-(s.alt/90)*170} 480,195`} fill="none" stroke={s.col} strokeWidth={i===0?2:1.2} strokeDasharray={i===0?"none":"5,4"} opacity={i===0?0.8:0.5}/>
+              <text x="490" y={195-(s.alt/90)*85} fill={s.col} fontSize="9" fontFamily="Cinzel,serif" opacity="0.8">{s.lbl}</text>
+            </g>
+          ))}
+          {/* Sun at noon */}
+          <circle cx="260" cy={195-70/90*170} r="10" fill="#FFD060" opacity="0.9"/>
+          <text x="260" y={195-70/90*170-18} textAnchor="middle" fill="#FFD060" fontSize="10" fontFamily="Cinzel,serif">noon sun</text>
+          {/* Angle arc */}
+          <path d={`M260,195 L260,${195-50} M260,195 L${260+50*Math.cos(-Math.PI/2+70*Math.PI/180)},${195-50*Math.sin(70*Math.PI/180)}`} stroke="#FFD060" strokeWidth="1" opacity="0.4"/>
+          <text x="285" y="168" fill="#FFD060" fontSize="13" fontFamily="Cinzel,serif" fontWeight="700">70°</text>
+          {/* Formula */}
+          <text x="260" y="224" textAnchor="middle" fill="#D06030" fontSize="11" fontFamily="Cinzel,serif" letterSpacing="0.06em">latitude = 90° − 70° = 20°N</text>
+          {/* Cardinal labels */}
+          <text x="40" y="210" textAnchor="middle" fill="#1A5060" fontSize="9" fontFamily="Cinzel,serif">EAST</text>
+          <text x="260" y="210" textAnchor="middle" fill="#1A5060" fontSize="9" fontFamily="Cinzel,serif">SOUTH</text>
+          <text x="480" y="210" textAnchor="middle" fill="#1A5060" fontSize="9" fontFamily="Cinzel,serif">WEST</text>
+          <text x="260" y="24" textAnchor="middle" fill="#1A2840" fontSize="9" fontFamily="Cinzel,serif">ZENITH 90°</text>
+        </svg>
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A4060", textAlign:"center", letterSpacing:"0.1em" }}>
+          SUN AT LOCAL NOON · ALTITUDE = 70° · LATITUDE = 90° − 70° = 20°N
+        </div>
+      </div>
+    </ModuleLearnScreen>
+  );
 
   const sc = SUN_SCENARIOS[0];
 
@@ -1000,22 +1579,24 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
     if (lat === sc.lat) {
       setConfirming(true);
       onComplete();
-      setTimeout(() => { setStep(4); setConfirming(false); }, 1800);
+      setTimeout(() => { setPhase("bridge"); setConfirming(false); }, 1800);
     }
   };
 
-  // Palu speech
+  if (phase === "bridge") return (
+    <BridgeScreen moduleNum={2} name={name} unlocked={unlocked} onReturn={onBridge || onBack} />
+  );
   let title = "", body = "";
   if (step === 1) {
     title = `E ${name}.`;
-    body = "You are six days out from Hawaiʻi. Cloud has hidden the stars for two nights. But Tama-nui-te-rā — the great sun — still crosses the sky. Drag the slider to find when he stands at his highest point.";
+    body = "You are five days out from Sāmoa, heading southeast toward Tahiti. Cloud has hidden the stars for two nights. But Tama-nui-te-rā — the great sun — still crosses the sky. Drag the slider to find when he stands at his highest point.";
   } else if (step === 2) {
     if (selAlt && selAlt !== sc.noonAlt) {
       title = "Look more carefully.";
       body = `${selAlt}° would place the sun ${selAlt < sc.noonAlt ? "lower" : "higher"} than it stands. Count the 15° reference lines from the horizon, then choose again.`;
     } else {
       title = "There. Local noon.";
-      body = "The sun stands due south at his peak. Now read the angle between him and the horizon. Each dashed line marks 15°.";
+      body = "The sun stands at his peak. Now read the angle between him and the horizon. Each dashed line marks 15°.";
     }
   } else if (step === 3) {
     if (selLat && selLat !== sc.lat) {
@@ -1037,7 +1618,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
 
       {/* Header */}
       <div style={{ height:"44px", borderBottom:"1px solid #0E1826", background:"rgba(4,8,18,0.95)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>POLYNESIAN WAYFINDING</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#3A6070", letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
       </div>
 
@@ -1051,7 +1632,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
       <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
 
         {/* Left panel */}
-        <div style={{ width:"260px", flexShrink:0, borderRight:"1px solid #0E1826", overflowY:"auto" }}>
+        <div style={{ width:"320px", flexShrink:0, borderRight:"1px solid #0E1826", overflowY:"auto" }}>
           <div style={{ display:"flex", flexDirection:"column", gap:"12px", padding:"18px", boxSizing:"border-box" }}>
 
             {/* Nav buttons */}
@@ -1064,9 +1645,9 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
 
             {/* Scenario card */}
             <div style={{ background:"rgba(12,20,40,0.85)", border:"1px solid #1E3050", borderRadius:"7px", padding:"12px 14px" }}>
-              <div style={{ fontSize:"9px", letterSpacing:"0.18em", color:"#3A6070", fontFamily:"Cinzel,serif", marginBottom:"5px" }}>SCENARIO A · SPRING EQUINOX</div>
-              <div style={{ fontSize:"14px", color:"#C0DCF0", fontFamily:"Cinzel,serif", fontWeight:"700", marginBottom:"2px" }}>Mid-voyage · 20°N</div>
-              <div style={{ fontSize:"10.5px", color:"#507080", fontFamily:"Cinzel,serif" }}>March 20 · Observation 6am – 6pm</div>
+              <div style={{ fontSize:"9px", letterSpacing:"0.18em", color:"#3A6070", fontFamily:"Cinzel,serif", marginBottom:"5px" }}>SĀMOA → TAHITI</div>
+              <div style={{ fontSize:"14px", color:"#C0DCF0", fontFamily:"Cinzel,serif", fontWeight:"700", marginBottom:"2px" }}>Day 5 · Spring Equinox · 20°S</div>
+              <div style={{ fontSize:"10.5px", color:"#507080", fontFamily:"Cinzel,serif" }}>Stars hidden two nights · Sun is your only guide</div>
             </div>
 
             {/* Step indicators */}
@@ -1083,9 +1664,9 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
 
             {/* Palu speech */}
             <div style={{ background:"rgba(6,11,22,0.7)", border:"1px solid #161F34", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px", overflowY:"auto" }}>
-              <div style={{ fontSize:"9px", color:"#365060", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
-              <div style={{ fontSize:"14px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.45" }}>{title}</div>
-              <div style={{ fontSize:"12px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.65" }}>{body}</div>
+              <div style={{ fontSize:"11px", color:"#365060", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
+              <div style={{ fontSize:"17px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{title}</div>
+              <div style={{ fontSize:"14px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.7" }}>{body}</div>
               {step === 1 && (
                 <div style={{ padding:"9px 12px", background:"rgba(18,55,80,0.4)", borderLeft:"2px solid #D06030", borderRadius:"0 4px 4px 0", fontSize:"11px", color:"#D08060", fontFamily:"Georgia,serif" }}>
                   Drag the time slider below the sky to find noon.
@@ -1370,13 +1951,66 @@ function SwellCanvas({ scenario, canoeHeading, showIsland, animOffset }) {
    SWELL MODULE
 ══════════════════════════════════════════════════════════════ */
 
-function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
+function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }) {
+  const [phase,         setPhase]        = useState("intro");
   const [step,          setStep]         = useState(1);
   const [selDir,        setSelDir]       = useState(null);
   const [canoeHeading,  setCanoeHeading] = useState(90);
   const [headingLocked, setHeadingLocked]= useState(false);
   const [animOffset,    setAnimOffset]   = useState(0);
   const [confirming,    setConfirming]   = useState(false);
+
+  if (phase === "intro") return (
+    <ModuleIntroScreen moduleNum={3} name={name}
+      onBegin={() => setPhase("learn")}
+      onBack={onBack} />
+  );
+  if (phase === "bridge") return (
+    <BridgeScreen moduleNum={3} name={name} unlocked={unlocked} onReturn={onBridge || onBack} />
+  );
+  if (phase === "learn") return (
+    <ModuleLearnScreen moduleNum={3} name={name}
+      onReady={() => setPhase("activity")}
+      onBack={onBack} onOpenBag={onOpenBag} unlocked={unlocked}>
+      <div style={{ width:"min(100%,520px)", display:"flex", flexDirection:"column", gap:"16px" }}>
+        <svg viewBox="0 0 520 220" style={{ width:"100%", borderRadius:"8px", background:"#030A16" }}>
+          {/* Ocean cross-section */}
+          <rect width="520" height="220" fill="#030A16"/>
+          {/* Ocean surface */}
+          <rect x="0" y="100" width="520" height="120" fill="#041018"/>
+          <line x1="0" y1="100" x2="520" y2="100" stroke="#0A3040" strokeWidth="1"/>
+          {/* Long swell waves */}
+          {Array.from({length:4},(_,i)=>(
+            <path key={i} d={`M${i*130},100 Q${i*130+65},${100-28} ${i*130+130},100`} fill="none" stroke="#2A90A8" strokeWidth="2.2" opacity="0.7"/>
+          ))}
+          <text x="65" y="88" textAnchor="middle" fill="#2A90A8" fontSize="10" fontFamily="Cinzel,serif">swell — 130m wavelength · 14s period</text>
+          {/* Wind chop on top */}
+          {Array.from({length:12},(_,i)=>(
+            <path key={i} d={`M${i*44},100 Q${i*44+22},${100-9} ${i*44+44},100`} fill="none" stroke="#4A6070" strokeWidth="1" opacity="0.45"/>
+          ))}
+          <text x="260" y="118" textAnchor="middle" fill="#2A4050" fontSize="9" fontFamily="Cinzel,serif">wind chop — short wavelength · 3-5s period</text>
+          {/* Island interference diagram */}
+          <rect x="0" y="155" width="520" height="65" fill="#030810"/>
+          <line x1="0" y1="155" x2="520" y2="155" stroke="#0A2030" strokeWidth="0.5"/>
+          {/* Island */}
+          <ellipse cx="260" cy="162" rx="28" ry="10" fill="#0E2018" stroke="#2A5040" strokeWidth="1.5"/>
+          <text x="260" y="165" textAnchor="middle" fill="#3A7050" fontSize="8" fontFamily="Cinzel,serif">ISLAND</text>
+          {/* Block behind */}
+          <ellipse cx="370" cy="185" rx="55" ry="18" fill="#061220" stroke="#1A4050" strokeWidth="0.8" strokeDasharray="4,5"/>
+          <text x="370" y="188" textAnchor="middle" fill="#1A5060" fontSize="8" fontFamily="Cinzel,serif">calm behind</text>
+          {/* Refraction arcs */}
+          {[-1,1].map(side=>(
+            <path key={side} d={`M${260+side*28},162 Q${260+side*60},${175} ${260+side*55},195`} fill="none" stroke="#2A90A8" strokeWidth="1" strokeDasharray="4,4" opacity="0.5"/>
+          ))}
+          <text x="145" y="204" textAnchor="middle" fill="#1A6070" fontSize="8" fontFamily="Cinzel,serif">refraction</text>
+          <text x="375" y="204" textAnchor="middle" fill="#1A6070" fontSize="8" fontFamily="Cinzel,serif">refraction</text>
+        </svg>
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#1A5060", textAlign:"center", letterSpacing:"0.1em" }}>
+          SWELL WAVELENGTH ~130M · WIND CHOP ~20M · ISLAND INTERFERENCE UP TO 40KM
+        </div>
+      </div>
+    </ModuleLearnScreen>
+  );
 
   const sc = SWELL_SCENARIOS[0];
 
@@ -1414,7 +2048,7 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
     if (type === sc.interferenceType) {
       setConfirming(true);
       onComplete();
-      setTimeout(() => { setStep(4); setConfirming(false); }, 1800);
+      setTimeout(() => { setPhase("bridge"); setConfirming(false); }, 1800);
     }
   };
 
@@ -1422,13 +2056,13 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
   const palus = {
     1: {
       title: `E ${name}. Close your eyes.`,
-      body: "Feel the motion beneath you — not the chop on the surface, but the long slow roll underneath it. That roll is the swell. It travels thousands of kilometres without changing direction. Watch the water. Which direction is the swell travelling from?",
+      body: "Feel the motion beneath you — not the chop on the surface, but the long slow roll underneath it. That roll is the swell. It travels thousands of kilometres without changing direction. We are leaving Tahiti, heading northeast to the Marquesas. Watch the water. Which direction is the swell travelling from?",
       hint: "Observe the long parallel lines — those are swell crests. The shorter, choppier lines are wind-waves. Identify which direction the swell is coming from, then choose.",
     },
     2: {
-      title: "Southeast. That is the trade swell.",
-      body: "It rolls in from the Southern Ocean, steady as breathing. Now use it. Our heading is south — Hema. Rotate the waka until the swell strikes your port quarter. Hold that angle and you hold your heading even when the stars are hidden.",
-      hint: "Drag the slider to rotate the canoe. Aim the bow (gold dot) toward 180° — due south. The swell will then hit the rear-left of the hull.",
+      title: "Northeast. That is the trade swell.",
+      body: "It rolls in from the southeast, steady as breathing. Now use it. Our heading is northeast — Koʻolau. Rotate the waka until the swell strikes your port beam. Hold that angle and you hold your heading even when the stars are hidden.",
+      hint: "Drag the slider to rotate the canoe. Aim the bow (gold dot) toward 25° — north-northeast. The swell will then hit the left side of the hull.",
     },
     3: {
       title: "Now we approach land.",
@@ -1460,7 +2094,7 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
 
       {/* Header */}
       <div style={{ height:"44px", borderBottom:"1px solid #0A1E2C", background:"rgba(3,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>POLYNESIAN WAYFINDING</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#2A9090", letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
       </div>
 
@@ -1474,7 +2108,7 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
       <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
 
         {/* Left panel */}
-        <div style={{ width:"260px", flexShrink:0, borderRight:"1px solid #0A1E2C", overflowY:"auto" }}>
+        <div style={{ width:"320px", flexShrink:0, borderRight:"1px solid #0A1E2C", overflowY:"auto" }}>
           <div style={{ display:"flex", flexDirection:"column", gap:"12px", padding:"18px", boxSizing:"border-box" }}>
 
             <div style={{ display:"flex", gap:"8px" }}>
@@ -1486,9 +2120,9 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
 
             {/* Scenario card */}
             <div style={{ background:"rgba(8,18,32,0.85)", border:"1px solid #0E2A3A", borderRadius:"7px", padding:"12px 14px" }}>
-              <div style={{ fontSize:"9px", letterSpacing:"0.18em", color:"#1A4858", fontFamily:"Cinzel,serif", marginBottom:"5px" }}>SCENARIO A · SOUTH PACIFIC</div>
-              <div style={{ fontSize:"14px", color:"#90C8D8", fontFamily:"Cinzel,serif", fontWeight:"700", marginBottom:"2px" }}>Day 8 — Open Ocean</div>
-              <div style={{ fontSize:"10.5px", color:"#2A5868", fontFamily:"Cinzel,serif" }}>Stars hidden · Overcast · 14s swell</div>
+              <div style={{ fontSize:"9px", letterSpacing:"0.18em", color:"#1A4858", fontFamily:"Cinzel,serif", marginBottom:"5px" }}>TAHITI → MARQUESAS</div>
+              <div style={{ fontSize:"14px", color:"#90C8D8", fontFamily:"Cinzel,serif", fontWeight:"700", marginBottom:"2px" }}>Day 3 — Open Ocean</div>
+              <div style={{ fontSize:"10.5px", color:"#2A5868", fontFamily:"Cinzel,serif" }}>NNE heading · SE trade swell · 14s period</div>
             </div>
 
             {/* Step indicators */}
@@ -1501,9 +2135,9 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
 
             {/* Palu speech */}
             <div style={{ background:"rgba(4,10,20,0.7)", border:"1px solid #0E1E2E", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px" }}>
-              <div style={{ fontSize:"9px", color:"#1A4050", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
-              <div style={{ fontSize:"14px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.45" }}>{palu.title}</div>
-              <div style={{ fontSize:"12px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.65" }}>{palu.body}</div>
+              <div style={{ fontSize:"11px", color:"#1A4050", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
+              <div style={{ fontSize:"17px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{palu.title}</div>
+              <div style={{ fontSize:"14px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.7" }}>{palu.body}</div>
               {palu.hint && (
                 <div style={{ padding:"9px 12px", background:"rgba(18,55,70,0.4)", borderLeft:"2px solid #2A90A8", borderRadius:"0 4px 4px 0", fontSize:"11px", color:"#2A90A8", fontFamily:"Georgia,serif" }}>
                   {palu.hint}
@@ -1812,12 +2446,34 @@ function WindMapSVG({ mode, step, selBearing, selElNino, confirming, onBearingSe
    WIND MODULE
 ══════════════════════════════════════════════════════════════ */
 
-function WindModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
+function WindModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }) {
+  const [phase,       setPhase]      = useState("intro");
   const [step,        setStep]       = useState(1);
   const [mode,        setMode]       = useState("normal");
   const [selBearing,  setSelBearing] = useState(null);
   const [selElNino,   setSelElNino]  = useState(null);
   const [confirming,  setConfirming] = useState(false);
+
+  if (phase === "intro") return (
+    <ModuleIntroScreen moduleNum={4} name={name}
+      onBegin={() => setPhase("learn")}
+      onBack={onBack} />
+  );
+  if (phase === "bridge") return (
+    <BridgeScreen moduleNum={4} name={name} unlocked={unlocked} onReturn={onBridge || onBack} />
+  );
+  if (phase === "learn") return (
+    <ModuleLearnScreen moduleNum={4} name={name}
+      onReady={() => setPhase("activity")}
+      onBack={onBack} onOpenBag={onOpenBag} unlocked={unlocked}>
+      <div style={{ width:"min(100%,560px)", display:"flex", flexDirection:"column", gap:"16px" }}>
+        <WindMapSVG mode="normal" step={1} selBearing={null} selElNino={null} confirming={false} onBearingSelect={()=>{}} onElNinoSelect={()=>{}} />
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A4070", textAlign:"center", letterSpacing:"0.1em" }}>
+          PACIFIC WIND BELTS · NE TRADES · ITCZ DOLDRUMS · SE TRADES
+        </div>
+      </div>
+    </ModuleLearnScreen>
+  );
 
   const sc = WIND_SCENARIO;
 
@@ -1836,7 +2492,7 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
     if (opt === sc.correctElNino) {
       setConfirming(true);
       onComplete();
-      setTimeout(() => { setStep(4); setConfirming(false); }, 1800);
+      setTimeout(() => { setPhase("bridge"); setConfirming(false); }, 1800);
     }
   };
 
@@ -1846,27 +2502,27 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
   const palus = {
     1: {
       title: `E ${name}. Read the wind before you leave the harbour.`,
-      body: "The SE trade winds blow steady from the east across the southern Pacific. Your voyage from Rarotonga to Aotearoa will cross their full width. Study the map — watch where the winds blow, where the doldrums sit, how the belts are laid.",
-      hint: "Toggle El Niño to see how the wind pattern changes in those years. When you understand the map, press Continue.",
+      body: "From the Marquesas, we sail northwest to Hawaiʻi — crossing the ITCZ doldrums, then riding the NE trades home. Study the map — watch where the winds blow, where the doldrums sit, how the belts are laid.",
+      hint: "Toggle El Niño to see how the wind pattern shifts in those years. When you understand the map, press Continue.",
       showToggle: true,
     },
     2: {
       title: "Now choose your departure bearing.",
-      body: "Aotearoa lies to the southwest. But if you aim straight for it, the SE trades will push you west — you will miss to the leeward side. Aim east of your destination and let the wind carry you in. Where do you point the bow?",
+      body: "Hawaiʻi lies to the northwest. We must cross the doldrums — aim slightly west of north so the NE trades carry us onto the mark. Where do you point the bow?",
       hint: null,
       showToggle: false,
     },
     3: {
-      title: selBearing === sc.correctBearing ? "190°. Upwind of the mark." : selBearing ? "Check the wind direction again." : "190°. Upwind of the mark.",
+      title: selBearing === sc.correctBearing ? "335°. The right course." : selBearing ? "Check the wind again." : "335°. The right course.",
       body: selBearing === sc.correctBearing
-        ? "You aim slightly east of south. The SE trades will push you west-southwest across the full passage. Arrive upwind and you can always fall off to leeward — arrive downwind and you cannot return. Now — the map has changed. What year is this?"
-        : `${selBearing}° points too far ${selBearing < sc.correctBearing ? "east" : "west"}. The SE trades come from the east. They will push you west. Aim east of Aotearoa so they carry you onto the mark.`,
+        ? "North-northwest — aimed slightly west so the NE trades push you onto Hawaiʻi rather than past it. Arrive upwind and you can always fall off to leeward. Now — the map has changed. What has happened to the ITCZ?"
+        : `${selBearing}° takes you too far ${selBearing < sc.correctBearing ? "east" : "west"}. The NE trades come from the northeast — they push west. Aim slightly west of your target so they carry you in, not past it.`,
       hint: null,
       showToggle: false,
     },
     4: {
       title: "The ITCZ moves south in El Niño.",
-      body: "The doldrums belt drops below the equator — directly across the route. The SE trades weaken. The crossing window changes. A navigator who knows this changes their calendar, not their courage.",
+      body: "The doldrums belt drops below its usual position — directly across the route. The crossing window changes. A navigator who knows this changes their calendar, not their courage.",
       hint: null,
       showToggle: false,
     },
@@ -1880,7 +2536,7 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
 
       {/* Header */}
       <div style={{ height:"44px", borderBottom:"1px solid #0A1828", background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>POLYNESIAN WAYFINDING</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#4A70A8", letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
       </div>
 
@@ -1894,7 +2550,7 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
       <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
 
         {/* Left panel */}
-        <div style={{ width:"260px", flexShrink:0, borderRight:"1px solid #0A1828", overflowY:"auto" }}>
+        <div style={{ width:"320px", flexShrink:0, borderRight:"1px solid #0A1828", overflowY:"auto" }}>
           <div style={{ display:"flex", flexDirection:"column", gap:"12px", padding:"18px", boxSizing:"border-box" }}>
 
             <div style={{ display:"flex", gap:"8px" }}>
@@ -1906,9 +2562,9 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
 
             {/* Scenario card */}
             <div style={{ background:"rgba(8,14,28,0.85)", border:"1px solid #0E2040", borderRadius:"7px", padding:"12px 14px" }}>
-              <div style={{ fontSize:"9px", letterSpacing:"0.18em", color:"#1A3858", fontFamily:"Cinzel,serif", marginBottom:"5px" }}>SCENARIO A · SE PACIFIC</div>
-              <div style={{ fontSize:"14px", color:"#7AAAD8", fontFamily:"Cinzel,serif", fontWeight:"700", marginBottom:"2px" }}>Rarotonga → Aotearoa</div>
-              <div style={{ fontSize:"10.5px", color:"#2A4868", fontFamily:"Cinzel,serif" }}>~2,400 km · SE trade wind passage</div>
+              <div style={{ fontSize:"9px", letterSpacing:"0.18em", color:"#1A3858", fontFamily:"Cinzel,serif", marginBottom:"5px" }}>MARQUESAS → HAWAIʻI</div>
+              <div style={{ fontSize:"14px", color:"#7AAAD8", fontFamily:"Cinzel,serif", fontWeight:"700", marginBottom:"2px" }}>NNW · Cross the ITCZ</div>
+              <div style={{ fontSize:"10.5px", color:"#2A4868", fontFamily:"Cinzel,serif" }}>~3,200 km · Cross doldrums · Ride NE trades</div>
             </div>
 
             {/* Step indicators */}
@@ -1921,9 +2577,9 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
 
             {/* Palu speech */}
             <div style={{ background:"rgba(4,8,20,0.7)", border:"1px solid #0E1E34", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px" }}>
-              <div style={{ fontSize:"9px", color:"#1A3050", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
-              <div style={{ fontSize:"14px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.45" }}>{palu.title}</div>
-              <div style={{ fontSize:"12px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.65" }}>{palu.body}</div>
+              <div style={{ fontSize:"11px", color:"#1A3050", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
+              <div style={{ fontSize:"17px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{palu.title}</div>
+              <div style={{ fontSize:"14px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.7" }}>{palu.body}</div>
               {palu.hint && (
                 <div style={{ padding:"9px 12px", background:"rgba(20,40,90,0.4)", borderLeft:"2px solid #4A70C0", borderRadius:"0 4px 4px 0", fontSize:"11px", color:"#6090C0", fontFamily:"Georgia,serif" }}>
                   {palu.hint}
@@ -2131,12 +2787,24 @@ function MigrationMap({ migration, color }) {
   );
 }
 
-function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
+function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }) {
+  const [phase,       setPhase]      = useState("intro");
   const [step,        setStep]       = useState(1);    // 1=field guide, 2=sightings challenge
   const [activeCard,  setActiveCard] = useState(0);    // which bird card is open
   const [sightingIdx, setSightingIdx]= useState(0);    // current sighting
   const [answers,     setAnswers]    = useState({});   // sightingIdx → chosen action
   const [confirming,  setConfirming] = useState(false);
+
+  // For Module 5: intro → field guide (learn phase) → sightings (activity)
+  // The field guide IS the learn phase, so "learn" maps to step 1, "activity" to step 2
+  if (phase === "intro") return (
+    <ModuleIntroScreen moduleNum={5} name={name}
+      onBegin={() => setPhase("activity")}
+      onBack={onBack} />
+  );
+  if (phase === "bridge") return (
+    <BridgeScreen moduleNum={5} name={name} unlocked={unlocked} onReturn={onBridge || onBack} />
+  );
 
   const currentSighting = BIRD_SIGHTINGS[sightingIdx];
   const currentBird     = BIRDS.find(b => b.id === currentSighting?.birdId);
@@ -2161,7 +2829,7 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
         setConfirming(false);
         if (isLast) {
           onComplete();
-          setStep(3);
+          setPhase("bridge");
         } else {
           setSightingIdx(i => i + 1);
         }
@@ -2172,21 +2840,21 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
   // Palu speech
   const paluStep1 = {
     title: `E ${name}. Watch what flies.`,
-    body: "Before a star is visible, before the sun has risen — the birds are already there. Each species carries a different message. Study them in the field guide, then we will test your eye.",
+    body: "We have left Hawaiʻi and the ocean ahead is wide. Before an island appears, before the sun or stars give us our bearing — the birds are already there. Each species carries a different message. Study them in the field guide, then we will test your eye.",
   };
 
   const paluStep2 = () => {
     const ans = answers[sightingIdx];
     const correct = ans === currentSighting?.correct;
     if (!ans) return {
-      title: `Day ${14 + sightingIdx}. A sighting.`,
+      title: `Day ${3 + sightingIdx}. A sighting.`,
       body: currentSighting?.context,
     };
     if (correct) return {
       title: "Correct.",
       body: sightingIdx < BIRD_SIGHTINGS.length - 1
         ? "The next day brings another sighting."
-        : "Every bird read correctly. Your eye is sharp.",
+        : "Every bird read correctly. Fiji is not far now.",
     };
     return {
       title: "Look again.",
@@ -2196,7 +2864,7 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
 
   const palu = step === 1 ? paluStep1 : step === 2 ? paluStep2() : {
     title: "The ʻiwa has found land.",
-    body: "It did not return. Somewhere ahead, beyond the horizon, it is landing. You carry this knowledge now — and the bird guide — for the voyage ahead.",
+    body: "It did not return. Somewhere ahead, beyond the horizon, it is landing. That is Fiji. We carry the bird guide with us now — and Matala approves.",
   };
 
   const stepLabels = ["1 · Field Guide", "2 · Sightings", "✦ Done"];
@@ -2207,7 +2875,7 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
 
       {/* Header */}
       <div style={{ height:"44px", borderBottom:"1px solid #0A1E18", background:"rgba(4,10,8,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>POLYNESIAN WAYFINDING</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#2A9A70", letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
       </div>
 
@@ -2221,7 +2889,7 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
       <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
 
         {/* Left panel */}
-        <div style={{ width:"260px", flexShrink:0, borderRight:"1px solid #0A1E18", overflowY:"auto" }}>
+        <div style={{ width:"320px", flexShrink:0, borderRight:"1px solid #0A1E18", overflowY:"auto" }}>
           <div style={{ display:"flex", flexDirection:"column", gap:"12px", padding:"18px", boxSizing:"border-box" }}>
 
             <div style={{ display:"flex", gap:"8px" }}>
@@ -2241,9 +2909,9 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
 
             {/* Palu speech */}
             <div style={{ background:"rgba(4,10,8,0.7)", border:"1px solid #0E1E14", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px" }}>
-              <div style={{ fontSize:"9px", color:"#1A3828", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
-              <div style={{ fontSize:"14px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.45" }}>{palu.title}</div>
-              <div style={{ fontSize:"12px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.65" }}>{palu.body}</div>
+              <div style={{ fontSize:"11px", color:"#1A3828", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
+              <div style={{ fontSize:"17px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{palu.title}</div>
+              <div style={{ fontSize:"14px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.7" }}>{palu.body}</div>
               {step === 3 && (
                 <div style={{ padding:"11px", background:"rgba(42,154,112,0.10)", border:`1px solid ${accent}44`, borderRadius:"6px", textAlign:"center", fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.09em" }}>
                   🐦 BIRD GUIDE ADDED TO YOUR BAG 🐦
@@ -2500,6 +3168,423 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete }) {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   CLOUDS MODULE
+══════════════════════════════════════════════════════════════ */
+
+// Cloud signs data — each has an animated SVG scene + question
+
+// Animated SVG scene — different for each sign
+function CloudScene({ sceneType, animOffset }) {
+  const W = 560, H = 240;
+
+  const clouds = Array.from({length:6}, (_,i) => ({
+    x: ((i*137+41) % 97)/97 * W,
+    y: 30 + (i*23)%60,
+    w: 60 + (i*17)%80,
+    h: 18 + (i*11)%22,
+    speed: 0.3 + (i*0.13)%0.5,
+  }));
+
+  if (sceneType === "stationary_cloud") {
+    // All clouds drift right; one central cloud stays fixed
+    return (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", borderRadius:"8px" }}>
+        <defs>
+          <linearGradient id="skyG6" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#060D18"/>
+            <stop offset="70%" stopColor="#091824"/>
+            <stop offset="100%" stopColor="#0A2030"/>
+          </linearGradient>
+        </defs>
+        <rect width={W} height={H} fill="url(#skyG6)"/>
+        {/* Ocean */}
+        <rect x={0} y={H*0.72} width={W} height={H*0.28} fill="#041018"/>
+        <line x1={0} y1={H*0.72} x2={W} y2={H*0.72} stroke="#0A3040" strokeWidth="1"/>
+        {Array.from({length:8},(_,i)=>(
+          <path key={i} d={`M${(i*80+animOffset*0.4)%W},${H*0.76+i%3*6} Q${(i*80+animOffset*0.4)%W+25},${H*0.74+i%3*6} ${(i*80+animOffset*0.4)%W+50},${H*0.76+i%3*6}`}
+            fill="none" stroke="#0E3848" strokeWidth="0.8" opacity="0.6"/>
+        ))}
+        {/* Moving clouds */}
+        {clouds.map((c,i) => (
+          <ellipse key={i}
+            cx={((c.x + animOffset * c.speed) % (W+80)) - 40}
+            cy={c.y} rx={c.w/2} ry={c.h/2}
+            fill="#1A2A38" opacity="0.7"/>
+        ))}
+        {/* THE stationary cloud — slightly brighter, clear label */}
+        <ellipse cx={W/2} cy={55} rx={70} ry={24} fill="#2A3E50" opacity="0.9"/>
+        <ellipse cx={W/2 - 28} cy={62} rx={42} ry={18} fill="#243648" opacity="0.85"/>
+        <ellipse cx={W/2 + 32} cy={60} rx={50} ry={20} fill="#243648" opacity="0.85"/>
+        <text x={W/2} y={44} textAnchor="middle" fill="#7AAAC8" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.12em">TU KAPUA</text>
+        {/* Island silhouette below */}
+        <ellipse cx={W/2} cy={H*0.74} rx={40} ry={8} fill="#0A2020" opacity="0.8"/>
+        {/* Vertical dashed line connecting cloud to island */}
+        <line x1={W/2} y1={82} x2={W/2} y2={H*0.71} stroke="#4A8A9A" strokeWidth="0.8" strokeDasharray="4,5" opacity="0.4"/>
+        <text x={W - 12} y={H - 10} textAnchor="end" fill="#1A3040" fontSize="8" fontFamily="Cinzel,serif">ALL OTHER CLOUDS MOVING →</text>
+      </svg>
+    );
+  }
+
+  if (sceneType === "lagoon_glow") {
+    const glowAmt = 0.45 + Math.sin(animOffset * 0.04) * 0.2;
+    return (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", borderRadius:"8px" }}>
+        <defs>
+          <linearGradient id="lagoonSky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#030810"/>
+            <stop offset="100%" stopColor="#061420"/>
+          </linearGradient>
+          <radialGradient id="lagoonLight" cx="50%" cy="100%" r="55%">
+            <stop offset="0%" stopColor="#00C896" stopOpacity={glowAmt * 0.55}/>
+            <stop offset="100%" stopColor="#00C896" stopOpacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width={W} height={H} fill="url(#lagoonSky)"/>
+        {/* Ocean — teal near center, dark at edges */}
+        <rect x={0} y={H*0.68} width={W} height={H*0.32} fill="#031410"/>
+        <rect x={W*0.25} y={H*0.68} width={W*0.5} height={H*0.32} fill="#041C14" opacity="0.8"/>
+        <line x1={0} y1={H*0.68} x2={W} y2={H*0.68} stroke="#0A3028" strokeWidth="1"/>
+        {/* Lagoon teal water colour */}
+        <ellipse cx={W/2} cy={H*0.82} rx={130} ry={26} fill="#00C896" opacity="0.1"/>
+        {/* Cloud with glowing underside */}
+        <ellipse cx={W/2} cy={85} rx={110} ry={32} fill="#1E3040" opacity="0.9"/>
+        <ellipse cx={W/2 - 40} cy={95} rx={70} ry={22} fill="#182838" opacity="0.85"/>
+        <ellipse cx={W/2 + 50} cy={92} rx={80} ry={24} fill="#182838" opacity="0.85"/>
+        {/* Glow on cloud underside */}
+        <ellipse cx={W/2} cy={112} rx={90} ry={14} fill="url(#lagoonLight)" opacity={glowAmt}/>
+        <text x={W/2} y={122} textAnchor="middle" fill="#00C896" fontSize="9" fontFamily="Cinzel,serif" opacity={glowAmt * 1.2} letterSpacing="0.1em">LAGOON GLOW</text>
+        {/* Dashed line */}
+        <line x1={W/2} y1={126} x2={W/2} y2={H*0.66} stroke="#00C896" strokeWidth="0.8" strokeDasharray="4,5" opacity="0.3"/>
+        <text x={W-12} y={H-10} textAnchor="end" fill="#0A2818" fontSize="8" fontFamily="Cinzel,serif">CORAL LAGOON BELOW</text>
+      </svg>
+    );
+  }
+
+  if (sceneType === "ocean_colour") {
+    const waveOff = animOffset * 0.6;
+    return (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", borderRadius:"8px" }}>
+        <defs>
+          <linearGradient id="oceanColourG" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stopColor="#041028"/>
+            <stop offset="45%"  stopColor="#062040"/>
+            <stop offset="65%"  stopColor="#0A3848"/>
+            <stop offset="100%" stopColor="#0E4030"/>
+          </linearGradient>
+          <linearGradient id="skyCG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#04080E"/>
+            <stop offset="100%" stopColor="#060C14"/>
+          </linearGradient>
+        </defs>
+        <rect width={W} height={H} fill="url(#skyCG)"/>
+        {/* Ocean split — dark left, teal right */}
+        <rect x={0} y={H*0.45} width={W} height={H*0.55} fill="url(#oceanColourG)"/>
+        <line x1={0} y1={H*0.45} x2={W} y2={H*0.45} stroke="#0A2030" strokeWidth="1"/>
+        {/* Colour boundary line */}
+        <line x1={W*0.55} y1={H*0.45} x2={W*0.55} y2={H} stroke="#1A8060" strokeWidth="1" strokeDasharray="5,6" opacity="0.5"/>
+        {/* Wave texture */}
+        {Array.from({length:10},(_,i)=>(
+          <path key={i}
+            d={`M0,${H*0.5+i*17} Q${95+(waveOff%100)},${H*0.48+i*17} 190,${H*0.5+i*17} Q${285+(waveOff%80)},${H*0.52+i*17} 380,${H*0.5+i*17} Q${475+(waveOff%90)},${H*0.48+i*17} 560,${H*0.5+i*17}`}
+            fill="none" stroke="#0E2838" strokeWidth="0.7" opacity="0.5"/>
+        ))}
+        {/* Labels */}
+        <text x={W*0.25} y={H*0.62} textAnchor="middle" fill="#1A3A58" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.1em">DEEP OCEAN</text>
+        <text x={W*0.25} y={H*0.72} textAnchor="middle" fill="#1A3A58" fontSize="8" fontFamily="Cinzel,serif">dark blue-purple</text>
+        <text x={W*0.78} y={H*0.62} textAnchor="middle" fill="#1A7050" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.1em">REEF SHELF</text>
+        <text x={W*0.78} y={H*0.72} textAnchor="middle" fill="#1A7050" fontSize="8" fontFamily="Cinzel,serif">green-turquoise</text>
+        {/* Waka silhouette */}
+        <ellipse cx={W*0.18} cy={H*0.47} rx={22} ry={4} fill="#1A2840" opacity="0.9"/>
+        <text x={W*0.18} y={H*0.42} textAnchor="middle" fill="#2A5060" fontSize="8" fontFamily="Cinzel,serif">you are here</text>
+      </svg>
+    );
+  }
+
+  // sea_signs — floating debris
+  const debrisItems = [
+    { x:180, y:0.62, w:18, h:6, label:"pumice",   color:"#4A5848", dx:0.5 },
+    { x:310, y:0.70, w:40, h:5, label:"driftwood", color:"#5A4020", dx:0.35 },
+    { x:420, y:0.65, w:24, h:8, label:"seaweed",   color:"#1A5030", dx:0.45 },
+  ];
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", borderRadius:"8px" }}>
+      <defs>
+        <linearGradient id="seaSignSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#04080E"/>
+          <stop offset="100%" stopColor="#060E18"/>
+        </linearGradient>
+      </defs>
+      <rect width={W} height={H} fill="url(#seaSignSky)"/>
+      <rect x={0} y={H*0.55} width={W} height={H*0.45} fill="#030C14"/>
+      <line x1={0} y1={H*0.55} x2={W} y2={H*0.55} stroke="#0A2030" strokeWidth="1"/>
+      {Array.from({length:8},(_,i)=>(
+        <path key={i} d={`M${(i*80+animOffset*0.4)%W},${H*0.60+i%3*16} Q${(i*80+animOffset*0.4)%W+30},${H*0.58+i%3*16} ${(i*80+animOffset*0.4)%W+60},${H*0.60+i%3*16}`}
+          fill="none" stroke="#0A2030" strokeWidth="0.7" opacity="0.5"/>
+      ))}
+      {/* Debris items with drift arrows */}
+      {debrisItems.map((d,i) => (
+        <g key={i}>
+          <ellipse cx={d.x + (animOffset * d.dx) % 40} cy={H*d.y} rx={d.w/2} ry={d.h/2} fill={d.color} opacity="0.85"/>
+          {/* Arrow showing drift direction */}
+          <line
+            x1={d.x + (animOffset * d.dx) % 40}
+            y1={H*d.y}
+            x2={d.x + (animOffset * d.dx) % 40 + 28}
+            y2={H*d.y - 6}
+            stroke="#4A8090" strokeWidth="1.2" strokeDasharray="3,3" opacity="0.6"/>
+          <polygon
+            points={`${d.x+(animOffset*d.dx)%40+28},${H*d.y-6} ${d.x+(animOffset*d.dx)%40+20},${H*d.y-10} ${d.x+(animOffset*d.dx)%40+20},${H*d.y-2}`}
+            fill="#4A8090" opacity="0.6"/>
+          <text x={d.x + (animOffset * d.dx) % 40} y={H*d.y - 12}
+            textAnchor="middle" fill="#2A5060" fontSize="8" fontFamily="Cinzel,serif">{d.label}</text>
+        </g>
+      ))}
+      {/* Land label in direction of drift */}
+      <text x={W - 14} y={H*0.58} textAnchor="end" fill="#1A4050" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.1em">LAND UPWIND →</text>
+      <text x={W - 14} y={H - 10} textAnchor="end" fill="#0A2030" fontSize="8" fontFamily="Cinzel,serif">watch the direction, not just the debris</text>
+    </svg>
+  );
+}
+
+function CloudsModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }) {
+  const [phase,      setPhase]     = useState("intro");
+  const [step,       setStep]      = useState(1);
+  const [answers,    setAnswers]   = useState({});
+  const [confirming, setConfirming]= useState(false);
+  const [animOffset, setAnimOffset]= useState(0);
+
+  if (phase === "intro") return (
+    <ModuleIntroScreen moduleNum={6} name={name}
+      onBegin={() => setPhase("learn")}
+      onBack={onBack} />
+  );
+  if (phase === "bridge") return (
+    <BridgeScreen moduleNum={6} name={name} unlocked={unlocked} onReturn={onBridge || onBack} />
+  );
+  if (phase === "learn") return (
+    <ModuleLearnScreen moduleNum={6} name={name}
+      onReady={() => setPhase("activity")}
+      onBack={onBack} onOpenBag={onOpenBag} unlocked={unlocked}>
+      <div style={{ width:"min(100%,500px)", display:"flex", flexDirection:"column", gap:"16px" }}>
+        <svg viewBox="0 0 500 280" style={{ width:"100%", borderRadius:"8px", background:"#04080E" }}>
+          <defs>
+            <linearGradient id="cloudLearnSky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#04080E"/><stop offset="100%" stopColor="#071424"/>
+            </linearGradient>
+          </defs>
+          <rect width="500" height="280" fill="url(#cloudLearnSky)"/>
+          {/* Moving clouds */}
+          {[{x:60,y:60,w:90,h:26},{x:300,y:45,w:110,h:30},{x:170,y:80,w:70,h:20}].map((c,i)=>(
+            <ellipse key={i} cx={c.x} cy={c.y} rx={c.w/2} ry={c.h/2} fill="#182838" opacity="0.7"/>
+          ))}
+          {/* Arrow showing clouds moving */}
+          <text x="420" y="75" fill="#1A3040" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.1em">→ moving</text>
+          {/* Tu Kapua — stationary cloud */}
+          <ellipse cx="250" cy="70" rx="80" ry="28" fill="#2A3E50" opacity="0.92"/>
+          <ellipse cx="220" cy="80" rx="50" ry="20" fill="#223040" opacity="0.85"/>
+          <ellipse cx="284" cy="78" rx="58" ry="22" fill="#223040" opacity="0.85"/>
+          {/* Glow on Tu Kapua */}
+          <ellipse cx="250" cy="96" rx="65" ry="10" fill="rgba(122,158,200,0.15)"/>
+          <text x="250" y="55" textAnchor="middle" fill="#7A9EC8" fontSize="10" fontFamily="Cinzel,serif" letterSpacing="0.1em">TU KAPUA — STATIONARY</text>
+          {/* Dashed line down */}
+          <line x1="250" y1="100" x2="250" y2="215" stroke="#7A9EC8" strokeWidth="1" strokeDasharray="5,5" opacity="0.4"/>
+          {/* Ocean */}
+          <rect x="0" y="215" width="500" height="65" fill="#030C10"/>
+          <line x1="0" y1="215" x2="500" y2="215" stroke="#0A3028" strokeWidth="1"/>
+          {/* Island */}
+          <ellipse cx="250" cy="220" rx="42" ry="12" fill="#0A2018" stroke="#2A5040" strokeWidth="1.5"/>
+          <text x="250" y="223" textAnchor="middle" fill="#3A7050" fontSize="9" fontFamily="Cinzel,serif">ISLAND BELOW</text>
+          {/* Lagoon glow */}
+          <ellipse cx="250" cy="240" rx="90" ry="20" fill="rgba(0,200,150,0.07)"/>
+          <text x="250" y="265" textAnchor="middle" fill="#008060" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.1em">lagoon glow · turquoise tint</text>
+        </svg>
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A4060", textAlign:"center", letterSpacing:"0.1em" }}>
+          TU KAPUA VISIBLE 50+ KM · LAGOON GLOW VISIBLE BEFORE ATOLL CRESTS HORIZON
+        </div>
+      </div>
+    </ModuleLearnScreen>
+  );
+
+  useEffect(() => {
+    let frame;
+    const tick = () => { setAnimOffset(o => (o + 0.6) % 1000); frame = requestAnimationFrame(tick); };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  const signIdx   = Math.min(step - 1, CLOUD_SIGNS.length - 1);
+  const sign      = CLOUD_SIGNS[signIdx];
+  const answered  = answers[signIdx];
+  const isCorrect = answered && sign.options.find(o => o.id === answered)?.correct;
+
+  const handleAnswer = optId => {
+    if (confirming || answered) return;
+    const correct = sign.options.find(o => o.id === optId)?.correct;
+    setAnswers(prev => ({ ...prev, [signIdx]: optId }));
+    if (correct) {
+      setConfirming(true);
+      const isLast = signIdx === CLOUD_SIGNS.length - 1;
+      setTimeout(() => {
+        setConfirming(false);
+        if (isLast) { onComplete(); setPhase("bridge"); }
+        else setStep(s => s + 1);
+      }, 1800);
+    }
+  };
+
+  // Palu speech
+  const paluSpeeches = {
+    0: { title: `E ${name}. Look up.`, body: "The sky reads the ocean beneath it. Every navigator who found land in this ocean learned to read clouds first — before the shore was visible, before the birds appeared. We are heading home to Tonga. These signs will bring us in safely." },
+    1: { title: "Now the water itself speaks.", body: "Light moves through water. The deeper the ocean, the darker and bluer it reads. When the colour changes, the floor has risen — land is near." },
+    2: { title: "Not all signs are in the sky.", body: "The ocean surface carries everything that has fallen into it upstream. Pumice from volcanoes. Driftwood from forests. Seaweed from reefs. Read what the current has carried." },
+    3: { title: "One more sign.", body: "Kupe taught this one: a cloud that sits still while all the others move is standing on land. He used it to find Aotearoa. We can use it to find the low-lying atolls of Tonga, still invisible below the horizon." },
+    4: { title: "You can read the approach.", body: "Standing cloud, lagoon glow, water colour, floating debris — each one a layer of knowledge. Together they form an approach map drawn by the ocean itself. Home is close." },
+  };
+  const speech = paluSpeeches[Math.min(step - 1, 4)];
+
+  const stepLabels = CLOUD_SIGNS.map((_, i) => `${i+1}`).concat(["✦"]);
+  const accent     = "#7A9EC8";
+
+  return (
+    <div style={{ width:"100%", height:"100%", background:"#040810", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+
+      {/* Header */}
+      <div style={{ height:"44px", borderBottom:"1px solid #0A1428", background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
+      </div>
+
+      {/* Module bar */}
+      <div style={{ padding:"7px 22px", borderBottom:"1px solid #0A1428", background:"rgba(4,8,18,0.6)", flexShrink:0 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em" }}>MODULE 6 · KAPUA ME TE MOANA</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#1A2A40", marginLeft:"14px", letterSpacing:"0.1em" }}>CLOUDS, SEA SIGNS & KUPE'S INSTRUCTIONS</span>
+      </div>
+
+      {/* Body */}
+      <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
+
+        {/* Left panel */}
+        <div style={{ width:"320px", flexShrink:0, borderRight:"1px solid #0A1428", overflowY:"auto" }}>
+          <div style={{ display:"flex", flexDirection:"column", gap:"12px", padding:"18px", boxSizing:"border-box" }}>
+
+            <div style={{ display:"flex", gap:"8px" }}>
+              <button onClick={onBack} style={{ flex:1, background:"none", border:"1px solid #0A1428", borderRadius:"4px", color:"#1A2A40", fontSize:"9px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"7px", cursor:"pointer" }}>← MAP</button>
+              <button onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":"#0A1428"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#1A2A40", fontSize:"9px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"7px", cursor:"pointer" }}>
+                {unlocked.length > 0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
+              </button>
+            </div>
+
+            {/* Scenario card */}
+            <div style={{ background:"rgba(8,14,28,0.85)", border:"1px solid #0E2040", borderRadius:"7px", padding:"12px 14px" }}>
+              <div style={{ fontSize:"9px", letterSpacing:"0.18em", color:"#1A2A40", fontFamily:"Cinzel,serif", marginBottom:"5px" }}>DAY 16 · APPROACHING LAND</div>
+              <div style={{ fontSize:"14px", color:accent, fontFamily:"Cinzel,serif", fontWeight:"700", marginBottom:"2px" }}>Read the Sky</div>
+              <div style={{ fontSize:"10.5px", color:"#2A3A58", fontFamily:"Cinzel,serif" }}>Four signs before landfall</div>
+            </div>
+
+            {/* Step indicators */}
+            <div style={{ display:"flex", gap:"4px" }}>
+              {stepLabels.map((label, i) => {
+                const done = i < step - 1, curr = i === step - 1;
+                return <div key={i} style={{ flex:1, textAlign:"center", padding:"5px 1px", fontSize:"8px", fontFamily:"Cinzel,serif", background:curr?`rgba(122,158,200,0.18)`:done?"rgba(26,120,110,0.18)":"rgba(255,255,255,0.03)", border:`1px solid ${curr?accent:done?"#1A8870":"#0E2030"}`, borderRadius:"4px", color:curr?accent:done?"#2BB5A0":"#1A2A40" }}>{label}</div>;
+              })}
+            </div>
+
+            {/* Palu speech */}
+            <div style={{ background:"rgba(4,8,20,0.7)", border:"1px solid #0E1E34", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px" }}>
+              <div style={{ fontSize:"11px", color:"#1A2A40", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
+              <div style={{ fontSize:"17px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{speech.title}</div>
+              <div style={{ fontSize:"14px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.7" }}>{speech.body}</div>
+
+              {/* Sign explanation — shows after correct answer */}
+              {answered && isCorrect && step <= CLOUD_SIGNS.length && (
+                <div style={{ padding:"10px 12px", background:`rgba(122,158,200,0.10)`, border:`1px solid ${accent}33`, borderRadius:"5px", fontSize:"11px", color:"#6A9AB8", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.6" }}>
+                  {sign.explanation}
+                </div>
+              )}
+
+              {step > CLOUD_SIGNS.length && (
+                <div style={{ padding:"11px", background:"rgba(122,158,200,0.10)", border:`1px solid ${accent}33`, borderRadius:"6px", textAlign:"center", fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.09em" }}>
+                  ☁ CLOUD & SEA READER ADDED TO YOUR BAG ☁
+                </div>
+              )}
+            </div>
+
+            {step > CLOUD_SIGNS.length && (
+              <button onClick={onBack} style={{ padding:"11px", borderRadius:"6px", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em", cursor:"pointer", border:`1px solid ${accent}`, background:`rgba(122,158,200,0.10)`, color:accent }}>
+                RETURN TO THE OCEAN →
+              </button>
+            )}
+
+          </div>
+        </div>
+
+        {/* Right — scene + question */}
+        <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden" }}>
+          {step <= CLOUD_SIGNS.length ? (
+            <div style={{ flex:1, display:"flex", flexDirection:"column", padding:"20px 24px", gap:"14px", overflowY:"auto" }}>
+
+              {/* Sign title */}
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"13px", fontWeight:"700", color:accent, letterSpacing:"0.06em" }}>
+                {sign.title}
+              </div>
+
+              {/* Animated scene */}
+              <CloudScene sceneType={sign.sceneType} animOffset={animOffset} />
+
+              {/* Question */}
+              <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#7AACBE", lineHeight:"1.65", fontStyle:"italic" }}>
+                {sign.question}
+              </div>
+
+              {/* Answer buttons */}
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px",
+                pointerEvents:confirming?"none":"auto", opacity:confirming?0.6:1, transition:"opacity 0.3s" }}>
+                {sign.options.map(opt => {
+                  const chosen = answered === opt.id;
+                  const right  = chosen && opt.correct;
+                  const wrong  = chosen && !opt.correct;
+                  return (
+                    <button key={opt.id} onClick={() => handleAnswer(opt.id)} style={{
+                      padding:"13px 10px", borderRadius:"7px", cursor:"pointer",
+                      fontFamily:"Cinzel,serif", fontSize:"11.5px", fontWeight:"600",
+                      textAlign:"center", lineHeight:"1.4",
+                      border:`1px solid ${right?"#7AAAC8":wrong?"#FF5533":answered?"#0A1828":"#0E2040"}`,
+                      background:right?"rgba(122,170,200,0.14)":wrong?"rgba(255,85,51,0.08)":"rgba(255,255,255,0.02)",
+                      color:right?accent:wrong?"#FF6644":answered?"#1A2A40":"#3A5878",
+                    }}>
+                      {opt.text}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Wrong answer hint */}
+              {answered && !isCorrect && (
+                <div style={{ padding:"10px 14px", background:"rgba(255,85,51,0.06)", border:"1px solid #FF553322", borderRadius:"6px", fontFamily:"Georgia,serif", fontSize:"11.5px", color:"#7A5050", fontStyle:"italic", lineHeight:"1.6" }}>
+                  {sign.explanation}
+                </div>
+              )}
+
+            </div>
+          ) : (
+            <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"32px" }}>
+              <div style={{ textAlign:"center", display:"flex", flexDirection:"column", gap:"16px", maxWidth:"380px" }}>
+                <div style={{ fontSize:"48px", opacity:0.7 }}>☁</div>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"18px", fontWeight:"700", color:accent, lineHeight:"1.4" }}>All four signs read.</div>
+                <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#5A8090", fontStyle:"italic", lineHeight:"1.7" }}>
+                  Standing cloud. Lagoon glow. Water colour. The drift of debris. You can now read the approach to any island — from 50 kilometres out — without instruments.
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
    WELCOME SCREEN
 ══════════════════════════════════════════════════════════════ */
 
@@ -2513,14 +3598,16 @@ function WelcomeScreen({ onSubmit }) {
         {stars.map((s, i) => <circle key={i} cx={`${s.x}%`} cy={`${s.y}%`} r={s.r} fill="#7AACCC" opacity={s.op} />)}
         <circle cx="50%" cy="50%" r="350" fill="none" stroke="rgba(30,60,100,0.10)" strokeWidth="1" />
       </svg>
-      <div style={{ zIndex: 1, textAlign: "center", padding: "32px 24px", maxWidth: "500px", display: "flex", flexDirection: "column", alignItems: "center", gap: "20px" }}>
+      <div style={{ zIndex: 1, textAlign: "center", padding: "32px 24px", maxWidth: "520px", display: "flex", flexDirection: "column", alignItems: "center", gap: "20px" }}>
         <div style={{ fontSize: "10px", letterSpacing: "0.32em", color: "#354A60", fontFamily: "Cinzel,serif" }}>A POLYNESIAN VOYAGING EXPERIENCE</div>
         <div>
-          <div style={{ fontSize: "42px", fontFamily: "Cinzel,serif", fontWeight: "900", color: "#C8941A", lineHeight: "1.0", textShadow: "0 0 60px rgba(200,148,26,0.3)" }}>Polynesian</div>
-          <div style={{ fontSize: "42px", fontFamily: "Cinzel,serif", fontWeight: "900", color: "#C8941A", lineHeight: "1.1", textShadow: "0 0 60px rgba(200,148,26,0.3)" }}>Wayfinding</div>
+          <div style={{ fontSize: "48px", fontFamily: "Cinzel,serif", fontWeight: "900", color: "#C8941A", lineHeight: "1.0", textShadow: "0 0 60px rgba(200,148,26,0.3)" }}>Ocean</div>
+          <div style={{ fontSize: "48px", fontFamily: "Cinzel,serif", fontWeight: "900", color: "#C8941A", lineHeight: "1.1", textShadow: "0 0 60px rgba(200,148,26,0.3)" }}>Adventure</div>
         </div>
         <div style={{ width: "52px", height: "1px", background: "linear-gradient(to right, transparent, #C8941A, transparent)" }} />
-        <div style={{ fontSize: "14px", color: "#7AABBB", fontFamily: "Georgia,serif", fontStyle: "italic", lineHeight: "1.72", maxWidth: "380px" }}>For 3,000 years, navigators crossed 10 million km² of open ocean — without instruments. Sky, sea, birds, and wind alone.</div>
+        <div style={{ fontSize: "14px", color: "#7AABBB", fontFamily: "Georgia,serif", fontStyle: "italic", lineHeight: "1.72", maxWidth: "400px" }}>
+          For 3,000 years, navigators crossed 10 million km² of open ocean without instruments. Do you have what it takes to make this voyage?
+        </div>
         <div style={{ width: "100%", background: "rgba(8,14,28,0.88)", border: "1px solid #1E3050", borderRadius: "10px", padding: "24px 26px", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div>
             <div style={{ fontSize: "13px", color: "#D0A840", fontFamily: "Cinzel,serif", fontWeight: "700", marginBottom: "4px" }}>Ko wai tō ingoa, haumāna?</div>
@@ -2535,8 +3622,200 @@ function WelcomeScreen({ onSubmit }) {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   APP
+   STORY CARD — intro narrative after name entry
 ══════════════════════════════════════════════════════════════ */
+
+
+function StoryCard({ name, onComplete }) {
+  const [pageIdx,  setPageIdx]  = useState(0);
+  const [revealed, setRevealed] = useState(0);
+  const [choice,   setChoice]   = useState(null);
+  const [muted,    setMuted]    = useState(false);
+  const audioRef = useRef(null);
+
+  // Ambient ocean drone via Web Audio — gentle, unobtrusive
+  useEffect(() => {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0, ctx.currentTime);
+    master.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 2);
+    master.connect(ctx.destination);
+
+    const nodes = [];
+    // Low ocean rumble — layered sine tones
+    [55, 82.4, 110].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.value = 0.3 - i * 0.08;
+      osc.connect(gain);
+      gain.connect(master);
+      osc.start();
+      nodes.push(osc);
+    });
+
+    // Slow LFO to give it a breathing, wave-like quality
+    const lfo = ctx.createOscillator();
+    const lfoGain = ctx.createGain();
+    lfo.frequency.value = 0.08;
+    lfoGain.gain.value = 0.025;
+    lfo.connect(lfoGain);
+    lfoGain.connect(master.gain);
+    lfo.start();
+    nodes.push(lfo);
+
+    audioRef.current = { ctx, master, nodes };
+
+    return () => {
+      master.gain.linearRampToValueAtTime(0, ctx.currentTime + 1);
+      setTimeout(() => { nodes.forEach(n => { try { n.stop(); } catch {} }); ctx.close(); }, 1100);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+    const { master, ctx } = audioRef.current;
+    master.gain.linearRampToValueAtTime(muted ? 0 : 0.07, ctx.currentTime + 0.5);
+  }, [muted]);
+
+  const pages = STORY_PAGES(name);
+  const page  = pages[pageIdx];
+  const isLast = pageIdx === pages.length - 1;
+
+  // Auto-reveal lines with a short stagger
+  useEffect(() => {
+    setRevealed(0);
+    const timers = page.text.map((_, i) =>
+      setTimeout(() => setRevealed(r => Math.max(r, i + 1)), 400 + i * 700)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [pageIdx]);
+
+  const allRevealed = revealed >= page.text.length;
+
+  const handleNext = () => {
+    if (!allRevealed) { setRevealed(page.text.length); return; }
+    if (isLast) return;
+    setPageIdx(p => p + 1);
+    setChoice(null);
+  };
+
+  const handleChoice = (c) => {
+    setChoice(c.id);
+    if (c.advance) setTimeout(() => onComplete(), c.joke ? 1200 : 600);
+  };
+
+  const stars = Array.from({length:60},(_,i)=>({ x:((i*137+41)%97)/97*100, y:((i*79+23)%89)/89*100, r:i%5===0?1.1:0.5, op:0.08+(i%5)*0.06 }));
+
+  // Parrot image — using a real Wikimedia tropical parrot
+  const PARROT_URL = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Rainbow_lorikeet_at_Airlie_Beach_P1030623.jpg/400px-Rainbow_lorikeet_at_Airlie_Beach_P1030623.jpg";
+
+  return (
+    <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", alignItems:"center", justifyContent:"center", position:"relative", overflow:"hidden" }}>
+
+      {/* Star field */}
+      <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none" }}>
+        {stars.map((s,i) => <circle key={i} cx={`${s.x}%`} cy={`${s.y}%`} r={s.r} fill="#7AACCC" opacity={s.op}/>)}
+      </svg>
+
+      {/* Card */}
+      <div style={{ position:"relative", zIndex:1, width:"min(680px, 95%)", background:"rgba(6,12,22,0.96)", border:"1px solid #1A3050", borderRadius:"14px", overflow:"hidden", boxShadow:"0 0 80px rgba(200,148,26,0.08)" }}>
+
+        {/* Progress dots */}
+        <div style={{ display:"flex", justifyContent:"center", gap:"8px", padding:"16px 0 0" }}>
+          {pages.map((_,i) => (
+            <div key={i} style={{ width:"6px", height:"6px", borderRadius:"50%", background: i === pageIdx ? "#C8941A" : i < pageIdx ? "#2A8860" : "#1A2840", transition:"background 0.3s" }}/>
+          ))}
+        </div>
+
+        {/* Location tag */}
+        <div style={{ textAlign:"center", padding:"10px 0 0", fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A4060", letterSpacing:"0.2em" }}>
+          {page.location.toUpperCase()}
+        </div>
+
+        {/* Main content row */}
+        <div style={{ display:"flex", gap:"0", minHeight:"340px" }}>
+
+          {/* Left — image */}
+          <div style={{ width:"200px", flexShrink:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"20px 16px", borderRight:"1px solid #0E1E30", gap:"16px" }}>
+            {page.id === "meeting" ? (
+              <div style={{ width:"150px", height:"150px", borderRadius:"10px", overflow:"hidden", border:"1px solid #1A3040" }}>
+                <img src={PARROT_URL} alt="Matala the parrot"
+                  style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"center" }}
+                  onError={e => { e.target.parentNode.innerHTML = '<div style="font-size:72px;display:flex;align-items:center;justify-content:center;height:100%;background:#07110A">🦜</div>'; }}/>
+              </div>
+            ) : (
+              <div style={{ fontSize:"72px", lineHeight:1, filter:"drop-shadow(0 0 20px rgba(200,148,26,0.3))" }}>{page.image}</div>
+            )}
+            <div style={{ textAlign:"center" }}>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", color:"#C8941A" }}>{page.speaker}</div>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A4050", letterSpacing:"0.06em", marginTop:"3px" }}>Master Navigator</div>
+            </div>
+          </div>
+
+          {/* Right — text */}
+          <div style={{ flex:1, padding:"28px 28px 20px", display:"flex", flexDirection:"column", justifyContent:"space-between", gap:"16px" }}>
+            <div style={{ display:"flex", flexDirection:"column", gap:"14px" }}>
+              {page.text.map((line, i) => (
+                <p key={i} style={{
+                  fontFamily:"Georgia,serif", fontSize:"14.5px", color:"#A8C8C0", lineHeight:"1.72", fontStyle:"italic", margin:0,
+                  opacity: i < revealed ? 1 : 0,
+                  transform: i < revealed ? "translateY(0)" : "translateY(6px)",
+                  transition:"opacity 0.5s ease, transform 0.5s ease",
+                }}>
+                  "{line}"
+                </p>
+              ))}
+            </div>
+
+            {/* Choices or Next */}
+            <div style={{ paddingTop:"12px", borderTop:"1px solid #0E1E30" }}>
+              {isLast && allRevealed && page.choices ? (
+                <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
+                  {page.choices.map(c => (
+                    <button key={c.id} onClick={() => handleChoice(c)} style={{
+                      padding:"12px 18px", borderRadius:"6px", cursor:"pointer",
+                      fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.08em",
+                      textAlign:"left",
+                      border:`1px solid ${choice===c.id ? "#C8941A" : "#1A3050"}`,
+                      background: choice===c.id ? "rgba(200,148,26,0.14)" : "rgba(255,255,255,0.02)",
+                      color: choice===c.id ? "#C8941A" : "#3A6070",
+                      transition:"all 0.2s",
+                    }}>
+                      {c.joke && choice===c.id ? "Too late — you already signed up. Let's go." : c.label}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <button onClick={handleNext} style={{
+                  padding:"10px 22px", borderRadius:"6px", cursor:"pointer",
+                  fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em",
+                  border:"1px solid #C8941A44", background:"rgba(200,148,26,0.08)", color:"#C8941A",
+                  opacity: allRevealed ? 1 : 0.4,
+                }}>
+                  {!allRevealed ? "…" : isLast ? "Hear more →" : "Continue →"}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{ padding:"12px 28px", borderTop:"1px solid #0A1828", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <div style={{ fontFamily:"Cinzel,serif", fontSize:"8.5px", color:"#1A2A40", letterSpacing:"0.1em" }}>
+            OCEAN ADVENTURE · A POLYNESIAN VOYAGING EXPERIENCE
+          </div>
+          <button onClick={() => setMuted(m => !m)} style={{ background:"none", border:"1px solid #1A2A40", borderRadius:"4px", padding:"4px 10px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A4050", letterSpacing:"0.08em" }}>
+            {muted ? "♪ UNMUTE" : "♪ MUTE"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 
 export default function App() {
   const [screen,   setScreen]   = useState("loading");
@@ -2566,27 +3845,36 @@ export default function App() {
     });
   };
 
+  const [compassPhase, setCompassPhase] = useState("intro");
+
   const handleSubmit = n => {
     localStorage.setItem("pvs_haumana", n);
-    setName(n); setScreen("map");
+    setName(n);
+    // Only unlock sweet potato seeds if not already in bag (new game)
+    const savedBag = JSON.parse(localStorage.getItem("pvs_bag") || "[]");
+    if (!savedBag.includes("sweet_potato_seeds")) unlock("sweet_potato_seeds");
+    setScreen("story");
   };
 
   const handleReset = () => {
     localStorage.removeItem("pvs_haumana");
     localStorage.removeItem("pvs_bag");
-    setName(""); setUnlocked([]); setStep(1);
+    setName(""); setUnlocked([]); setStep(1); setCompassPhase("intro");
     setSelHouse(null); setSelStar(null);
     setScreen("welcome");
   };
 
   const handleHouseClick = h => {
     setSelHouse(h);
-    if (Math.abs(h.angle - 180) < 6) setTimeout(() => setStep(2), 900);
+    if (Math.abs(h.angle - 22.5) < 6) setTimeout(() => setStep(2), 900);
   };
 
   const handleStarClick = s => {
     setSelStar(s);
-    if (s.correct) { unlock("star_compass"); setTimeout(() => setStep(3), 900); }
+    if (s.correct) {
+      unlock("star_compass"); unlock("samoan_star_map");
+      setTimeout(() => setCompassPhase("bridge"), 900);
+    }
   };
 
   const css = `
@@ -2600,6 +3888,8 @@ export default function App() {
 
   if (screen === "welcome") return <><style>{css}</style><WelcomeScreen onSubmit={handleSubmit} /></>;
 
+  if (screen === "story") return <><style>{css}</style><StoryCard name={name} onComplete={() => setScreen("map")} /></>;
+
   const bgStars = Array.from({ length: 55 }, (_, i) => ({ x:((i*113+37)%97)/97*100, y:((i*79+23)%89)/89*100, r:i%5===0?1.1:0.55, op:0.10+(i%5)*0.06 }));
 
   return (
@@ -2608,21 +3898,93 @@ export default function App() {
       <NavigatorsBag open={bagOpen} onClose={() => setBagOpen(false)} unlocked={unlocked} />
 
       {screen === "map" && (
-        <VoyageMap name={name} onNavigate={m => { if (m===1) setScreen("compass"); if (m===2) setScreen("sunarc"); if (m===3) setScreen("swells"); if (m===4) setScreen("wind"); if (m===5) setScreen("birds"); }} unlocked={unlocked} onOpenBag={() => setBagOpen(true)} onReset={handleReset} />
+        <VoyageMap name={name} onNavigate={m => {
+          if (m===1) setScreen("compass");
+          if (m===2) setScreen("sunarc");
+          if (m===3) setScreen("swells");
+          if (m===4) setScreen("wind");
+          if (m===5) setScreen("birds");
+          if (m===6) setScreen("clouds");
+          if (m===7) setScreen("voyage");
+        }} unlocked={unlocked} onOpenBag={() => setBagOpen(true)} onReset={handleReset} />
       )}
 
-      {screen === "compass" && (
+      {screen === "compass" && compassPhase === "intro" && (
+        <ModuleIntroScreen moduleNum={1} name={name}
+          onBegin={() => setCompassPhase("learn")}
+          onBack={() => setScreen("map")} />
+      )}
+      {screen === "compass" && compassPhase === "learn" && (
+        <ModuleLearnScreen moduleNum={1} name={name}
+          onReady={() => setCompassPhase("activity")}
+          onBack={() => setScreen("map")}
+          onOpenBag={() => setBagOpen(true)}
+          unlocked={unlocked}>
+          {/* Learn visual — annotated compass dial */}
+          <div style={{ width:"min(100%,500px)", display:"flex", flexDirection:"column", gap:"16px" }}>
+            <svg viewBox="0 0 500 500" style={{ width:"100%", filter:"drop-shadow(0 0 30px rgba(200,148,26,0.2))" }}>
+              <defs>
+                <radialGradient id="learnBg"><stop offset="0%" stopColor="#0D1B30"/><stop offset="100%" stopColor="#060D1C"/></radialGradient>
+              </defs>
+              <circle cx="250" cy="250" r="245" fill="url(#learnBg)" stroke="#1A2840" strokeWidth="1.5"/>
+              {/* Quadrant fills */}
+              {[{a:0,c:"rgba(200,120,20,0.12)"},{a:90,c:"rgba(160,145,15,0.10)"},{a:180,c:"rgba(15,95,155,0.13)"},{a:270,c:"rgba(90,35,170,0.10)"}].map(({a,c},i)=>{
+                const r1=(a-90)*Math.PI/180, r2=(a+90-90)*Math.PI/180;
+                return <path key={i} d={`M250,250 L${(250+220*Math.cos(r1)).toFixed(1)},${(250+220*Math.sin(r1)).toFixed(1)} A220,220 0 0,1 ${(250+220*Math.cos(r2)).toFixed(1)},${(250+220*Math.sin(r2)).toFixed(1)} Z`} fill={c}/>;
+              })}
+              {/* Tick marks */}
+              {Array.from({length:32},(_,i)=>{
+                const rad=(i*11.25-90)*Math.PI/180;
+                const isCard=i%8===0, isManu=i%4===0&&!isCard;
+                const r1=isCard?60:isManu?80:100, r2=220;
+                return <line key={i} x1={(250+(r1)*Math.cos(rad)).toFixed(1)} y1={(250+(r1)*Math.sin(rad)).toFixed(1)} x2={(250+r2*Math.cos(rad)).toFixed(1)} y2={(250+r2*Math.sin(rad)).toFixed(1)} stroke={isCard?"#3A5A80":isManu?"#2A4060":"#1A2840"} strokeWidth={isCard?2:isManu?1.2:0.6}/>;
+              })}
+              <circle cx="250" cy="250" r="220" fill="none" stroke="#253850" strokeWidth="1.5"/>
+              <circle cx="250" cy="250" r="60"  fill="#090F1E" stroke="#1A2840" strokeWidth="1"/>
+              {/* Cardinal labels */}
+              {[["Ākau",250,40],["Hikina",460,258],["Hema",250,468],["Komohana",40,258]].map(([n,x,y])=>(
+                <text key={n} x={x} y={y} textAnchor="middle" dominantBaseline="middle" fill="#5A92BC" fontSize="15" fontFamily="Cinzel,serif" fontWeight="600">{n}</text>
+              ))}
+              {/* Quadrant labels */}
+              {[["KOʻOLAU","#B07825",45],["MALANAI","#9A9A20",135],["KONA","#2090C0",225],["HOʻOLUA","#8040C8",315]].map(([n,c,a])=>{
+                const rad=(a-90)*Math.PI/180;
+                return <text key={n} x={(250+260*Math.cos(rad)).toFixed(1)} y={(250+260*Math.sin(rad)).toFixed(1)} textAnchor="middle" dominantBaseline="middle" fill={c} fontSize="11" fontFamily="Cinzel,serif" fontWeight="700" letterSpacing="0.15em">{n}</text>;
+              })}
+              {/* Key stars */}
+              {[
+                {a:67.5,  r:6,  c:"#FFD060", n:"Hōkūleʻa"},
+                {a:101.25,r:7,  c:"#A0C8FF", n:"Takurua"},
+                {a:146.25,r:5,  c:"#FFFCE0", n:"Atutahi"},
+              ].map(s=>{
+                const rad=(s.a-90)*Math.PI/180;
+                const sx=250+185*Math.cos(rad), sy=250+185*Math.sin(rad);
+                return (
+                  <g key={s.n}>
+                    <circle cx={sx.toFixed(1)} cy={sy.toFixed(1)} r={s.r} fill={s.c} opacity="0.9"/>
+                    <text x={(sx+18*Math.cos(rad)).toFixed(1)} y={(sy+18*Math.sin(rad)).toFixed(1)} textAnchor="middle" fill={s.c} fontSize="10" fontFamily="Cinzel,serif" opacity="0.8">{s.n}</text>
+                  </g>
+                );
+              })}
+              <circle cx="250" cy="250" r="5" fill="#5A92BC"/>
+            </svg>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A4060", textAlign:"center", letterSpacing:"0.1em" }}>
+              32 HOUSES · 11.25° EACH · KEY STARS AT THEIR RISING AZIMUTHS
+            </div>
+          </div>
+        </ModuleLearnScreen>
+      )}
+      {screen === "compass" && compassPhase === "activity" && (
         <div style={{ width:"100%",height:"100%",background:"#04070E",display:"flex",flexDirection:"column",overflow:"hidden" }}>
           <div style={{ height:"44px",borderBottom:"1px solid #0E1826",background:"rgba(4,8,18,0.95)",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 22px",flexShrink:0 }}>
-            <span style={{ fontFamily:"Cinzel,serif",fontSize:"12px",fontWeight:"700",color:"#C8941A",letterSpacing:"0.12em" }}>POLYNESIAN WAYFINDING</span>
+            <span style={{ fontFamily:"Cinzel,serif",fontSize:"12px",fontWeight:"700",color:"#C8941A",letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
             <span style={{ fontFamily:"Cinzel,serif",fontSize:"10.5px",color:"#3A6070",letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
           </div>
           <div style={{ padding:"7px 22px",borderBottom:"1px solid #0E1826",background:"rgba(4,8,18,0.6)",flexShrink:0 }}>
-            <span style={{ fontFamily:"Cinzel,serif",fontSize:"9.5px",color:"#4A7090",letterSpacing:"0.16em" }}>MODULE 1 · THE STAR COMPASS</span>
-            <span style={{ fontFamily:"Cinzel,serif",fontSize:"9.5px",color:"#2A4858",marginLeft:"14px",letterSpacing:"0.1em" }}>KOʻOLAU · MALANAI · KONA · HOʻOLUA</span>
+            <span style={{ fontFamily:"Cinzel,serif",fontSize:"9.5px",color:"#C8941A",letterSpacing:"0.16em" }}>MODULE 01 · TONGA → SĀMOA</span>
+            <span style={{ fontFamily:"Cinzel,serif",fontSize:"9.5px",color:"#2A4858",marginLeft:"14px",letterSpacing:"0.1em" }}>THE STAR COMPASS · NĀLEO-KOʻOLAU</span>
           </div>
           <div style={{ flex:1,display:"flex",overflow:"hidden",minHeight:0 }}>
-            <div style={{ width:"260px",flexShrink:0,borderRight:"1px solid #0E1826",overflowY:"auto" }}>
+            <div style={{ width:"320px",flexShrink:0,borderRight:"1px solid #0E1826",overflowY:"auto" }}>
               <PaluPanel step={step} selHouse={selHouse} selStar={selStar} hovHouse={hovHouse} hovStar={hovStar} name={name} onBack={() => setScreen("map")} onOpenBag={() => setBagOpen(true)} unlocked={unlocked} />
             </div>
             <div style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",padding:"16px" }}>
@@ -2636,6 +3998,10 @@ export default function App() {
           </div>
         </div>
       )}
+      {screen === "compass" && compassPhase === "bridge" && (
+        <BridgeScreen moduleNum={1} name={name} unlocked={unlocked}
+          onReturn={() => { setScreen("map"); setCompassPhase("intro"); setStep(1); setSelHouse(null); setSelStar(null); }} />
+      )}
       {screen === "sunarc" && (
         <SunArcModule
           name={name}
@@ -2643,6 +4009,7 @@ export default function App() {
           onOpenBag={() => setBagOpen(true)}
           unlocked={unlocked}
           onComplete={() => unlock("sun_arc")}
+          onBridge={() => setScreen("map")}
         />
       )}
       {screen === "swells" && (
@@ -2651,7 +4018,8 @@ export default function App() {
           onBack={() => setScreen("map")}
           onOpenBag={() => setBagOpen(true)}
           unlocked={unlocked}
-          onComplete={() => unlock("wave_reader")}
+          onComplete={() => { unlock("wave_reader"); unlock("taro_plant"); }}
+          onBridge={() => setScreen("map")}
         />
       )}
       {screen === "wind" && (
@@ -2661,6 +4029,7 @@ export default function App() {
           onOpenBag={() => setBagOpen(true)}
           unlocked={unlocked}
           onComplete={() => unlock("wind_reader")}
+          onBridge={() => setScreen("map")}
         />
       )}
       {screen === "birds" && (
@@ -2670,6 +4039,25 @@ export default function App() {
           onOpenBag={() => setBagOpen(true)}
           unlocked={unlocked}
           onComplete={() => unlock("bird_guide")}
+          onBridge={() => setScreen("map")}
+        />
+      )}
+      {screen === "clouds" && (
+        <CloudsModule
+          name={name}
+          onBack={() => setScreen("map")}
+          onOpenBag={() => setBagOpen(true)}
+          unlocked={unlocked}
+          onComplete={() => unlock("cloud_reader")}
+          onBridge={() => setScreen("map")}
+        />
+      )}
+      {screen === "voyage" && (
+        <FinalVoyageModule
+          name={name}
+          onBack={() => setScreen("map")}
+          onOpenBag={() => setBagOpen(true)}
+          unlocked={unlocked}
         />
       )}
     </>
