@@ -175,16 +175,371 @@ class ErrorBoundary extends React.Component {
 
 
 
+/* ══════════════════════════════════════════════════════════════
+   SĀMOA ARRIVAL SCREEN — interactive beach scene
+══════════════════════════════════════════════════════════════ */
+
+function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
+  // Phases: palu → palm → greeter → dialogue → exchange → complete
+  const [phase,       setPhase]      = useState("palu");
+  const [lineIdx,     setLineIdx]    = useState(0);
+  const [palmHov,     setPalmHov]    = useState(false);
+  const [greeterHov,  setGreeterHov] = useState(false);
+  const [palmClicked, setPalmClicked]= useState(false);
+  const [shared,      setShared]     = useState(false);   // gave sweet potatoes
+  const [declined,    setDeclined]   = useState(false);
+  const [storyVis,    setStoryVis]   = useState(false);
+  const [returnVis,   setReturnVis]  = useState(false);
+
+  const accent = "#C8941A";
+  const b = BRIDGE_CONTENT[1];
+
+  // Reveal Palu's arrival lines one at a time
+  useEffect(() => {
+    if (phase !== "palu") return;
+    const timers = b.paluLines.map((_, i) =>
+      setTimeout(() => setLineIdx(idx => Math.max(idx, i + 1)), 900 + i * 1800)
+    );
+    // After last line, unlock palm
+    const unlock = setTimeout(() => setPhase("palm"), 900 + b.paluLines.length * 1800 + 600);
+    return () => { timers.forEach(clearTimeout); clearTimeout(unlock); };
+  }, [phase]);
+
+  const handlePalmClick = () => {
+    if (phase !== "palm") return;
+    setPalmClicked(true);
+    setTimeout(() => setPhase("greeter"), 1400);
+  };
+
+  const handleGreeterClick = () => {
+    if (phase !== "greeter") return;
+    setPhase("dialogue");
+  };
+
+  const handleShare = () => {
+    setShared(true);
+    setPhase("exchange");
+    onUnlock("samoan_star_map");
+    setTimeout(() => setStoryVis(true), 1200);
+    setTimeout(() => setReturnVis(true), 2400);
+  };
+
+  const handleDecline = () => {
+    setDeclined(true);
+    setPhase("declined");
+    setTimeout(() => setReturnVis(true), 1000);
+  };
+
+  const W = 760, H = 420;
+  const palmX = 160, palmY = 290;
+  const greeterX = 580, greeterY = 295;
+
+  const canClickPalm    = phase === "palm";
+  const canClickGreeter = phase === "greeter";
+  const samoanStarMap   = BAG_ITEMS.find(i => i.id === "samoan_star_map");
+
+  return (
+    <div style={{ width:"100%", height:"100%", background:"#08100A", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+
+      {/* Header */}
+      <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:"rgba(8,16,10,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:`${accent}88`, letterSpacing:"0.18em" }}>ARRIVED · SĀMOA</div>
+      </div>
+
+      {/* Beach scene */}
+      <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", position:"relative" }}>
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          style={{ width:"100%", flex:1, display:"block" }}
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {/* Sky — warm late afternoon */}
+          <defs>
+            <linearGradient id="samoaSky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#1A2840"/>
+              <stop offset="60%" stopColor="#2A4A38"/>
+              <stop offset="100%" stopColor="#3A6040"/>
+            </linearGradient>
+            <linearGradient id="samoaSand" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#4A3A18"/>
+              <stop offset="100%" stopColor="#3A2C10"/>
+            </linearGradient>
+            <linearGradient id="samoaOcean" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#0A3040"/>
+              <stop offset="100%" stopColor="#061828"/>
+            </linearGradient>
+            <filter id="samoaGlow">
+              <feGaussianBlur stdDeviation="4" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="softGlow">
+              <feGaussianBlur stdDeviation="8" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          {/* Sky */}
+          <rect width={W} height={H} fill="url(#samoaSky)"/>
+
+          {/* Stars (it's evening) */}
+          {[[80,40,1.2],[180,25,0.8],[320,18,1.4],[500,30,1.0],[640,22,1.2],[720,45,0.9],[420,55,0.7],[260,48,1.1]].map(([x,y,r],i)=>(
+            <circle key={i} cx={x} cy={y} r={r} fill="#C8D8E8" opacity="0.6"/>
+          ))}
+
+          {/* Distant mountains */}
+          <path d="M0,200 Q120,120 200,160 Q280,100 360,140 Q440,80 520,130 Q600,90 680,120 Q720,110 760,130 L760,220 L0,220Z"
+            fill="#1A3028" opacity="0.8"/>
+
+          {/* Ocean */}
+          <rect x="0" y="220" width={W} height="80" fill="url(#samoaOcean)"/>
+          {/* Wave lines */}
+          {[0,1,2,3].map(i=>(
+            <path key={i} d={`M${i*210-30},${238+i*8} Q${i*210+55},${232+i*8} ${i*210+110},${238+i*8}`}
+              fill="none" stroke="#1A6060" strokeWidth="1.2" opacity="0.5"/>
+          ))}
+
+          {/* Beach */}
+          <path d="M0,290 Q190,270 380,278 Q570,285 760,272 L760,420 L0,420Z"
+            fill="url(#samoaSand)"/>
+          {/* Sand texture lines */}
+          {[0,1,2].map(i=>(
+            <path key={i} d={`M${i*280},${310+i*15} Q${i*280+140},${305+i*15} ${i*280+280},${310+i*15}`}
+              fill="none" stroke="#5A4820" strokeWidth="0.6" opacity="0.4"/>
+          ))}
+
+          {/* Waka on beach — just arrived */}
+          <path d="M280,292 Q380,282 480,292 L472,300 Q380,294 288,300Z"
+            fill="#1A2818" stroke="#2A4030" strokeWidth="1.5"/>
+          <line x1="380" y1="292" x2="380" y2="266" stroke="#2A4030" strokeWidth="1.5"/>
+          <path d="M380,268 Q398,276 395,288 L380,288Z" fill="#1A3020" stroke="#2A4030" strokeWidth="1" opacity="0.8"/>
+
+          {/* ── PALM TREE ── */}
+          {/* Trunk */}
+          <path d={`M${palmX},${palmY} Q${palmX-12},${palmY-60} ${palmX+8},${palmY-120}`}
+            stroke="#3A2A10" strokeWidth="14" fill="none" strokeLinecap="round"
+            opacity={canClickPalm && palmHov ? 1 : 0.85}/>
+          {/* Fronds */}
+          {[[-40,-30],[-20,-45],[5,-48],[28,-40],[42,-28],[30,-15],[-8,-12]].map(([dx,dy],i)=>(
+            <path key={i}
+              d={`M${palmX+8},${palmY-120} Q${palmX+8+dx*0.5},${palmY-120+dy*0.5} ${palmX+8+dx},${palmY-120+dy}`}
+              stroke="#2A5020" strokeWidth={i%2===0?5:3} fill="none" strokeLinecap="round"
+              opacity={canClickPalm && palmHov ? 1 : 0.85}/>
+          ))}
+          {/* Coconuts */}
+          {[[2,-108],[14,-112],[-4,-115]].map(([dx,dy],i)=>(
+            <circle key={i} cx={palmX+8+dx} cy={palmY+dy} r="5" fill="#3A2A08"/>
+          ))}
+          {/* Glow pulse when clickable */}
+          {canClickPalm && (
+            <circle cx={palmX} cy={palmY-80} r={palmHov ? 55 : 42}
+              fill="none" stroke="#C8941A" strokeWidth="1.5" opacity={palmHov ? 0.6 : 0.3}
+              style={{ transition:"all 0.3s" }}/>
+          )}
+          {/* Invisible click target */}
+          {canClickPalm && (
+            <rect x={palmX-50} y={palmY-140} width="110" height="160" fill="transparent"
+              style={{ cursor:"pointer" }}
+              onMouseEnter={() => setPalmHov(true)}
+              onMouseLeave={() => setPalmHov(false)}
+              onClick={handlePalmClick}/>
+          )}
+          {/* Palm tooltip */}
+          {canClickPalm && palmHov && (
+            <g>
+              <rect x={palmX-50} y={palmY-168} width="100" height="22" rx="4" fill="#08100A" stroke="#C8941A44"/>
+              <text x={palmX} y={palmY-153} textAnchor="middle" fill="#C8941A" fontSize="10" fontFamily="Cinzel,serif">look around</text>
+            </g>
+          )}
+          {/* Palm clicked speech bubble */}
+          {palmClicked && (
+            <g>
+              <rect x={palmX-10} y={palmY-195} width="200" height="58" rx="8"
+                fill="#08100A" stroke="#C8941A44" strokeWidth="1.5"/>
+              <path d={`M${palmX+20},${palmY-137} L${palmX+30},${palmY-126} L${palmX+40},${palmY-137}`}
+                fill="#08100A" stroke="#C8941A44" strokeWidth="1.5"/>
+              <text x={palmX+90} y={palmY-172} textAnchor="middle" fill="#A8C8A0" fontSize="10" fontFamily="Georgia,serif" fontStyle="italic">This is a good place</text>
+              <text x={palmX+90} y={palmY-156} textAnchor="middle" fill="#A8C8A0" fontSize="10" fontFamily="Georgia,serif" fontStyle="italic">to rest. Go say hello.</text>
+              <text x={palmX+90} y={palmY-143} textAnchor="middle" fill="#C8941A" fontSize="8" fontFamily="Cinzel,serif" letterSpacing="0.06em">— PALU HEMI</text>
+            </g>
+          )}
+
+          {/* ── SAMOAN GREETER ── */}
+          {/* Only visible after palm clicked */}
+          {phase !== "palu" && phase !== "palm" && (
+            <g opacity={greeterHov && canClickGreeter ? 1 : 0.9}>
+              {/* Body */}
+              <ellipse cx={greeterX} cy={greeterY+8} rx="22" ry="28" fill="#7A5A38"/>
+              {/* Clothing wrap */}
+              <path d={`M${greeterX-22},${greeterY+5} Q${greeterX},${greeterY-8} ${greeterX+22},${greeterY+5}`}
+                fill="#3A6048" opacity="0.9"/>
+              {/* Head */}
+              <circle cx={greeterX} cy={greeterY-24} r="18" fill="#8A6040"/>
+              {/* Hair */}
+              <path d={`M${greeterX-16},${greeterY-36} Q${greeterX},${greeterY-48} ${greeterX+16},${greeterY-36}`}
+                fill="#1A1008" opacity="0.95"/>
+              {/* Eyes */}
+              <ellipse cx={greeterX-6} cy={greeterY-24} rx="2.5" ry="2.5" fill="#1A0E06"/>
+              <ellipse cx={greeterX+6} cy={greeterY-24} rx="2.5" ry="2.5" fill="#1A0E06"/>
+              {/* Smile */}
+              <path d={`M${greeterX-7},${greeterY-16} Q${greeterX},${greeterY-11} ${greeterX+7},${greeterY-16}`}
+                stroke="#5A3010" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+              {/* Arms raised in greeting */}
+              <path d={`M${greeterX-22},${greeterY} Q${greeterX-38},${greeterY-22} ${greeterX-32},${greeterY-36}`}
+                stroke="#8A6040" strokeWidth="7" fill="none" strokeLinecap="round"/>
+              <path d={`M${greeterX+22},${greeterY} Q${greeterX+38},${greeterY-22} ${greeterX+32},${greeterY-36}`}
+                stroke="#8A6040" strokeWidth="7" fill="none" strokeLinecap="round"/>
+              {/* Legs */}
+              <rect x={greeterX-10} y={greeterY+28} width="9" height="22" rx="4" fill="#7A5A38"/>
+              <rect x={greeterX+2} y={greeterY+28} width="9" height="22" rx="4" fill="#7A5A38"/>
+              {/* Necklace */}
+              <path d={`M${greeterX-14},${greeterY-8} Q${greeterX},${greeterY-2} ${greeterX+14},${greeterY-8}`}
+                stroke="#C8941A" strokeWidth="2" fill="none" opacity="0.8"/>
+              {/* Glow when clickable */}
+              {canClickGreeter && (
+                <circle cx={greeterX} cy={greeterY-10} r={greeterHov ? 48 : 38}
+                  fill="none" stroke="#C8941A" strokeWidth="1.5" opacity={greeterHov ? 0.7 : 0.35}
+                  style={{ transition:"all 0.3s" }}/>
+              )}
+            </g>
+          )}
+          {/* Greeter click target */}
+          {canClickGreeter && (
+            <rect x={greeterX-44} y={greeterY-52} width="88" height="110"
+              fill="transparent" style={{ cursor:"pointer" }}
+              onMouseEnter={() => setGreeterHov(true)}
+              onMouseLeave={() => setGreeterHov(false)}
+              onClick={handleGreeterClick}/>
+          )}
+          {/* Greeter tooltip */}
+          {canClickGreeter && greeterHov && (
+            <g>
+              <rect x={greeterX-56} y={greeterY-80} width="112" height="22" rx="4" fill="#08100A" stroke="#C8941A44"/>
+              <text x={greeterX} y={greeterY-65} textAnchor="middle" fill="#C8941A" fontSize="10" fontFamily="Cinzel,serif">say hello</text>
+            </g>
+          )}
+
+          {/* Palu speech bubbles — arrival lines */}
+          {phase === "palu" && b.paluLines.slice(0, lineIdx).map((line, i) => {
+            const y = 28 + i * 34;
+            return (
+              <g key={i} style={{ opacity: i < lineIdx ? 1 : 0, transition:"opacity 0.6s" }}>
+                <rect x="24" y={y} width="440" height="28" rx="6"
+                  fill="#08100A" stroke="#C8941A44" strokeWidth="1.2"/>
+                <text x="36" y={y + 12} fill="#A8C8A0" fontSize="11" fontFamily="Georgia,serif" fontStyle="italic">
+                  "{line.length > 60 ? line.slice(0, 57) + "…" : line}"
+                </text>
+                {i === lineIdx - 1 && (
+                  <text x="36" y={y + 22} fill="#C8941A" fontSize="8" fontFamily="Cinzel,serif" letterSpacing="0.06em">— PALU HEMI</text>
+                )}
+              </g>
+            );
+          })}
+
+          {/* Exchange result — star map gift */}
+          {shared && (
+            <g>
+              <rect x={greeterX - 120} y={greeterY - 120} width="240" height="80" rx="8"
+                fill="#08100A" stroke="#C8941A66" strokeWidth="1.5"/>
+              <path d={`M${greeterX},${greeterY-40} L${greeterX-10},${greeterY-38} L${greeterX+10},${greeterY-38}`}
+                fill="#08100A" stroke="#C8941A66" strokeWidth="1.5"/>
+              <text x={greeterX} y={greeterY-96} textAnchor="middle" fill="#C8941A" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.1em">TAUTAI SAYS</text>
+              <text x={greeterX} y={greeterY-78} textAnchor="middle" fill="#A8C8A0" fontSize="10" fontFamily="Georgia,serif" fontStyle="italic">"These seeds will feed many.</text>
+              <text x={greeterX} y={greeterY-64} textAnchor="middle" fill="#A8C8A0" fontSize="10" fontFamily="Georgia,serif" fontStyle="italic">Take our star map in return."</text>
+              <text x={greeterX} y={greeterY-50} textAnchor="middle" fill="#2AB870" fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">✦ Samoan Star Map received</text>
+            </g>
+          )}
+
+          {/* Declined response */}
+          {declined && (
+            <g>
+              <rect x={greeterX - 110} y={greeterY - 100} width="220" height="60" rx="8"
+                fill="#08100A" stroke="#C8941A33" strokeWidth="1.2"/>
+              <text x={greeterX} y={greeterY-76} textAnchor="middle" fill="#A8C8A0" fontSize="10" fontFamily="Georgia,serif" fontStyle="italic">"Come back when you are</text>
+              <text x={greeterX} y={greeterY-62} textAnchor="middle" fill="#A8C8A0" fontSize="10" fontFamily="Georgia,serif" fontStyle="italic">ready. We will be here."</text>
+            </g>
+          )}
+
+        </svg>
+
+        {/* Dialogue panel — slides up when greeter clicked */}
+        {phase === "dialogue" && (
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,10,6,0.97)", borderTop:`1px solid ${accent}44`, padding:"20px 28px", display:"flex", flexDirection:"column", gap:"14px" }}>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.18em", opacity:0.7 }}>TAUTAI FALEOLO · SAMOAN WAYFINDER</div>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8A0", lineHeight:"1.7", fontStyle:"italic" }}>
+              "Visitors from Tonga! We heard the stories of your crossing — three nights on the open ocean. You carry the star compass in your mind now. What have you brought us from the islands?"
+            </div>
+            <div style={{ display:"flex", gap:"12px" }}>
+              <button onClick={handleShare} style={{ flex:1, padding:"13px 18px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}`, background:`rgba(200,148,26,0.14)`, color:accent }}>
+                Share the sweet potato cuttings →
+              </button>
+              <button onClick={handleDecline} style={{ padding:"13px 18px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", letterSpacing:"0.1em", border:"1px solid #1A3028", background:"none", color:"#3A6050" }}>
+                Not yet
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Story card — slides up after exchange */}
+        {storyVis && (
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,10,6,0.97)", borderTop:`1px solid ${accent}44`, padding:"20px 28px 16px", display:"flex", flexDirection:"column", gap:"14px" }}>
+            <div style={{ display:"flex", gap:"28px", alignItems:"flex-start" }}>
+              {/* Cultural story */}
+              <div style={{ flex:1 }}>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"8px", opacity:0.7 }}>NAVIGATOR'S KNOWLEDGE</div>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"14px", fontWeight:"700", color:"#E8D8A8", marginBottom:"10px" }}>{b.storyTitle}</div>
+                <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#7AACBE", lineHeight:"1.75", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"14px" }}>
+                  {b.story}
+                </div>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"8.5px", color:`${accent}55`, letterSpacing:"0.1em", marginTop:"8px" }}>— {b.storyCitation}</div>
+              </div>
+              {/* Bag item */}
+              <div style={{ width:"200px", flexShrink:0, display:"flex", flexDirection:"column", gap:"10px" }}>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", opacity:0.7 }}>ADDED TO YOUR BAG</div>
+                {samoanStarMap && (
+                  <div style={{ display:"flex", alignItems:"center", gap:"12px", padding:"11px 14px", background:`${samoanStarMap.color}10`, border:`1px solid ${samoanStarMap.color}33`, borderRadius:"8px" }}>
+                    <span style={{ fontSize:"22px" }}>{samoanStarMap.icon}</span>
+                    <div>
+                      <div style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#D0C8A8" }}>{samoanStarMap.name}</div>
+                      <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:`${samoanStarMap.color}99`, letterSpacing:"0.06em", marginTop:"2px" }}>{samoanStarMap.hawaiian}</div>
+                    </div>
+                  </div>
+                )}
+                <div style={{ fontFamily:"Georgia,serif", fontSize:"11.5px", color:"#5A8090", lineHeight:"1.65", fontStyle:"italic" }}>{b.bagNote}</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Return button */}
+        {returnVis && (
+          <div style={{ position:"absolute", top:"12px", right:"16px", display:"flex", flexDirection:"column", gap:"8px", alignItems:"flex-end" }}>
+            <div style={{ padding:"10px 14px", background:`${accent}0E`, border:`1px solid ${accent}33`, borderRadius:"6px", fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, lineHeight:"1.5", letterSpacing:"0.03em", maxWidth:"260px", textAlign:"right" }}>
+              {b.bridgeLine}
+            </div>
+            <button onClick={onReturn} style={{ padding:"12px 20px", borderRadius:"6px", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.14em", cursor:"pointer", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>
+              RETURN TO THE OCEAN →
+            </button>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+
+
+
 function BridgeScreen({ moduleNum, name, unlocked, onReturn }) {
   const b     = BRIDGE_CONTENT[moduleNum];
   const m     = MODULE_CONTENT[moduleNum];
   const accent = m.accent;
-  const [lineIdx, setLineIdx] = useState(0);
-  const [showStory, setShowStory] = useState(false);
-  const [showBag,   setShowBag]   = useState(false);
+  const [lineIdx,    setLineIdx]    = useState(0);
+  const [showStory,  setShowStory]  = useState(false);
+  const [showBag,    setShowBag]    = useState(false);
   const [showReturn, setShowReturn] = useState(false);
 
-  // Stagger: lines reveal one by one, then story, then bag, then button
   useEffect(() => {
     const t1 = setTimeout(() => setLineIdx(1), 800);
     const t2 = setTimeout(() => setLineIdx(2), 2400);
@@ -955,8 +1310,8 @@ function CompassLearnDiagram({ step }) {
         );
       })()}
 
-      {/* Step 1+: 32 house division lines (was step 0) */}
-      {step >= 1 && Array.from({length:32},(_,i) => {
+      {/* Step 2+: 32 house division lines */}
+      {step >= 2 && Array.from({length:32},(_,i) => {
         const rad=(i*11.25-90)*Math.PI/180;
         const isCard=i%8===0, isManu=i%4===0&&!isCard;
         const r1=isCard?RI-2:isManu?RI+20:RI+45;
@@ -967,16 +1322,16 @@ function CompassLearnDiagram({ step }) {
           stroke={isCard?"#3A5A80":isManu?"#253860":"#162840"}
           strokeWidth={isCard?1.8:isManu?1.1:0.5}/>;
       })}
-      <circle cx={CX} cy={CY} r={R} fill="none" stroke="#253850" strokeWidth="1.5"/>
+      {step >= 2 && <circle cx={CX} cy={CY} r={R} fill="none" stroke="#253850" strokeWidth="1.5"/>}
 
-      {/* Step 1+: quadrant colours (no names yet) */}
-      {step >= 1 && qAngles.map((a,i) => {
+      {/* Step 2+: quadrant colours (no names yet) */}
+      {step >= 2 && qAngles.map((a,i) => {
         const r1=(a-90)*Math.PI/180, r2=(a+90-90)*Math.PI/180;
         return <path key={i} d={`M${CX},${CY} L${(CX+R*Math.cos(r1)).toFixed(1)},${(CY+R*Math.sin(r1)).toFixed(1)} A${R},${R} 0 0,1 ${(CX+R*Math.cos(r2)).toFixed(1)},${(CY+R*Math.sin(r2)).toFixed(1)} Z`} fill={qFill[i]}/>;
       })}
 
-      {/* Step 1+: inner hub — always, but no text labels until step 3 */}
-      {step >= 1 && <circle cx={CX} cy={CY} r={RI} fill="#060D1C" stroke="#1A2840" strokeWidth="1"/>}
+      {/* Step 2+: inner hub */}
+      {step >= 2 && <circle cx={CX} cy={CY} r={RI} fill="#060D1C" stroke="#1A2840" strokeWidth="1"/>}
 
       {/* Step 3+: cardinal labels + quadrant names appear */}
       {step >= 3 && <>
@@ -4948,7 +5303,7 @@ function App() {
     if (step !== 1 || keepGoing) return;
     setSelStar(s);
     if (s.correct) {
-      unlock("star_compass"); unlock("samoan_star_map");
+      unlock("star_compass");
       setKeepGoing(true);
     }
   };
@@ -5261,8 +5616,12 @@ function App() {
         </div>
       )}
       {screen === "compass" && compassPhase === "bridge" && (
-        <BridgeScreen moduleNum={1} name={name} unlocked={unlocked}
-          onReturn={() => { setScreen("map"); setCompassPhase("intro"); setStep(1); setSelHouse(null); setSelStar(null); }} />
+        <SamoaArrivalScreen
+          name={name}
+          unlocked={unlocked}
+          onUnlock={unlock}
+          onReturn={() => { setScreen("map"); setCompassPhase("intro"); setStep(1); setSelHouse(null); setSelStar(null); }}
+        />
       )}
       {screen === "sunarc" && (
         <SunArcModule
