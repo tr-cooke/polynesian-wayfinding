@@ -176,8 +176,156 @@ class ErrorBoundary extends React.Component {
 
 
 /* ══════════════════════════════════════════════════════════════
-   SĀMOA ARRIVAL SCREEN — interactive beach scene
+   SĀMOA CROSSING — brief sea voyage between activity and arrival
 ══════════════════════════════════════════════════════════════ */
+
+function SamoaCrossing({ name, onArrive }) {
+  const [lineIdx, setLineIdx] = useState(0);
+  const [arrived, setArrived] = useState(false);
+
+  const lines = [
+    "Keep Mānaiakalani on your starboard bow. Hold the heading.",
+    "Good. Three nights now — the stars have not failed us once.",
+    `You have done this, ${name}. I was here, but you were the one navigating.`,
+    "Look ahead. Do you see the change in the clouds? Land.",
+  ];
+
+  const isLast = lineIdx === lines.length - 1;
+
+  const handleClick = () => {
+    if (arrived) return;
+    if (!isLast) {
+      setLineIdx(i => i + 1);
+    } else {
+      setArrived(true);
+      setTimeout(onArrive, 900);
+    }
+  };
+
+  // Animated stars
+  const stars = Array.from({length:80},(_,i)=>({
+    x: ((i*137+17)%99)/99*100,
+    y: ((i*83+11)%97)/97*80,
+    r: i%9===0?1.6:i%4===0?1.0:0.5,
+    op: 0.2 + (i%7)*0.1,
+  }));
+
+  // Canoe position drifts slightly per line
+  const canoeX = 50 + lineIdx * 3;
+  const canoeY = 68 + Math.sin(lineIdx * 0.8) * 1.5;
+
+  return (
+    <div
+      onClick={handleClick}
+      style={{ width:"100%", height:"100%", background:"#030810", display:"flex", flexDirection:"column", overflow:"hidden", cursor:"pointer", userSelect:"none" }}
+    >
+      {/* Header */}
+      <div style={{ height:"44px", borderBottom:"1px solid #0A1828", background:"rgba(3,8,16,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#1A3050", letterSpacing:"0.18em" }}>TONGA → SĀMOA · NIGHT {lineIdx + 1}</span>
+      </div>
+
+      {/* Ocean scene */}
+      <div style={{ flex:1, position:"relative", overflow:"hidden" }}>
+        <svg width="100%" height="100%" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice" style={{ position:"absolute", inset:0 }}>
+          <defs>
+            <radialGradient id="crossSky" cx="50%" cy="30%" r="70%">
+              <stop offset="0%" stopColor="#060E24"/>
+              <stop offset="100%" stopColor="#020810"/>
+            </radialGradient>
+            <linearGradient id="crossOcean" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#040C1C"/>
+              <stop offset="100%" stopColor="#020810"/>
+            </linearGradient>
+          </defs>
+
+          {/* Sky */}
+          <rect width="800" height="340" fill="url(#crossSky)"/>
+          {/* Ocean */}
+          <rect y="340" width="800" height="160" fill="url(#crossOcean)"/>
+          {/* Horizon */}
+          <line x1="0" y1="340" x2="800" y2="340" stroke="#0A2040" strokeWidth="1"/>
+
+          {/* Stars */}
+          {stars.map((s,i)=>(
+            <circle key={i} cx={`${s.x}%`} cy={`${s.y}%`} r={s.r} fill="#B8D0E8" opacity={s.op}/>
+          ))}
+
+          {/* Mānaiakalani — guide star, glowing */}
+          <circle cx="195" cy="82" r="16" fill="#C0E8FF" opacity="0.08"/>
+          <circle cx="195" cy="82" r="8" fill="#C0E8FF" opacity="0.9"/>
+          <text x="215" y="78" fill="#C0E8FF" fontSize="11" fontFamily="Cinzel,serif" opacity="0.8">Mānaiakalani</text>
+          {/* Dotted line from star toward horizon */}
+          <line x1="195" y1="90" x2="195" y2="338" stroke="#C0E8FF" strokeWidth="0.8" strokeDasharray="3,10" opacity="0.18"/>
+
+          {/* Ocean swells */}
+          {[0,1,2,3,4].map(i=>(
+            <path key={i}
+              d={`M${-50+i*220},${360+i*18} Q${70+i*220},${354+i*18} ${170+i*220},${360+i*18} Q${260+i*220},${366+i*18} ${350+i*220},${360+i*18}`}
+              fill="none" stroke="#0A2840" strokeWidth="1.2" opacity="0.6"/>
+          ))}
+
+          {/* Moon reflection on water */}
+          <ellipse cx="400" cy="360" rx="80" ry="8" fill="#0A1830" opacity="0.5"/>
+          <ellipse cx="400" cy="360" rx="20" ry="3" fill="#1A3050" opacity="0.4"/>
+
+          {/* Waka — centre frame, subtle movement */}
+          <g transform={`translate(${canoeX * 8 - 200}, ${canoeY * 5 - 290})`}>
+            {/* Hull */}
+            <path d="M320,345 Q400,332 480,345 L474,354 Q400,345 326,354Z"
+              fill="#0A1818" stroke="#1A3828" strokeWidth="1.5"/>
+            {/* Mast */}
+            <line x1="400" y1="345" x2="400" y2="302" stroke="#1A3020" strokeWidth="2"/>
+            {/* Sail */}
+            <path d="M400,305 Q422,316 418,340 L400,340Z"
+              fill="#1A2E20" stroke="#2A4030" strokeWidth="1" opacity="0.7"/>
+            {/* Outrigger */}
+            <line x1="330" y1="350" x2="295" y2="360" stroke="#1A3020" strokeWidth="1.5"/>
+            <path d="M280,359 Q295,355 310,359 L308,364 Q295,360 282,364Z"
+              fill="#0A1818" stroke="#1A3020" strokeWidth="1"/>
+          </g>
+
+          {/* "Land" cloud hint on last line */}
+          {isLast && (
+            <g>
+              <ellipse cx="600" cy="295" rx="55" ry="20" fill="#0E1E10" opacity="0.7"/>
+              <ellipse cx="580" cy="305" rx="40" ry="16" fill="#0C1C0E" opacity="0.65"/>
+              <ellipse cx="620" cy="300" rx="45" ry="18" fill="#0C1C0E" opacity="0.65"/>
+              <text x="600" y="328" textAnchor="middle" fill="#C8941A" fontSize="10" fontFamily="Cinzel,serif" opacity="0.7">stationary cloud</text>
+            </g>
+          )}
+
+          {/* Arrived fade */}
+          {arrived && (
+            <rect width="800" height="500" fill="#F0E8C0" opacity="0.15" style={{ transition:"opacity 0.9s" }}/>
+          )}
+        </svg>
+
+        {/* Palu speech — HTML overlay for wrapping */}
+        <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(2,6,14,0.9)", borderTop:"1px solid #0A1828", padding:"20px 32px 16px" }}>
+          <div style={{ fontFamily:"Georgia,serif", fontSize:"17px", color:"#A8C8A0", lineHeight:"1.8", fontStyle:"italic", marginBottom:"10px" }}>
+            "{lines[lineIdx]}"
+          </div>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+            <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#C8941A", letterSpacing:"0.08em" }}>— PALU HEMI</span>
+            <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+              <div style={{ display:"flex", gap:"6px" }}>
+                {lines.map((_,i) => (
+                  <div key={i} style={{ width:i===lineIdx?14:7, height:7, borderRadius:4, background:i<=lineIdx?"#C8941A":"#0A1828", transition:"all 0.25s" }}/>
+                ))}
+              </div>
+              <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#C8941A", opacity:0.55, letterSpacing:"0.06em" }}>
+                {isLast ? "click to arrive →" : "click to continue →"}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 
 function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
   // Phase flow: palu → (click each line) → palm → greeter → dialogue → exchange → story → farewell
@@ -554,52 +702,55 @@ function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
 
 
 function BridgeScreen({ moduleNum, name, unlocked, onReturn }) {
-  const b     = BRIDGE_CONTENT[moduleNum];
-  const m     = MODULE_CONTENT[moduleNum];
+  const b      = BRIDGE_CONTENT[moduleNum];
+  const m      = MODULE_CONTENT[moduleNum];
   const accent = m.accent;
-  const [lineIdx,    setLineIdx]    = useState(0);
-  const [showStory,  setShowStory]  = useState(false);
-  const [showBag,    setShowBag]    = useState(false);
-  const [showReturn, setShowReturn] = useState(false);
 
-  useEffect(() => {
-    const t1 = setTimeout(() => setLineIdx(1), 800);
-    const t2 = setTimeout(() => setLineIdx(2), 2400);
-    const t3 = setTimeout(() => setLineIdx(3), 4000);
-    const t4 = setTimeout(() => setShowStory(true), 5200);
-    const t5 = setTimeout(() => setShowBag(true),   6400);
-    const t6 = setTimeout(() => setShowReturn(true), 7200);
-    return () => [t1,t2,t3,t4,t5,t6].forEach(clearTimeout);
-  }, []);
+  // Click-through phases: palu → story → bag → return
+  // lineIdx tracks which Palu line is showing; phase advances on click
+  const [lineIdx,   setLineIdx]   = useState(0);
+  const [phase,     setPhase]     = useState("palu"); // palu | story | bag | done
 
-  const handleSkip = () => {
-    setLineIdx(3); setShowStory(true); setShowBag(true); setShowReturn(true);
+  const handleAdvance = () => {
+    if (phase === "palu") {
+      if (lineIdx < b.paluLines.length - 1) {
+        setLineIdx(i => i + 1);
+      } else {
+        setPhase("story");
+      }
+    } else if (phase === "story") {
+      setPhase("bag");
+    } else if (phase === "bag") {
+      setPhase("done");
+    }
   };
 
-  // Warm daytime arrival colours — this is a success screen, not ocean black
-  const arrivalBg = "#08100A";
-  const particles = Array.from({length:40},(_,i)=>({ x:((i*137+41)%97)/97*100, y:((i*79+23)%89)/89*100, r:i%7===0?1.2:0.6, op:0.08+(i%5)*0.06 }));
+  const accent2 = accent;
+  const particles = Array.from({length:40},(_,i)=>({ x:((i*137+41)%97)/97*100, y:((i*79+23)%89)/89*100, r:i%7===0?1.2:0.6, op:0.06+(i%5)*0.05 }));
+
+  const currentLine = b.paluLines[lineIdx]?.replace("{{name}}", name) ?? "";
+  const isLastLine  = lineIdx === b.paluLines.length - 1;
 
   return (
-    <div style={{ width:"100%", height:"100%", background:arrivalBg, display:"flex", flexDirection:"column", overflow:"hidden", position:"relative" }}>
+    <div style={{ width:"100%", height:"100%", background:"#08100A", display:"flex", flexDirection:"column", overflow:"hidden", position:"relative" }}>
 
       {/* Header */}
-      <div style={{ height:"44px", borderBottom:`1px solid ${accent}44`, background:"rgba(8,16,10,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0, zIndex:2 }}>
+      <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:"rgba(8,16,10,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0, zIndex:2 }}>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
-        <button onClick={handleSkip} style={{ background:"none", border:`1px solid ${accent}33`, borderRadius:"5px", padding:"5px 14px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:`${accent}99`, letterSpacing:"0.1em" }}>SKIP ↓</button>
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:`${accent}88`, letterSpacing:"0.18em" }}>ARRIVED · {(b.destination || "").toUpperCase()}</div>
       </div>
 
-      {/* Ambient light particles — warm shore tones */}
+      {/* Ambient particles */}
       <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none", zIndex:0 }}>
         {particles.map((s,i)=><circle key={i} cx={`${s.x}%`} cy={`${s.y}%`} r={s.r} fill={accent} opacity={s.op}/>)}
       </svg>
 
-      {/* Content */}
+      {/* Main content */}
       <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0, zIndex:1 }}>
 
-        {/* Left — Palu speaks */}
-        <div style={{ width:"340px", flexShrink:0, borderRight:`1px solid ${accent}18`, overflowY:"auto", display:"flex", flexDirection:"column" }}>
-          <div style={{ padding:"28px 24px", display:"flex", flexDirection:"column", gap:"20px", flex:1 }}>
+        {/* Left — always visible */}
+        <div style={{ width:"340px", flexShrink:0, borderRight:`1px solid ${accent}18`, display:"flex", flexDirection:"column" }}>
+          <div style={{ padding:"28px 24px", display:"flex", flexDirection:"column", gap:"22px", flex:1 }}>
 
             {/* Arrival tag */}
             <div style={{ display:"flex", alignItems:"center", gap:"12px" }}>
@@ -610,97 +761,92 @@ function BridgeScreen({ moduleNum, name, unlocked, onReturn }) {
             {/* Scene icon */}
             <div style={{ fontSize:"52px", lineHeight:1, filter:`drop-shadow(0 0 20px ${accent}44)` }}>{b.arrivalScene}</div>
 
-            {/* Palu lines — stagger in */}
-            <div style={{ display:"flex", flexDirection:"column", gap:"14px" }}>
-              {b.paluLines.map((line, i) => {
-                const text = line.replace("{{name}}", name);
-                return (
-                  <div key={i} style={{
-                    fontFamily:"Georgia,serif", fontSize:"14px", color:"#A8C8C0", lineHeight:"1.72", fontStyle:"italic",
-                    borderLeft:`2px solid ${accent}55`, paddingLeft:"14px",
-                    opacity: i < lineIdx ? 1 : 0,
-                    transform: i < lineIdx ? "translateY(0)" : "translateY(8px)",
-                    transition:"opacity 0.6s ease, transform 0.6s ease",
-                  }}>
-                    "{text}"
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Bridge line — teaser for next module */}
-            {showReturn && (
-              <div style={{
-                padding:"12px 14px", background:`${accent}0E`, border:`1px solid ${accent}33`, borderRadius:"6px",
-                fontFamily:"Cinzel,serif", fontSize:"11px", color:accent, lineHeight:"1.6", letterSpacing:"0.03em",
-                opacity:1, transition:"opacity 0.5s",
-              }}>
-                {b.bridgeLine}
+            {/* Current Palu line */}
+            {phase === "palu" && (
+              <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8C0", lineHeight:"1.8", fontStyle:"italic", borderLeft:`2px solid ${accent}55`, paddingLeft:"16px" }}>
+                "{currentLine}"
               </div>
             )}
 
-            {/* Return button */}
-            {showReturn && (
-              <button onClick={onReturn} style={{
-                padding:"13px", borderRadius:"6px", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700",
-                letterSpacing:"0.14em", cursor:"pointer", border:`1px solid ${accent}`,
-                background:`${accent}18`, color:accent,
-              }}>
-                RETURN TO THE OCEAN →
-              </button>
+            {/* Progress dots during palu phase */}
+            {phase === "palu" && b.paluLines.length > 1 && (
+              <div style={{ display:"flex", gap:"7px" }}>
+                {b.paluLines.map((_,i) => (
+                  <div key={i} style={{ width:i===lineIdx?14:7, height:7, borderRadius:4, background:i<=lineIdx?accent:"#1A3020", transition:"all 0.25s" }}/>
+                ))}
+              </div>
             )}
+
+            {/* Bridge line — shown in done phase */}
+            {phase === "done" && (
+              <div style={{ padding:"14px 16px", background:`${accent}0E`, border:`1px solid ${accent}33`, borderRadius:"6px", fontFamily:"Georgia,serif", fontSize:"14px", color:accent, lineHeight:"1.7", fontStyle:"italic" }}>
+                "{b.bridgeLine}"
+              </div>
+            )}
+
+            {/* Continue / Return button */}
+            <div style={{ marginTop:"auto" }}>
+              {phase !== "done" ? (
+                <button onClick={handleAdvance} style={{ width:"100%", padding:"13px", borderRadius:"6px", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.14em", cursor:"pointer", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>
+                  {phase === "palu" && !isLastLine ? "CONTINUE →" :
+                   phase === "palu" && isLastLine  ? "NAVIGATOR'S KNOWLEDGE →" :
+                   phase === "story"               ? "SEE WHAT'S IN YOUR BAG →" :
+                                                     "CONTINUE →"}
+                </button>
+              ) : (
+                <button onClick={onReturn} style={{ width:"100%", padding:"13px", borderRadius:"6px", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.14em", cursor:"pointer", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>
+                  RETURN TO THE OCEAN →
+                </button>
+              )}
+            </div>
 
           </div>
         </div>
 
-        {/* Right — story + bag reveal */}
-        <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column", gap:"0" }}>
+        {/* Right — story then bag, revealed by phase */}
+        <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column" }}>
 
-          {/* Cultural story card */}
-          <div style={{
-            padding:"28px 32px 24px",
-            opacity: showStory ? 1 : 0,
-            transform: showStory ? "translateY(0)" : "translateY(16px)",
-            transition:"opacity 0.7s ease, transform 0.7s ease",
-          }}>
-            <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"12px", opacity:0.7 }}>NAVIGATOR'S KNOWLEDGE</div>
-            <div style={{ fontFamily:"Cinzel,serif", fontSize:"16px", fontWeight:"700", color:"#E8D8A8", marginBottom:"16px", lineHeight:"1.3" }}>{b.storyTitle}</div>
-            <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", lineHeight:"1.8", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"18px", marginBottom:"12px" }}>
-              {b.story}
+          {/* Cultural story */}
+          {(phase === "story" || phase === "bag" || phase === "done") && (
+            <div style={{ padding:"28px 32px 24px" }}>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"12px", opacity:0.7 }}>NAVIGATOR'S KNOWLEDGE</div>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"16px", fontWeight:"700", color:"#E8D8A8", marginBottom:"16px", lineHeight:"1.3" }}>{b.storyTitle}</div>
+              <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", lineHeight:"1.85", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"18px", marginBottom:"12px" }}>
+                {b.story}
+              </div>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:`${accent}55`, letterSpacing:"0.1em" }}>— {b.storyCitation}</div>
             </div>
-            <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:`${accent}66`, letterSpacing:"0.1em" }}>— {b.storyCitation}</div>
-          </div>
+          )}
 
           {/* Divider */}
-          {showBag && <div style={{ height:"1px", background:`${accent}18`, margin:"0 32px" }}/>}
+          {(phase === "bag" || phase === "done") && (
+            <div style={{ height:"1px", background:`${accent}18`, margin:"0 32px" }}/>
+          )}
 
-          {/* Bag items revealed */}
-          <div style={{
-            padding:"24px 32px 32px",
-            opacity: showBag ? 1 : 0,
-            transform: showBag ? "translateY(0)" : "translateY(16px)",
-            transition:"opacity 0.7s ease, transform 0.7s ease",
-          }}>
-            <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"14px", opacity:0.7 }}>ADDED TO YOUR BAG</div>
-            <div style={{ display:"flex", flexDirection:"column", gap:"10px", marginBottom:"16px" }}>
-              {b.bagItems.map(itemId => {
-                const item = BAG_ITEMS.find(bi => bi.id === itemId);
-                if (!item) return null;
-                return (
-                  <div key={itemId} style={{ display:"flex", alignItems:"center", gap:"14px", padding:"11px 14px", background:`${item.color}10`, border:`1px solid ${item.color}33`, borderRadius:"8px" }}>
-                    <span style={{ fontSize:"22px", flexShrink:0 }}>{item.icon}</span>
-                    <div>
-                      <div style={{ fontFamily:"Cinzel,serif", fontSize:"13px", fontWeight:"700", color:"#D0C8A8" }}>{item.name}</div>
-                      <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:`${item.color}99`, letterSpacing:"0.06em", marginTop:"2px" }}>{item.hawaiian}</div>
+          {/* Bag items */}
+          {(phase === "bag" || phase === "done") && (
+            <div style={{ padding:"24px 32px 32px" }}>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"14px", opacity:0.7 }}>ADDED TO YOUR BAG</div>
+              <div style={{ display:"flex", flexDirection:"column", gap:"10px", marginBottom:"16px" }}>
+                {b.bagItems.map(itemId => {
+                  const item = BAG_ITEMS.find(bi => bi.id === itemId);
+                  if (!item) return null;
+                  return (
+                    <div key={itemId} style={{ display:"flex", alignItems:"center", gap:"14px", padding:"11px 14px", background:`${item.color}10`, border:`1px solid ${item.color}33`, borderRadius:"8px" }}>
+                      <span style={{ fontSize:"22px", flexShrink:0 }}>{item.icon}</span>
+                      <div>
+                        <div style={{ fontFamily:"Cinzel,serif", fontSize:"13px", fontWeight:"700", color:"#D0C8A8" }}>{item.name}</div>
+                        <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:`${item.color}99`, letterSpacing:"0.06em", marginTop:"2px" }}>{item.hawaiian}</div>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+              <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#5A8090", lineHeight:"1.7", fontStyle:"italic" }}>
+                {b.bagNote}
+              </div>
             </div>
-            <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#5A8090", lineHeight:"1.7", fontStyle:"italic" }}>
-              {b.bagNote}
-            </div>
-          </div>
+          )}
 
         </div>
       </div>
@@ -2652,55 +2798,110 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
           </svg>
         );
       }
-      // Screen 4: hand raised on deck, two scenes
+      // Screen 4: measuring the gap from zenith DOWN to the sun
+      // Key insight: not 73° from horizon up — 17° from directly overhead down
+      const ZENITH_Y  = 28;   // y=28 is "directly overhead" in this view
+      const HORIZON_Y = 248;  // y=248 is the horizon
+      const SUN_CX    = 300;  // sun x — slightly right of centre (south)
+      const PERSON_X  = 160;  // person standing on waka
+      const PERSON_Y  = HORIZON_Y - 2;
+      // 17° gap: 17/90 of the way from zenith to horizon
+      const GAP_PX    = (17 / 90) * (HORIZON_Y - ZENITH_Y); // ~41px
+      const SUN_Y     = ZENITH_Y + GAP_PX;    // sun sits 17° below zenith
+      const ZENITH_LINE_X = SUN_CX;           // zenith line drops straight from sun x
+
       return (
-        <svg viewBox="0 0 480 280" style={{ width:"100%", borderRadius:"8px", background:"#040C16" }}>
+        <svg viewBox="0 0 480 300" style={{ width:"100%", borderRadius:"8px", background:"#040C16" }}>
+          <defs>
+            <linearGradient id="s4sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#040C16"/>
+              <stop offset="100%" stopColor="#061420"/>
+            </linearGradient>
+          </defs>
+
           {/* Sky */}
-          <rect width="480" height="220" fill="#040C16"/>
-          <path d="M0,220 Q240,180 480,220" fill="#030C08"/>
-          <line x1="0" y1="220" x2="480" y2="220" stroke="#1A5030" strokeWidth="1.5"/>
-          {/* Ocean hints */}
-          {[0,1,2].map(i=>(
-            <path key={i} d={`M${i*180},225 Q${i*180+60},222 ${i*180+120},225`} fill="none" stroke="#0A3020" strokeWidth="0.8" opacity="0.6"/>
+          <rect width="480" height={HORIZON_Y} fill="url(#s4sky)"/>
+          {/* Ocean */}
+          <rect y={HORIZON_Y} width="480" height={300 - HORIZON_Y} fill="#030C08"/>
+          <line x1="0" y1={HORIZON_Y} x2="480" y2={HORIZON_Y} stroke="#1A5030" strokeWidth="1.5"/>
+
+          {/* ── ZENITH LINE — straight up from person ── */}
+          <line x1={ZENITH_LINE_X} y1={HORIZON_Y} x2={ZENITH_LINE_X} y2={ZENITH_Y - 4}
+            stroke="#C8941A" strokeWidth="1" strokeDasharray="3,7" opacity="0.35"/>
+          {/* Zenith label */}
+          <text x={ZENITH_LINE_X} y={ZENITH_Y - 8} textAnchor="middle"
+            fill="#C8941A" fontSize="9" fontFamily="Cinzel,serif" opacity="0.6">DIRECTLY OVERHEAD</text>
+
+          {/* ── SUN — sits 17° BELOW zenith ── */}
+          <circle cx={SUN_CX} cy={SUN_Y} r="18" fill="#FFD060" opacity="0.12"/>
+          <circle cx={SUN_CX} cy={SUN_Y} r="11" fill="#FFD060" opacity="0.95"/>
+          <text x={SUN_CX + 18} y={SUN_Y - 4} fill="#FFD060" fontSize="10" fontFamily="Cinzel,serif">noon sun</text>
+
+          {/* ── THE GAP — this is what Palu measures ── */}
+          {/* Bracket: from zenith point down to sun */}
+          <line x1={ZENITH_LINE_X + 28} y1={ZENITH_Y} x2={ZENITH_LINE_X + 28} y2={SUN_Y}
+            stroke="#D06030" strokeWidth="2.5" strokeLinecap="round" opacity="0.9"/>
+          {/* Top tick */}
+          <line x1={ZENITH_LINE_X + 22} y1={ZENITH_Y} x2={ZENITH_LINE_X + 34} y2={ZENITH_Y}
+            stroke="#D06030" strokeWidth="2" opacity="0.9"/>
+          {/* Bottom tick */}
+          <line x1={ZENITH_LINE_X + 22} y1={SUN_Y} x2={ZENITH_LINE_X + 34} y2={SUN_Y}
+            stroke="#D06030" strokeWidth="2" opacity="0.9"/>
+          {/* 17° label */}
+          <text x={ZENITH_LINE_X + 52} y={(ZENITH_Y + SUN_Y) / 2 + 5}
+            fill="#D06030" fontSize="16" fontFamily="Cinzel,serif" fontWeight="700">17°</text>
+          <text x={ZENITH_LINE_X + 52} y={(ZENITH_Y + SUN_Y) / 2 + 20}
+            fill="#D06030" fontSize="9" fontFamily="Cinzel,serif" opacity="0.8">Tahiti's gap</text>
+
+          {/* ── PERSON ON WAKA — arm extended straight up ── */}
+          {/* Waka hull */}
+          <path d={`M${PERSON_X - 55},${PERSON_Y} Q${PERSON_X},${PERSON_Y - 8} ${PERSON_X + 55},${PERSON_Y} L${PERSON_X + 50},${PERSON_Y + 8} Q${PERSON_X},${PERSON_Y + 2} ${PERSON_X - 50},${PERSON_Y + 8}Z`}
+            fill="#0A1808" stroke="#1A3820" strokeWidth="1.2"/>
+          {/* Body */}
+          <line x1={PERSON_X} y1={PERSON_Y - 2} x2={PERSON_X} y2={PERSON_Y - 40}
+            stroke="#7A5030" strokeWidth="7" strokeLinecap="round"/>
+          {/* Head */}
+          <circle cx={PERSON_X} cy={PERSON_Y - 50} r="10" fill="#8A6040"/>
+          {/* Arm raised straight up */}
+          <line x1={PERSON_X + 4} y1={PERSON_Y - 36} x2={PERSON_X + 8} y2={PERSON_Y - 80}
+            stroke="#7A5030" strokeWidth="5" strokeLinecap="round"/>
+          {/* Hand at top of arm — flat, palm facing right */}
+          {/* Palm block */}
+          <rect x={PERSON_X + 4} y={PERSON_Y - 94} width="18" height="16" rx="4" fill="#7A5030"/>
+          {/* Fingers */}
+          {[0,1,2,3].map(i => (
+            <rect key={i} x={PERSON_X + 5 + i * 4} y={PERSON_Y - 108} width="3.5" height="16" rx="2" fill="#7A5030"/>
           ))}
-          {/* Sun at noon */}
-          <circle cx="240" cy="58" r="16" fill="#FFD060" opacity="0.15"/>
-          <circle cx="240" cy="58" r="10" fill="#FFD060" opacity="0.95"/>
-          {/* Angle arc from horizon to sun */}
-          {(()=>{
-            const H = 220, cx = 240, sunY = 58;
-            const angle = Math.asin((H - sunY) / 180) * 180 / Math.PI;
+          {/* Thumb */}
+          <rect x={PERSON_X + 1} y={PERSON_Y - 90} width="5" height="10" rx="2.5" fill="#7A5030" opacity="0.9"/>
+
+          {/* ── HAND-WIDTH MARKERS on the gap bracket ── */}
+          {/* Show three hand-widths stacked = ~17° */}
+          {[0,1,2].map(i => {
+            const blockH = GAP_PX / 3 - 2;
+            const blockY = ZENITH_Y + i * (GAP_PX / 3) + 1;
             return (
-              <>
-                <line x1={cx} y1={H} x2={cx} y2={sunY+10} stroke="#FFD060" strokeWidth="1" strokeDasharray="3,4" opacity="0.5"/>
-                <line x1={cx} y1={H} x2={cx+60} y2={H} stroke="#FFD060" strokeWidth="1" opacity="0.35"/>
-                <path d={`M${cx+55},${H} A55,55 0 0,0 ${cx+10},${H-52}`} fill="none" stroke="#D06030" strokeWidth="1.5" opacity="0.8"/>
-                <text x={cx+70} y={H-30} fill="#D06030" fontSize="13" fontFamily="Cinzel,serif" fontWeight="700">73°</text>
-                <text x={cx+70} y={H-16} fill="#D06030" fontSize="9" fontFamily="Cinzel,serif" opacity="0.7">= Tahiti's height</text>
-              </>
+              <rect key={i} x={ZENITH_LINE_X - 22} y={blockY} width="16" height={blockH} rx="2"
+                fill="#D06030" opacity={0.12 + i * 0.06}
+                stroke="#D06030" strokeWidth="0.8" strokeOpacity="0.5"/>
             );
-          })()}
-          {/* Hand silhouette — raised to sun height */}
-          {(()=>{
-            const hx = 170, hy = 88;
-            return (
-              <g opacity="0.85">
-                {/* Palm */}
-                <rect x={hx-10} y={hy} width="22" height="28" rx="5" fill="#7A5030"/>
-                {/* Fingers */}
-                {[0,1,2,3].map(i=>(
-                  <rect key={i} x={hx-9+i*7} y={hy-20} width="6" height="24" rx="3" fill="#7A5030"/>
-                ))}
-                {/* Thumb */}
-                <rect x={hx-18} y={hy+5} width="10" height="18" rx="5" fill="#7A5030" style={{ transform:"rotate(-20deg)", transformOrigin:`${hx-13}px ${hy+14}px` }}/>
-                {/* Arm */}
-                <rect x={hx-4} y={hy+28} width="10" height="40" rx="3" fill="#6A4028"/>
-              </g>
-            );
-          })()}
-          {/* Annotations */}
-          <text x="120" y="212" textAnchor="middle" fill="#D06030" fontSize="10" fontFamily="Cinzel,serif">"three hand-widths"</text>
-          <text x="240" y="258" textAnchor="middle" fill="#7AACBE" fontSize="11" fontFamily="Cinzel,serif" fontStyle="italic">When the sun stands here — we are on Tahiti's path</text>
+          })}
+          <text x={ZENITH_LINE_X - 14} y={ZENITH_Y + GAP_PX / 2 + 4}
+            textAnchor="middle" fill="#D06030" fontSize="8" fontFamily="Cinzel,serif" opacity="0.7">3×</text>
+
+          {/* ── ANNOTATIONS ── */}
+          {/* Arrow from hand to gap */}
+          <path d={`M${PERSON_X + 30},${PERSON_Y - 90} Q${PERSON_X + 60},${(ZENITH_Y + SUN_Y)/2} ${ZENITH_LINE_X - 30},${(ZENITH_Y + SUN_Y)/2}`}
+            fill="none" stroke="#D06030" strokeWidth="1" strokeDasharray="3,4" opacity="0.4"/>
+
+          {/* Horizon label */}
+          <text x="24" y={HORIZON_Y - 6} fill="#1A5030" fontSize="8" fontFamily="Cinzel,serif">HORIZON</text>
+
+          {/* Caption */}
+          <text x="240" y="280" textAnchor="middle" fill="#7AACBE" fontSize="11"
+            fontFamily="Georgia,serif" fontStyle="italic">
+            Measure the gap from overhead — not the angle from the sea
+          </text>
         </svg>
       );
     };
@@ -2784,7 +2985,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
   const isNoonFound = actStep === 1 && noonFound;
 
   const handleSkyPointerDown = (e) => {
-    if (actStep !== 2 || confirmed) return;
+    if (actStep !== 2 || confirmed || niceWork) return;
     setIsDragging(true);
     const rect = e.currentTarget.getBoundingClientRect();
     const rawY = (e.clientY - rect.top) / rect.height;
@@ -2792,7 +2993,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
     setHandY(clamped);
   };
   const handleSkyPointerMove = (e) => {
-    if (!isDragging || actStep !== 2) return;
+    if (!isDragging || actStep !== 2 || confirmed || niceWork) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const rawY = (e.clientY - rect.top) / rect.height;
     const clamped = Math.max(0, Math.min(1, 1 - rawY));
@@ -2801,11 +3002,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
   const handleSkyPointerUp = () => {
     if (!isDragging) return;
     setIsDragging(false);
-    if (handY !== null && Math.abs(handY - TAHITI_HAND) <= TOLERANCE) {
-      setConfirmed(true);
-      onComplete();
-      setTimeout(() => setNiceWork("done"), 600);
-    }
+    // No auto-confirm on release — user must click the CONFIRM button
   };
 
   let paluTitle = "", paluBody = "";
@@ -2878,20 +3075,25 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
                 </div>
               )}
               {actStep === 2 && !confirmed && handY !== null && Math.abs(handY - TAHITI_HAND) <= TOLERANCE && (
-                <button onClick={() => { setConfirmed(true); onComplete(); setTimeout(() => setNiceWork("done"), 400); }}
-                  style={{ padding:"12px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`rgba(208,96,48,0.14)`, color:accent }}>
+                <button onClick={() => { setConfirmed(true); onComplete(); setTimeout(() => setNiceWork("done"), 200); }}
+                  style={{ padding:"14px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`rgba(208,96,48,0.18)`, color:accent }}>
                   CONFIRM — THIS IS TAHITI'S HEIGHT →
                 </button>
               )}
-              {/* Nice work overlay */}
+              {/* Nice work overlay — requires explicit click to continue */}
               {niceWork === "done" && (
-                <div style={{ position:"absolute", inset:0, background:"rgba(4,8,18,0.93)", borderRadius:"7px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"14px", padding:"20px" }}>
-                  <div style={{ fontSize:"28px" }}>☀</div>
-                  <div style={{ fontFamily:"Cinzel,serif", fontSize:"15px", fontWeight:"700", color:accent, textAlign:"center" }}>ʻAʻā's path found.</div>
-                  <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#7AACBE", fontStyle:"italic", textAlign:"center", lineHeight:"1.6" }}>
-                    Turn east. Tama-nui-te-rā has spoken — and he speaks for ʻAʻā. Tahiti will find us.
+                <div style={{ position:"absolute", inset:0, background:"rgba(4,8,18,0.96)", borderRadius:"7px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"18px", padding:"24px" }}>
+                  <div style={{ fontSize:"32px" }}>☀</div>
+                  <div style={{ fontFamily:"Cinzel,serif", fontSize:"16px", fontWeight:"700", color:accent, textAlign:"center" }}>
+                    ʻAʻā's path found.
                   </div>
-                  <button onClick={() => setPhase("bridge")} style={{ padding:"11px 24px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`rgba(208,96,48,0.14)`, color:accent }}>
+                  <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", fontStyle:"italic", textAlign:"center", lineHeight:"1.7" }}>
+                    When Tama-nui-te-rā stands at that height, ʻAʻā would pass directly overhead tonight. We are on Tahiti's latitude.
+                  </div>
+                  <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#A8C8A0", fontStyle:"italic", textAlign:"center", lineHeight:"1.7" }}>
+                    Turn east — and Tahiti will find us.
+                  </div>
+                  <button onClick={() => setPhase("bridge")} style={{ padding:"13px 28px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`rgba(208,96,48,0.14)`, color:accent, marginTop:"6px" }}>
                     CONTINUE →
                   </button>
                 </div>
@@ -5527,7 +5729,7 @@ function App() {
                       <div style={{ fontSize:"17px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>Mānaiakalani. You found it.</div>
                       <div style={{ fontSize:"14px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>See how it sits in the Nāleo-Koʻolau house — north-northeast. Keep it on your starboard bow all night and we hold our heading for Sāmoa.</div>
                       <div style={{ padding:"11px",background:"rgba(200,148,26,0.10)",border:"1px solid rgba(200,148,26,0.28)",borderRadius:"6px",textAlign:"center",fontFamily:"Cinzel,serif",fontSize:"10px",color:"#C8941A",letterSpacing:"0.09em" }}>✦ STAR COMPASS ADDED TO YOUR BAG ✦</div>
-                      <button onClick={() => setCompassPhase("bridge")} style={{ padding:"12px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A" }}>
+                      <button onClick={() => setCompassPhase("crossing")} style={{ padding:"12px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A" }}>
                         SAIL TO SĀMOA →
                       </button>
                     </>
@@ -5639,6 +5841,12 @@ function App() {
 
           </div>
         </div>
+      )}
+      {screen === "compass" && compassPhase === "crossing" && (
+        <SamoaCrossing
+          name={name}
+          onArrive={() => setCompassPhase("bridge")}
+        />
       )}
       {screen === "compass" && compassPhase === "bridge" && (
         <SamoaArrivalScreen
