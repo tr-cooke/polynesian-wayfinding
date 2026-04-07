@@ -48,14 +48,14 @@ function FeedbackButton() {
         display: "flex",
         alignItems: "center",
         gap: "7px",
-        padding: hovered ? "9px 16px" : "9px 12px",
+        padding: "9px 16px",
         borderRadius: "24px",
-        border: "1px solid rgba(200,148,26,0.35)",
-        background: hovered ? "rgba(200,148,26,0.18)" : "rgba(4,8,18,0.82)",
+        border: "1px solid rgba(200,148,26,0.45)",
+        background: hovered ? "rgba(200,148,26,0.22)" : "rgba(4,8,18,0.88)",
         backdropFilter: "blur(8px)",
         cursor: "pointer",
-        transition: "all 0.2s ease",
-        boxShadow: hovered ? "0 0 20px rgba(200,148,26,0.2)" : "0 2px 12px rgba(0,0,0,0.4)",
+        transition: "background 0.2s ease",
+        boxShadow: hovered ? "0 0 20px rgba(200,148,26,0.25)" : "0 2px 12px rgba(0,0,0,0.4)",
       }}
     >
       <span style={{ fontSize: "14px", lineHeight: 1 }}>✦</span>
@@ -66,10 +66,6 @@ function FeedbackButton() {
         letterSpacing: "0.1em",
         color: "#C8941A",
         whiteSpace: "nowrap",
-        maxWidth: hovered ? "80px" : "0px",
-        overflow: "hidden",
-        transition: "max-width 0.2s ease",
-        opacity: hovered ? 1 : 0,
       }}>
         FEEDBACK
       </span>
@@ -897,8 +893,8 @@ function CompassLearnDiagram({ step }) {
       {/* Background circle — always */}
       <circle cx={CX} cy={CY} r={R+8} fill="url(#clBg)"/>
 
-      {/* Step 0: Rising point insight — arc animation showing star path vs fixed horizon point */}
-      {step === 0 && (()=>{
+      {/* Step 0+1: Rising point insight — arc animation showing star path vs fixed horizon point */}
+      {step <= 1 && (()=>{
         const horizY = CY + 210;
         const arcSteps = 9;
         // Star arc positions (rise ESE, peak overhead, set WSW)
@@ -2093,239 +2089,569 @@ function SkyArc({ scenario, timeVal, step, selAlt, selLat, confirming, onTimeCha
 ══════════════════════════════════════════════════════════════ */
 
 function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }) {
-  const [phase,       setPhase]      = useState("intro");
-  const [step,        setStep]       = useState(1);
-  const [timeVal,     setTimeVal]    = useState(120);
-  const [selAlt,      setSelAlt]     = useState(null);
-  const [selLat,      setSelLat]     = useState(null);
-  const [confirming,  setConfirming] = useState(false);
-  const [niceWork,    setNiceWork]   = useState(null); // null | "step2" | "step3" | "done"
+  const [phase,      setPhase]     = useState("intro");
+  const [learnStep,  setLearnStep] = useState(0);
+  const [actStep,    setActStep]   = useState(1);
+  const [noonFound,  setNoonFound] = useState(false);
+  const [handY,      setHandY]     = useState(null);
+  const [isDragging, setIsDragging]= useState(false);
+  const [niceWork,   setNiceWork]  = useState(null);
+  const [confirmed,  setConfirmed] = useState(false);
+  const [sunTime,    setSunTime]   = useState(0); // for noon-finding animation
 
-  if (phase === "intro") return (
-    <ModuleIntroScreen moduleNum={2} name={name}
-      onBegin={() => setPhase("learn")}
-      onBack={onBack} />
-  );
-  if (phase === "learn") return (
-    <ModuleLearnScreen moduleNum={2} name={name}
-      onReady={() => setPhase("activity")}
-      onBack={onBack} onOpenBag={onOpenBag} unlocked={unlocked}>
-      <div style={{ width:"min(100%,520px)", display:"flex", flexDirection:"column", gap:"16px" }}>
-        <svg viewBox="0 0 520 240" style={{ width:"100%", borderRadius:"8px", background:"#050B1A" }}>
-          <defs>
-            <linearGradient id="learnSkyG" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#050B1A"/><stop offset="100%" stopColor="#0E3A54"/>
-            </linearGradient>
-          </defs>
-          <rect width="520" height="240" fill="url(#learnSkyG)"/>
-          <rect x="0" y="195" width="520" height="45" fill="#030810"/>
-          <line x1="0" y1="195" x2="520" y2="195" stroke="#1E6070" strokeWidth="1.5"/>
-          {/* Reference arcs at different latitudes */}
-          {[{alt:70,col:"#D06030",lbl:"20°N (equinox)"},{alt:46.5,col:"#8A4820",lbl:"20°N (winter)"}].map((s,i)=>(
-            <g key={i}>
-              <path d={`M40,195 Q260,${195-(s.alt/90)*170} 480,195`} fill="none" stroke={s.col} strokeWidth={i===0?2:1.2} strokeDasharray={i===0?"none":"5,4"} opacity={i===0?0.8:0.5}/>
-              <text x="490" y={195-(s.alt/90)*85} fill={s.col} fontSize="9" fontFamily="Cinzel,serif" opacity="0.8">{s.lbl}</text>
-            </g>
-          ))}
-          {/* Sun at noon */}
-          <circle cx="260" cy={195-70/90*170} r="10" fill="#FFD060" opacity="0.9"/>
-          <text x="260" y={195-70/90*170-18} textAnchor="middle" fill="#FFD060" fontSize="10" fontFamily="Cinzel,serif">noon sun</text>
-          {/* Angle arc */}
-          <path d={`M260,195 L260,${195-50} M260,195 L${260+50*Math.cos(-Math.PI/2+70*Math.PI/180)},${195-50*Math.sin(70*Math.PI/180)}`} stroke="#FFD060" strokeWidth="1" opacity="0.4"/>
-          <text x="285" y="168" fill="#FFD060" fontSize="13" fontFamily="Cinzel,serif" fontWeight="700">70°</text>
-          {/* Formula */}
-          <text x="260" y="224" textAnchor="middle" fill="#D06030" fontSize="11" fontFamily="Cinzel,serif" letterSpacing="0.06em">latitude = 90° − 70° = 20°N</text>
-          {/* Cardinal labels */}
-          <text x="40" y="210" textAnchor="middle" fill="#1A5060" fontSize="9" fontFamily="Cinzel,serif">EAST</text>
-          <text x="260" y="210" textAnchor="middle" fill="#1A5060" fontSize="9" fontFamily="Cinzel,serif">SOUTH</text>
-          <text x="480" y="210" textAnchor="middle" fill="#1A5060" fontSize="9" fontFamily="Cinzel,serif">WEST</text>
-          <text x="260" y="24" textAnchor="middle" fill="#1A2840" fontSize="9" fontFamily="Cinzel,serif">ZENITH 90°</text>
+  // Sun animation for step 1 — must be at top level before any early returns
+  useEffect(() => {
+    if (phase !== "activity" || actStep !== 1 || noonFound) return;
+    const id = setInterval(() => setSunTime(t => (t + 0.4) % 100), 40);
+    return () => clearInterval(id);
+  }, [phase, actStep, noonFound]);
+
+  const accent = "#D06030";
+  const TAHITI_HAND = 0.81; // target hand height (73° out of 90° = ~0.81)
+  const TOLERANCE   = 0.05;
+
+  // ── INTRO ──────────────────────────────────────────────────────
+  if (phase === "intro") {
+    const content = MODULE_CONTENT[2];
+    const mod = { num:"02", title:"The Sun's Arc", sub:"Sāmoa → Tahiti · ʻAʻā · Tama-nui-te-rā" };
+    const stars = Array.from({length:60},(_,i)=>({ x:((i*137+41)%97)/97*100, y:((i*79+23)%89)/89*100, r:i%7===0?1.3:i%3===0?0.8:0.4, op:0.1+(i%5)*0.07 }));
+    return (
+      <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", flexDirection:"column", overflow:"hidden", position:"relative" }}>
+        <div style={{ height:"44px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0, zIndex:2 }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+          <button onClick={onBack} style={{ background:"none", border:`1px solid ${accent}33`, borderRadius:"5px", padding:"5px 14px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.1em", opacity:0.7 }}>← MAP</button>
+        </div>
+        <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none", zIndex:0 }}>
+          {stars.map((s,i)=><circle key={i} cx={`${s.x}%`} cy={`${s.y}%`} r={s.r} fill={accent} opacity={s.op}/>)}
         </svg>
-        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A4060", textAlign:"center", letterSpacing:"0.1em" }}>
-          SUN AT LOCAL NOON · ALTITUDE = 70° · LATITUDE = 90° − 70° = 20°N
+        <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", zIndex:1, padding:"32px 40px" }}>
+          <div style={{ maxWidth:"700px", width:"100%", display:"flex", gap:"48px", alignItems:"center" }}>
+            {/* Palu portrait */}
+            <div style={{ flexShrink:0, display:"flex", flexDirection:"column", alignItems:"center", gap:"10px" }}>
+              <div style={{ width:"140px", height:"160px", borderRadius:"10px", overflow:"hidden", border:`1px solid ${accent}33` }}>
+                <PaluPortrait />
+              </div>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", color:accent }}>Palu Hemi</div>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"8px", color:"#3A4050", letterSpacing:"0.06em" }}>Master Navigator</div>
+            </div>
+            {/* Quote + CTA */}
+            <div style={{ flex:1, display:"flex", flexDirection:"column", gap:"28px" }}>
+              <div style={{ display:"flex", alignItems:"center", gap:"16px" }}>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:accent, letterSpacing:"0.2em", opacity:0.7 }}>MODULE {mod.num}</div>
+                <div style={{ flex:1, height:"1px", background:`linear-gradient(to right, ${accent}44, transparent)` }}/>
+              </div>
+              <div>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"36px", fontWeight:"900", color:"#E8D8A8", lineHeight:"1.1", marginBottom:"8px" }}>{mod.title}</div>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"12px", color:accent, letterSpacing:"0.14em", opacity:0.7 }}>{mod.sub}</div>
+              </div>
+              <div style={{ width:"60px", height:"1px", background:`linear-gradient(to right, ${accent}, transparent)` }}/>
+              <div style={{ borderLeft:`2px solid ${accent}55`, paddingLeft:"22px" }}>
+                <div style={{ fontFamily:"Georgia,serif", fontSize:"17px", color:"#B0C8C0", lineHeight:"1.75", fontStyle:"italic" }}>
+                  "{content.intro.quote}"
+                </div>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.1em", marginTop:"12px", opacity:0.65 }}>
+                  — {content.intro.attribution}
+                </div>
+              </div>
+              <div style={{ display:"flex", gap:"12px", alignItems:"center" }}>
+                <button onClick={() => setPhase("learn")} style={{ padding:"14px 36px", background:`linear-gradient(135deg, ${accent}22, ${accent}11)`, border:`1px solid ${accent}`, borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:accent, letterSpacing:"0.14em" }}>
+                  BEGIN LEARNING →
+                </button>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A3A50", letterSpacing:"0.1em" }}>E {name.toUpperCase()} · HAUMĀNA</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </ModuleLearnScreen>
-  );
+    );
+  }
 
-  const sc = SUN_SCENARIOS[0];
+  // ── LEARN — 4 click-through screens ────────────────────────────
+  if (phase === "learn") {
+    const concepts = MODULE_CONTENT[2].learn.concepts;
+    const concept  = concepts[learnStep];
+    const isLast   = learnStep === concepts.length - 1;
+    const dep      = MODULE_CONTENT[2].departure;
 
-  const handleTimeChange = val => {
-    if (step !== 1 || confirming) return;
-    setTimeVal(val);
-    if (Math.abs(val - 360) <= 10) {
-      setConfirming(true);
-      setTimeout(() => { setConfirming(false); setNiceWork("step2"); }, 600);
-    }
-  };
+    // SVG diagrams per screen
+    const renderDiagram = () => {
+      if (learnStep === 0) {
+        // Screen 1: cross-section of earth showing zenith lines → ʻAʻā overhead at Tahiti
+        return (
+          <svg viewBox="0 0 480 300" style={{ width:"100%", borderRadius:"8px", background:"#050B18" }}>
+            {/* Sky */}
+            <rect width="480" height="220" fill="#050B18"/>
+            {/* Earth surface */}
+            <rect x="0" y="220" width="480" height="80" fill="#0A1808"/>
+            <line x1="0" y1="220" x2="480" y2="220" stroke="#1A4020" strokeWidth="1.5"/>
+            {/* Labels on ground */}
+            <text x="80" y="240" textAnchor="middle" fill="#2A5030" fontSize="9" fontFamily="Cinzel,serif">EQUATOR</text>
+            <text x="240" y="240" textAnchor="middle" fill="#2A5030" fontSize="9" fontFamily="Cinzel,serif">SĀMOA · 14°S</text>
+            <text x="390" y="240" textAnchor="middle" fill="#D06030" fontSize="9" fontFamily="Cinzel,serif" fontWeight="700">TAHITI · 17°S</text>
+            {/* Zenith lines shooting up */}
+            <line x1="80" y1="220" x2="80" y2="40" stroke="#1A5030" strokeWidth="1" strokeDasharray="4,6" opacity="0.5"/>
+            <line x1="240" y1="220" x2="240" y2="40" stroke="#1A5030" strokeWidth="1" strokeDasharray="4,6" opacity="0.5"/>
+            <line x1="390" y1="220" x2="390" y2="40" stroke="#D06030" strokeWidth="2" strokeDasharray="4,4" opacity="0.8"/>
+            {/* ʻAʻā star — sits at end of Tahiti's zenith line */}
+            <circle cx="390" cy="38" r="10" fill="#C0E8FF" opacity="0.95"/>
+            <circle cx="390" cy="38" r="18" fill="none" stroke="#C0E8FF" strokeWidth="1" opacity="0.3"/>
+            <text x="415" y="32" fill="#C0E8FF" fontSize="12" fontFamily="Cinzel,serif" fontWeight="700">ʻAʻā</text>
+            <text x="415" y="46" fill="#C0E8FF" fontSize="9" fontFamily="Cinzel,serif" opacity="0.7">(Sirius)</text>
+            {/* Arrow annotation */}
+            <text x="390" y="80" textAnchor="middle" fill="#D06030" fontSize="10" fontFamily="Cinzel,serif" opacity="0.8">↕ directly</text>
+            <text x="390" y="93" textAnchor="middle" fill="#D06030" fontSize="10" fontFamily="Cinzel,serif" opacity="0.8">overhead</text>
+            {/* Another dim star above equator */}
+            <circle cx="80" cy="55" r="6" fill="#8AB0D0" opacity="0.5"/>
+            <text x="105" y="50" fill="#8AB0D0" fontSize="9" fontFamily="Cinzel,serif" opacity="0.5">Atutahi</text>
+            <text x="105" y="62" fill="#8AB0D0" fontSize="8" fontFamily="Cinzel,serif" opacity="0.4">(equator)</text>
+          </svg>
+        );
+      }
+      if (learnStep === 1) {
+        // Screen 2: night sky view — ʻAʻā passing overhead as you sail south
+        return (
+          <svg viewBox="0 0 480 280" style={{ width:"100%", borderRadius:"8px", background:"#030810" }}>
+            <rect width="480" height="280" fill="#030810"/>
+            {/* Stars scattered */}
+            {[[40,40,3],[120,25,2],[200,55,2.5],[330,20,3.5],[420,45,2],[160,90,2],[380,80,2.5]].map(([x,y,r],i)=>(
+              <circle key={i} cx={x} cy={y} r={r} fill="#7AACCC" opacity="0.5"/>
+            ))}
+            {/* Overhead zenith marker */}
+            <line x1="240" y1="0" x2="240" y2="260" stroke="#C8941A" strokeWidth="1" strokeDasharray="3,7" opacity="0.25"/>
+            <text x="240" y="14" textAnchor="middle" fill="#C8941A" fontSize="9" fontFamily="Cinzel,serif" opacity="0.5">DIRECTLY OVERHEAD</text>
+            {/* ʻAʻā - glowing bright */}
+            <circle cx="240" cy="60" r="14" fill="#C0E8FF" opacity="0.15"/>
+            <circle cx="240" cy="60" r="9" fill="#C0E8FF" opacity="0.95"/>
+            <text x="265" y="54" fill="#C0E8FF" fontSize="13" fontFamily="Cinzel,serif" fontWeight="700">ʻAʻā</text>
+            <text x="265" y="69" fill="#C0E8FF" fontSize="10" fontFamily="Cinzel,serif" opacity="0.7">directly above</text>
+            {/* Horizon */}
+            <rect x="0" y="220" width="480" height="60" fill="#030C08"/>
+            <line x1="0" y1="220" x2="480" y2="220" stroke="#1A5030" strokeWidth="1.5"/>
+            <text x="240" y="245" textAnchor="middle" fill="#2A5030" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.1em">HORIZON</text>
+            {/* Waka silhouette */}
+            <path d="M160,220 Q240,212 320,220 L315,226 Q240,222 165,226 Z" fill="#0A1808" stroke="#1A4020" strokeWidth="1"/>
+            <line x1="240" y1="220" x2="240" y2="196" stroke="#1A3010" strokeWidth="1.5"/>
+            {/* Label */}
+            <text x="240" y="272" textAnchor="middle" fill="#D06030" fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">ʻAʻā overhead = you are on Tahiti's path</text>
+          </svg>
+        );
+      }
+      if (learnStep === 2) {
+        // Screen 3: cloudy night, sun during the day — the "same dome" connection
+        return (
+          <svg viewBox="0 0 480 280" style={{ width:"100%", borderRadius:"8px", background:"#050A14" }}>
+            {/* Left: night/cloudy */}
+            <rect width="235" height="280" fill="#050A10"/>
+            <rect x="0" y="220" width="235" height="60" fill="#030810"/>
+            <line x1="0" y1="220" x2="235" y2="220" stroke="#1A3040" strokeWidth="1"/>
+            {/* Cloud covering ʻAʻā */}
+            <ellipse cx="120" cy="60" rx="75" ry="28" fill="#1A2030" opacity="0.9"/>
+            <ellipse cx="90" cy="70" rx="55" ry="22" fill="#182030" opacity="0.85"/>
+            <ellipse cx="150" cy="68" rx="60" ry="24" fill="#182030" opacity="0.85"/>
+            <text x="118" y="67" textAnchor="middle" fill="#3A5060" fontSize="10" fontFamily="Cinzel,serif">cloud</text>
+            {/* Hidden star hint */}
+            <circle cx="118" cy="38" r="7" fill="#C0E8FF" opacity="0.15"/>
+            <text x="118" y="36" textAnchor="middle" fill="#3A5060" fontSize="8" fontFamily="Cinzel,serif">ʻAʻā?</text>
+            <text x="118" y="160" textAnchor="middle" fill="#3A5060" fontSize="10" fontFamily="Cinzel,serif">Stars hidden</text>
+            <text x="118" y="175" textAnchor="middle" fill="#3A5060" fontSize="9" fontFamily="Cinzel,serif">two nights</text>
+            {/* Divider */}
+            <line x1="237" y1="0" x2="237" y2="280" stroke="#1A3040" strokeWidth="1"/>
+            {/* Right: day, sun visible */}
+            <rect x="238" y="0" width="242" height="280" fill="#08141E"/>
+            <rect x="238" y="220" width="242" height="60" fill="#030C08"/>
+            <line x1="238" y1="220" x2="480" y2="220" stroke="#1A4020" strokeWidth="1"/>
+            {/* Sun at noon */}
+            <circle cx="359" cy="65" r="18" fill="#FFD060" opacity="0.15"/>
+            <circle cx="359" cy="65" r="11" fill="#FFD060" opacity="0.95"/>
+            {/* Dotted arc path */}
+            <path d="M248,220 Q359,40 470,220" fill="none" stroke="#D06030" strokeWidth="1.2" strokeDasharray="6,5" opacity="0.5"/>
+            <text x="359" y="46" textAnchor="middle" fill="#FFD060" fontSize="10" fontFamily="Cinzel,serif">Tama-nui-te-rā</text>
+            {/* Connection arrow */}
+            <text x="359" y="150" textAnchor="middle" fill="#D06030" fontSize="10" fontFamily="Cinzel,serif">Sun still crosses</text>
+            <text x="359" y="165" textAnchor="middle" fill="#D06030" fontSize="10" fontFamily="Cinzel,serif">the same dome</text>
+            {/* Labels */}
+            <text x="118" y="200" textAnchor="middle" fill="#2A4050" fontSize="9" fontFamily="Cinzel,serif">NIGHT</text>
+            <text x="359" y="200" textAnchor="middle" fill="#D06030" fontSize="9" fontFamily="Cinzel,serif">DAY</text>
+          </svg>
+        );
+      }
+      // Screen 4: hand raised on deck, two scenes
+      return (
+        <svg viewBox="0 0 480 280" style={{ width:"100%", borderRadius:"8px", background:"#040C16" }}>
+          {/* Sky */}
+          <rect width="480" height="220" fill="#040C16"/>
+          <path d="M0,220 Q240,180 480,220" fill="#030C08"/>
+          <line x1="0" y1="220" x2="480" y2="220" stroke="#1A5030" strokeWidth="1.5"/>
+          {/* Ocean hints */}
+          {[0,1,2].map(i=>(
+            <path key={i} d={`M${i*180},225 Q${i*180+60},222 ${i*180+120},225`} fill="none" stroke="#0A3020" strokeWidth="0.8" opacity="0.6"/>
+          ))}
+          {/* Sun at noon */}
+          <circle cx="240" cy="58" r="16" fill="#FFD060" opacity="0.15"/>
+          <circle cx="240" cy="58" r="10" fill="#FFD060" opacity="0.95"/>
+          {/* Angle arc from horizon to sun */}
+          {(()=>{
+            const H = 220, cx = 240, sunY = 58;
+            const angle = Math.asin((H - sunY) / 180) * 180 / Math.PI;
+            return (
+              <>
+                <line x1={cx} y1={H} x2={cx} y2={sunY+10} stroke="#FFD060" strokeWidth="1" strokeDasharray="3,4" opacity="0.5"/>
+                <line x1={cx} y1={H} x2={cx+60} y2={H} stroke="#FFD060" strokeWidth="1" opacity="0.35"/>
+                <path d={`M${cx+55},${H} A55,55 0 0,0 ${cx+10},${H-52}`} fill="none" stroke="#D06030" strokeWidth="1.5" opacity="0.8"/>
+                <text x={cx+70} y={H-30} fill="#D06030" fontSize="13" fontFamily="Cinzel,serif" fontWeight="700">73°</text>
+                <text x={cx+70} y={H-16} fill="#D06030" fontSize="9" fontFamily="Cinzel,serif" opacity="0.7">= Tahiti's height</text>
+              </>
+            );
+          })()}
+          {/* Hand silhouette — raised to sun height */}
+          {(()=>{
+            const hx = 170, hy = 88;
+            return (
+              <g opacity="0.85">
+                {/* Palm */}
+                <rect x={hx-10} y={hy} width="22" height="28" rx="5" fill="#7A5030"/>
+                {/* Fingers */}
+                {[0,1,2,3].map(i=>(
+                  <rect key={i} x={hx-9+i*7} y={hy-20} width="6" height="24" rx="3" fill="#7A5030"/>
+                ))}
+                {/* Thumb */}
+                <rect x={hx-18} y={hy+5} width="10" height="18" rx="5" fill="#7A5030" style={{ transform:"rotate(-20deg)", transformOrigin:`${hx-13}px ${hy+14}px` }}/>
+                {/* Arm */}
+                <rect x={hx-4} y={hy+28} width="10" height="40" rx="3" fill="#6A4028"/>
+              </g>
+            );
+          })()}
+          {/* Annotations */}
+          <text x="120" y="212" textAnchor="middle" fill="#D06030" fontSize="10" fontFamily="Cinzel,serif">"three hand-widths"</text>
+          <text x="240" y="258" textAnchor="middle" fill="#7AACBE" fontSize="11" fontFamily="Cinzel,serif" fontStyle="italic">When the sun stands here — we are on Tahiti's path</text>
+        </svg>
+      );
+    };
 
-  const handleAltSelect = alt => {
-    if (confirming || niceWork) return;
-    setSelAlt(alt);
-    if (alt === sc.noonAlt) {
-      setConfirming(true);
-      setTimeout(() => { setConfirming(false); setNiceWork("step3"); }, 600);
-    }
-  };
+    return (
+      <div style={{ width:"100%", height:"100%", background:"#060E08", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+        {/* Header */}
+        <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:"rgba(6,14,8,0.96)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em", opacity:0.8 }}>HAUMĀNA · {name.toUpperCase()}</span>
+        </div>
+        {/* Location bar */}
+        <div style={{ padding:"7px 22px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,10,6,0.7)", flexShrink:0, display:"flex", alignItems:"center", gap:"14px" }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em", opacity:0.9 }}>ON SHORE · {MODULE_CONTENT[2].departure.location.toUpperCase()}</span>
+          <span style={{ fontFamily:"Georgia,serif", fontSize:"9px", color:`${accent}66`, fontStyle:"italic" }}>{MODULE_CONTENT[2].departure.note}</span>
+        </div>
+        {/* Body */}
+        <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
+          {/* Left panel */}
+          <div style={{ width:"320px", flexShrink:0, borderRight:`1px solid ${accent}18`, overflowY:"auto", background:"rgba(4,10,6,0.85)", display:"flex", flexDirection:"column" }}>
+            <div style={{ padding:"22px 20px", display:"flex", flexDirection:"column", gap:"16px", flex:1 }}>
+              {/* Nav */}
+              <div style={{ display:"flex", gap:"8px" }}>
+                <button onClick={onBack} style={{ flex:1, background:"none", border:`1px solid ${accent}22`, borderRadius:"4px", color:"#2A3A28", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
+                <button onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":accent+"22"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#2A3A28", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>
+                  {unlocked.length>0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
+                </button>
+              </div>
+              {/* Step dots */}
+              <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
+                {concepts.map((_,i)=>(
+                  <div key={i} onClick={() => setLearnStep(i)} style={{ width:i===learnStep?"18px":"7px", height:"7px", borderRadius:"4px", background:i===learnStep?accent:i<learnStep?"#2A8860":"#1A2820", cursor:"pointer", transition:"all 0.25s" }}/>
+                ))}
+                <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A3A28", marginLeft:"4px" }}>{learnStep+1}/{concepts.length}</span>
+              </div>
+              {/* Heading */}
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"19px", fontWeight:"700", color:accent, lineHeight:"1.3" }}>
+                {concept.heading}
+              </div>
+              {/* Body */}
+              <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#7AACBE", lineHeight:"1.82", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"16px" }}>
+                {concept.body}
+              </div>
+              {/* Prev / Next / Set Sail */}
+              <div style={{ display:"flex", gap:"8px", marginTop:"auto" }}>
+                {learnStep > 0 && (
+                  <button onClick={() => setLearnStep(i=>i-1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}33`, background:"none", color:`${accent}88` }}>← PREV</button>
+                )}
+                {!isLast ? (
+                  <button onClick={() => setLearnStep(i=>i+1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>NEXT →</button>
+                ) : (
+                  <button onClick={() => setPhase("activity")} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`linear-gradient(135deg,${accent}22,${accent}0A)`, color:accent }}>SET SAIL →</button>
+                )}
+              </div>
+            </div>
+          </div>
+          {/* Right — diagram */}
+          <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px", background:"rgba(4,10,5,0.4)" }}>
+            {renderDiagram()}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const handleClearAlt = () => { setSelAlt(null); };
-
-  const handleLatSelect = lat => {
-    if (confirming || niceWork) return;
-    setSelLat(lat);
-    if (lat === sc.lat) {
-      setConfirming(true);
-      setTimeout(() => { setConfirming(false); setNiceWork("done"); onComplete(); }, 600);
-    }
-  };
-
-  const handleClearLat = () => { setSelLat(null); };
-
-  const handleNiceWorkContinue = () => {
-    if (niceWork === "step2") { setStep(2); setNiceWork(null); }
-    else if (niceWork === "step3") { setStep(3); setNiceWork(null); }
-    else if (niceWork === "done") { setPhase("bridge"); }
-  };
-
+  // ── ACTIVITY — hand-dragging mechanic ──────────────────────────
   if (phase === "bridge") return (
     <BridgeScreen moduleNum={2} name={name} unlocked={unlocked} onReturn={onBridge || onBack} />
   );
-  let title = "", body = "";
-  if (step === 1) {
-    title = `E ${name}.`;
-    body = "You are five days out from Sāmoa, heading southeast toward Tahiti. Cloud has hidden the stars for two nights. But Tama-nui-te-rā — the great sun — still crosses the sky. Drag the slider to find when he stands at his highest point.";
-  } else if (step === 2) {
-    if (selAlt && selAlt !== sc.noonAlt) {
-      title = "Look more carefully.";
-      body = `${selAlt}° would place the sun ${selAlt < sc.noonAlt ? "lower" : "higher"} than it stands. Count the 15° reference lines from the horizon, then choose again.`;
-    } else {
-      title = "There. Local noon.";
-      body = "The sun stands at his peak. Now read the angle between him and the horizon. Each dashed line marks 15°.";
-    }
-  } else if (step === 3) {
-    if (selLat && selLat !== sc.lat) {
-      title = "Check the arithmetic.";
-      body = `latitude = 90° − altitude = 90° − ${sc.noonAlt}° = ${90 - sc.noonAlt}°. Which answer is ${90 - sc.noonAlt}°N?`;
-    } else {
-      title = `${sc.noonAlt}°. That is it.`;
-      body = `The sun stands ${sc.noonAlt}° above the horizon at noon. At the equinox, no seasonal correction is needed. Latitude = 90° − altitude. Where are you standing on the ocean?`;
-    }
-  } else {
-    title = `${sc.lat}° north.`;
-    body = "You know exactly where you stand. No sextant, no instrument — only the angle of the sun and the knowledge of the season. Tama-nui-te-rā has spoken.";
-  }
 
-  const stepLabels = ["1 · Noon", "2 · Altitude", "3 · Latitude", "✦ Done"];
+  // Sky constants
+  const SKY_H  = 320;
+  const HORIZ  = SKY_H - 40;  // horizon y
+  const ZENITH = 24;            // zenith y
+  const SUN_X  = 260;
+
+  // handY 0=horizon, 1=zenith  →  sun Y position
+  const handYPx  = handY !== null ? HORIZ - handY * (HORIZ - ZENITH) : null;
+  const targetY  = HORIZ - TAHITI_HAND * (HORIZ - ZENITH);
+
+  const isNoonFound = actStep === 1 && noonFound;
+
+  const handleSkyPointerDown = (e) => {
+    if (actStep !== 2 || confirmed) return;
+    setIsDragging(true);
+    const rect = e.currentTarget.getBoundingClientRect();
+    const rawY = (e.clientY - rect.top) / rect.height;
+    const clamped = Math.max(0, Math.min(1, 1 - rawY));
+    setHandY(clamped);
+  };
+  const handleSkyPointerMove = (e) => {
+    if (!isDragging || actStep !== 2) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const rawY = (e.clientY - rect.top) / rect.height;
+    const clamped = Math.max(0, Math.min(1, 1 - rawY));
+    setHandY(clamped);
+  };
+  const handleSkyPointerUp = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    if (handY !== null && Math.abs(handY - TAHITI_HAND) <= TOLERANCE) {
+      setConfirmed(true);
+      onComplete();
+      setTimeout(() => setNiceWork("done"), 600);
+    }
+  };
+
+  let paluTitle = "", paluBody = "";
+  if (actStep === 1) {
+    paluTitle = `E ${name}. Watch the sky.`;
+    paluBody = "We are five days out from Sāmoa. The stars have been hidden for two nights. But Tama-nui-te-rā still crosses the sky. We need to find local noon — the moment he stands at his highest point. Click the sky when the sun reaches its peak.";
+  } else if (actStep === 2) {
+    if (confirmed) {
+      paluTitle = "That is ʻAʻā's path.";
+      paluBody = "When Tama-nui-te-rā stands at that height, ʻAʻā would pass directly overhead tonight. We are on Tahiti's latitude. Turn east — she will find us.";
+    } else if (handY !== null && Math.abs(handY - TAHITI_HAND) > TOLERANCE) {
+      paluTitle = handY > TAHITI_HAND ? "A little lower." : "A little higher.";
+      paluBody = handY > TAHITI_HAND
+        ? "That height belongs to an island north of Tahiti. We have not sailed far enough south yet. Lower your hand a fraction."
+        : "That height belongs to an island south of Tahiti. We have sailed too far. Raise your hand slightly.";
+    } else {
+      paluTitle = "Raise your hand to the sun.";
+      paluBody = "I have memorised the height of Tama-nui-te-rā that belongs to Tahiti's path. Drag your hand up from the horizon until it matches where I would hold it. When the sun sits there — we are on ʻAʻā's path.";
+    }
+  }
 
   return (
     <div style={{ width:"100%", height:"100%", background:"#04070E", display:"flex", flexDirection:"column", overflow:"hidden" }}>
-
       {/* Header */}
       <div style={{ height:"44px", borderBottom:"1px solid #0E1826", background:"rgba(4,8,18,0.95)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#3A6070", letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
+        <div style={{ display:"flex", gap:"10px", alignItems:"center" }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#3A6070", letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
+          <button onClick={onOpenBag} style={{ background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":"#1A2840"}`, borderRadius:"5px", padding:"5px 12px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", color:unlocked.length>0?"#C8941A":"#2A4050", letterSpacing:"0.08em" }}>✦ BAG ({unlocked.length})</button>
+        </div>
       </div>
-
       {/* Module bar */}
       <div style={{ padding:"7px 22px", borderBottom:"1px solid #0E1826", background:"rgba(4,8,18,0.6)", flexShrink:0 }}>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#D06030", letterSpacing:"0.16em" }}>MODULE 2 · TAMA-NUI-TE-RĀ</span>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#2A4858", marginLeft:"14px", letterSpacing:"0.1em" }}>THE SUN'S ARC · LATITUDE BY DAY</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em" }}>MODULE 2 · TAMA-NUI-TE-RĀ</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#2A4858", marginLeft:"14px", letterSpacing:"0.1em" }}>SĀMOA → TAHITI · DAY 5</span>
       </div>
-
       {/* Body */}
       <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
-
         {/* Left panel */}
         <div style={{ width:"320px", flexShrink:0, borderRight:"1px solid #0E1826", overflowY:"auto" }}>
           <div style={{ display:"flex", flexDirection:"column", gap:"12px", padding:"18px", boxSizing:"border-box" }}>
-
-            {/* Nav buttons */}
             <div style={{ display:"flex", gap:"8px" }}>
               <button onClick={onBack} style={{ flex:1, background:"none", border:"1px solid #0E1826", borderRadius:"4px", color:"#2A4050", fontSize:"9px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"7px", cursor:"pointer" }}>← MAP</button>
-              <button onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":"#0E1826"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#2A4050", fontSize:"9px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"7px", cursor:"pointer" }}>
-                {unlocked.length > 0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
-              </button>
             </div>
-
+            {/* Step indicators */}
+            <div style={{ display:"flex", gap:"4px" }}>
+              {["1 · Noon", "2 · Hand", "✦ Done"].map((label, i) => {
+                const done = i + 1 < actStep || (i === 2 && confirmed);
+                const curr = i + 1 === actStep && !(i === 2 && confirmed);
+                return <div key={i} style={{ flex:1, textAlign:"center", padding:"5px 1px", fontSize:"7px", fontFamily:"Cinzel,serif", letterSpacing:"0.04em", background:curr?"rgba(208,96,48,0.18)":done?"rgba(26,120,110,0.18)":"rgba(255,255,255,0.03)", border:`1px solid ${curr?accent:done?"#1A8870":"#1E3050"}`, borderRadius:"4px", color:curr?"#E07040":done?"#2BB5A0":"#3A5060" }}>{label}</div>;
+              })}
+            </div>
             {/* Scenario card */}
             <div style={{ background:"rgba(12,20,40,0.85)", border:"1px solid #1E3050", borderRadius:"7px", padding:"12px 14px" }}>
               <div style={{ fontSize:"9px", letterSpacing:"0.18em", color:"#3A6070", fontFamily:"Cinzel,serif", marginBottom:"5px" }}>SĀMOA → TAHITI</div>
-              <div style={{ fontSize:"14px", color:"#C0DCF0", fontFamily:"Cinzel,serif", fontWeight:"700", marginBottom:"2px" }}>Day 5 · Spring Equinox · 20°S</div>
-              <div style={{ fontSize:"10.5px", color:"#507080", fontFamily:"Cinzel,serif" }}>Stars hidden two nights · Sun is your only guide</div>
+              <div style={{ fontSize:"13px", color:"#C0DCF0", fontFamily:"Cinzel,serif", fontWeight:"700", marginBottom:"2px" }}>Day 5 · Near the Equinox</div>
+              <div style={{ fontSize:"10px", color:"#507080", fontFamily:"Cinzel,serif" }}>Stars hidden two nights · ʻAʻā not visible · Sun is your guide</div>
             </div>
-
-            {/* Step indicators */}
-            <div style={{ display:"flex", gap:"4px" }}>
-              {stepLabels.map((label, i) => {
-                const done = i + 1 < step, curr = i + 1 === step;
-                return (
-                  <div key={i} style={{ flex:1, textAlign:"center", padding:"5px 1px", fontSize:"7px", fontFamily:"Cinzel,serif", letterSpacing:"0.04em", background:curr?"rgba(208,96,48,0.18)":done?"rgba(26,120,110,0.18)":"rgba(255,255,255,0.03)", border:`1px solid ${curr?"#D06030":done?"#1A8870":"#1E3050"}`, borderRadius:"4px", color:curr?"#E07040":done?"#2BB5A0":"#3A5060" }}>
-                    {label}
-                  </div>
-                );
-              })}
-            </div>
-
             {/* Palu speech */}
-            <div style={{ background:"rgba(6,11,22,0.7)", border:"1px solid #161F34", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px", overflowY:"auto", position:"relative" }}>
-              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}><div style={{ fontSize:"11px", color:"#365060", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div><span style={{ fontSize:"16px", opacity:0.75 }}>🦜</span></div>
-              <div style={{ fontSize:"20px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{title}</div>
-              <div style={{ fontSize:"15px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.75" }}>{body}</div>
-              {step === 1 && !niceWork && (
+            <div style={{ background:"rgba(6,11,22,0.7)", border:"1px solid #161F34", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px", position:"relative", flex:1 }}>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                <div style={{ fontSize:"11px", color:"#365060", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
+                <span style={{ fontSize:"16px", opacity:0.75 }}>🦜</span>
+              </div>
+              <div style={{ fontSize:"19px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{paluTitle}</div>
+              <div style={{ fontSize:"15px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.75" }}>{paluBody}</div>
+              {actStep === 1 && !noonFound && (
                 <div style={{ padding:"9px 12px", background:"rgba(18,55,80,0.4)", borderLeft:"2px solid #D06030", borderRadius:"0 4px 4px 0", fontSize:"11px", color:"#D08060", fontFamily:"Georgia,serif" }}>
-                  Drag the time slider below the sky to find noon.
+                  Watch the sun arc from east to west. Click it when it reaches its peak.
                 </div>
               )}
-              {/* Wrong answer try-again */}
-              {step === 2 && selAlt && selAlt !== sc.noonAlt && !niceWork && (
-                <button onClick={handleClearAlt} style={{ padding:"9px", borderRadius:"5px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:"1px solid #D0603055", background:"rgba(208,96,48,0.08)", color:"#D06030" }}>TRY AGAIN ↩</button>
-              )}
-              {step === 3 && selLat && selLat !== sc.lat && !niceWork && (
-                <button onClick={handleClearLat} style={{ padding:"9px", borderRadius:"5px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:"1px solid #D0603055", background:"rgba(208,96,48,0.08)", color:"#D06030" }}>TRY AGAIN ↩</button>
-              )}
-              {step === 4 && (
-                <div style={{ padding:"11px", background:"rgba(208,96,48,0.10)", border:"1px solid rgba(208,96,48,0.28)", borderRadius:"6px", textAlign:"center", fontFamily:"Cinzel,serif", fontSize:"10px", color:"#D06030", letterSpacing:"0.09em" }}>
-                  ☀ SUN ARC ADDED TO YOUR BAG ☀
-                </div>
+              {actStep === 2 && !confirmed && handY !== null && Math.abs(handY - TAHITI_HAND) <= TOLERANCE && (
+                <button onClick={() => { setConfirmed(true); onComplete(); setTimeout(() => setNiceWork("done"), 400); }}
+                  style={{ padding:"12px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`rgba(208,96,48,0.14)`, color:accent }}>
+                  CONFIRM — THIS IS TAHITI'S HEIGHT →
+                </button>
               )}
               {/* Nice work overlay */}
-              {niceWork && (
-                <div style={{ position:"absolute", inset:0, background:"rgba(4,8,18,0.92)", borderRadius:"7px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"14px", padding:"20px" }}>
+              {niceWork === "done" && (
+                <div style={{ position:"absolute", inset:0, background:"rgba(4,8,18,0.93)", borderRadius:"7px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"14px", padding:"20px" }}>
                   <div style={{ fontSize:"28px" }}>☀</div>
-                  <div style={{ fontFamily:"Cinzel,serif", fontSize:"15px", fontWeight:"700", color:"#D06030", textAlign:"center" }}>
-                    {niceWork === "done" ? "You know your position." : "Correct."}
-                  </div>
+                  <div style={{ fontFamily:"Cinzel,serif", fontSize:"15px", fontWeight:"700", color:accent, textAlign:"center" }}>ʻAʻā's path found.</div>
                   <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#7AACBE", fontStyle:"italic", textAlign:"center", lineHeight:"1.6" }}>
-                    {niceWork === "step2" ? "Local noon found. Now read the altitude." : niceWork === "step3" ? "Good altitude reading. Now calculate your latitude." : "Tama-nui-te-rā has spoken. No sextant, no instrument — only the angle and the season."}
+                    Turn east. Tama-nui-te-rā has spoken — and he speaks for ʻAʻā. Tahiti will find us.
                   </div>
-                  <button onClick={handleNiceWorkContinue} style={{ padding:"11px 24px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #D06030", background:"rgba(208,96,48,0.14)", color:"#D06030" }}>
-                    {niceWork === "done" ? "CONTINUE →" : "NEXT →"}
+                  <button onClick={() => setPhase("bridge")} style={{ padding:"11px 24px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`rgba(208,96,48,0.14)`, color:accent }}>
+                    CONTINUE →
                   </button>
                 </div>
               )}
             </div>
-
           </div>
         </div>
 
-        {/* Right: sky view */}
-        <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"20px 24px", overflow:"hidden" }}>
-          <div style={{ width:"min(100%, 640px)" }}>
-            <SkyArc
-              scenario={sc} timeVal={timeVal} step={step}
-              selAlt={selAlt} selLat={selLat}
-              confirming={confirming}
-              onTimeChange={handleTimeChange}
-              onAltSelect={handleAltSelect}
-              onLatSelect={handleLatSelect}
-            />
-          </div>
-        </div>
+        {/* Right — sky canvas */}
+        <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"20px", gap:"12px", overflow:"hidden", background:"#04070E", userSelect:"none" }}>
 
+          {actStep === 1 ? (
+            /* Step 1: animated sun crossing — click to catch noon */
+            (() => {
+              const t = sunTime / 100;
+              const sunX = 60 + t * (480 - 120);
+              const sunY = 220 - Math.sin(t * Math.PI) * 160;
+              const atNoon = Math.abs(t - 0.5) < 0.08;
+              return (
+                <svg
+                  viewBox="0 0 520 260"
+                  style={{ width:"min(100%,520px)", borderRadius:"8px", background:"#050B14", cursor: atNoon ? "pointer" : "default" }}
+                  onClick={() => {
+                    if (atNoon && !noonFound) {
+                      setNoonFound(true);
+                      setTimeout(() => { setActStep(2); }, 1200);
+                    }
+                  }}
+                >
+                  <rect width="520" height="220" fill="#050B14"/>
+                  {[[40,30],[100,18],[200,40],[350,22],[440,35],[160,55],[380,50]].map(([x,y],i)=>(
+                    <circle key={i} cx={x} cy={y} r={1} fill="#4A6888" opacity="0.3"/>
+                  ))}
+                  <rect y="220" width="520" height="40" fill="#030C08"/>
+                  <line x1="0" y1="220" x2="520" y2="220" stroke="#1A5030" strokeWidth="1.5"/>
+                  <path d="M60,220 Q260,48 460,220" fill="none" stroke="#D06030" strokeWidth="1" strokeDasharray="5,7" opacity="0.3"/>
+                  <line x1="260" y1="0" x2="260" y2="220" stroke="#C8941A" strokeWidth="1" strokeDasharray="2,8" opacity="0.2"/>
+                  <text x="260" y="12" textAnchor="middle" fill="#C8941A" fontSize="8" fontFamily="Cinzel,serif" opacity="0.4">OVERHEAD</text>
+                  <text x="60"  y="238" textAnchor="middle" fill="#1A5030" fontSize="8" fontFamily="Cinzel,serif">EAST</text>
+                  <text x="260" y="238" textAnchor="middle" fill="#1A5030" fontSize="8" fontFamily="Cinzel,serif">SOUTH</text>
+                  <text x="460" y="238" textAnchor="middle" fill="#1A5030" fontSize="8" fontFamily="Cinzel,serif">WEST</text>
+                  {atNoon && <circle cx={sunX} cy={sunY} r="26" fill="#FFD060" opacity="0.12"/>}
+                  <circle cx={sunX} cy={sunY} r={atNoon ? 13 : 9} fill="#FFD060" opacity={atNoon ? 1 : 0.85}/>
+                  {atNoon && (
+                    <>
+                      <text x={sunX} y={sunY - 22} textAnchor="middle" fill="#FFD060" fontSize="10" fontFamily="Cinzel,serif" fontWeight="700">LOCAL NOON</text>
+                      <text x={sunX} y={sunY - 10} textAnchor="middle" fill="#FFD060" fontSize="9" fontFamily="Cinzel,serif" opacity="0.7">click to mark</text>
+                    </>
+                  )}
+                  {noonFound && (
+                    <text x="260" y="140" textAnchor="middle" fill="#2AB870" fontSize="14" fontFamily="Cinzel,serif" fontWeight="700">✓ Noon marked</text>
+                  )}
+                </svg>
+              );
+            })()
+          ) : (
+            /* Step 2: static noon sky — drag hand up to match Tahiti's angle */
+            <div style={{ position:"relative", width:"min(100%,520px)" }}>
+              <svg
+                viewBox={`0 0 520 ${SKY_H}`}
+                style={{ width:"100%", borderRadius:"8px", background:"#050B14", cursor: confirmed ? "default" : "ns-resize", touchAction:"none" }}
+                onPointerDown={handleSkyPointerDown}
+                onPointerMove={handleSkyPointerMove}
+                onPointerUp={handleSkyPointerUp}
+                onPointerLeave={handleSkyPointerUp}
+              >
+                {/* Sky */}
+                <rect width="520" height={HORIZ} fill="#050B14"/>
+                <rect y={HORIZ} width="520" height={SKY_H - HORIZ} fill="#030C08"/>
+                <line x1="0" y1={HORIZ} x2="520" y2={HORIZ} stroke="#1A5030" strokeWidth="1.5"/>
+                {/* Zenith line */}
+                <line x1={SUN_X} y1="0" x2={SUN_X} y2={HORIZ} stroke="#C8941A" strokeWidth="1" strokeDasharray="2,8" opacity="0.2"/>
+                <text x={SUN_X} y="14" textAnchor="middle" fill="#C8941A" fontSize="8" fontFamily="Cinzel,serif" opacity="0.35">OVERHEAD</text>
+                {/* Angle reference lines every 15° */}
+                {[15,30,45,60,75].map(deg => {
+                  const y = HORIZ - (deg/90) * (HORIZ - ZENITH);
+                  return (
+                    <g key={deg}>
+                      <line x1="36" y1={y} x2="484" y2={y} stroke="#122840" strokeWidth="0.8" strokeDasharray="3,8"/>
+                      <text x="30" y={y+4} textAnchor="end" fill="#1A3A58" fontSize="9" fontFamily="Cinzel,serif">{deg}°</text>
+                    </g>
+                  );
+                })}
+                {/* Target zone (subtle) */}
+                <rect x="0" y={targetY - 12} width="520" height="24" fill="#D06030" opacity="0.06" rx="2"/>
+                {/* Cardinal labels */}
+                <text x="70" y={HORIZ - 6} fill="#1A5030" fontSize="8" fontFamily="Cinzel,serif">EAST</text>
+                <text x={SUN_X} y={HORIZ - 6} textAnchor="middle" fill="#1A5030" fontSize="8" fontFamily="Cinzel,serif">SOUTH</text>
+                <text x="450" y={HORIZ - 6} fill="#1A5030" fontSize="8" fontFamily="Cinzel,serif">WEST</text>
+                {/* Sun at noon (static) */}
+                <circle cx={SUN_X} cy={targetY} r="16" fill="#FFD060" opacity="0.15"/>
+                <circle cx={SUN_X} cy={targetY} r="10" fill="#FFD060" opacity="0.9"/>
+                <text x={SUN_X + 18} y={targetY - 4} fill="#FFD060" fontSize="10" fontFamily="Cinzel,serif">noon sun</text>
+                {/* Hand line — dragged by user */}
+                {handY !== null && (() => {
+                  const hy = HORIZ - handY * (HORIZ - ZENITH);
+                  const close = Math.abs(handY - TAHITI_HAND) <= TOLERANCE;
+                  const col = close ? "#2AB870" : "#D06030";
+                  return (
+                    <>
+                      {/* Hand line across sky */}
+                      <line x1="40" y1={hy} x2="480" y2={hy} stroke={col} strokeWidth="2.5" strokeDasharray="none" opacity="0.85"/>
+                      {/* Hand icon at left edge */}
+                      <rect x="12" y={hy - 18} width="16" height="36" rx="4" fill={col} opacity="0.9"/>
+                      {[0,1,2,3].map(i => (
+                        <rect key={i} x={12 + i*4} y={hy - 28} width="3.5" height="14" rx="2" fill={col} opacity="0.9"/>
+                      ))}
+                      {/* Thumb */}
+                      <rect x="6" y={hy - 8} width="8" height="14" rx="3" fill={col} opacity="0.85"/>
+                      {/* Angle readout */}
+                      <text x="490" y={hy + 4} fill={col} fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">
+                        {Math.round(handY * 90)}°
+                      </text>
+                      {close && (
+                        <text x="260" y={hy - 14} textAnchor="middle" fill="#2AB870" fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">✓ Tahiti's height</text>
+                      )}
+                    </>
+                  );
+                })()}
+                {/* Instruction */}
+                {handY === null && (
+                  <text x="260" y={HORIZ/2} textAnchor="middle" fill="#3A5060" fontSize="13" fontFamily="Georgia,serif" fontStyle="italic">drag upward to raise your hand</text>
+                )}
+                {/* Waka hint at horizon */}
+                <path d={`M180,${HORIZ} Q260,${HORIZ - 6} 340,${HORIZ} L336,${HORIZ + 6} Q260,${HORIZ + 2} 184,${HORIZ + 6} Z`} fill="#0A1808" stroke="#1A4020" strokeWidth="1" opacity="0.8"/>
+              </svg>
+              <div style={{ textAlign:"center", fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A4060", letterSpacing:"0.1em", marginTop:"6px" }}>
+                DRAG UPWARD · MATCH TAMA-NUI-TE-RĀ'S HEIGHT AT TAHITI'S LATITUDE
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 }
+
 
 /* ══════════════════════════════════════════════════════════════
    SWELL CANVAS
@@ -4289,62 +4615,51 @@ function WelcomeScreen({ onSubmit }) {
 
 
 function PaluPortrait() {
-  // SVG illustration of Palu Hemi — older Polynesian master navigator
   return (
     <svg viewBox="0 0 140 160" style={{ width:"100%", height:"100%", borderRadius:"10px" }}>
-      <defs>
-        <radialGradient id="skinGrad" cx="50%" cy="40%" r="60%">
-          <stop offset="0%" stopColor="#8B5E3C"/>
-          <stop offset="100%" stopColor="#5C3A1E"/>
-        </radialGradient>
-        <radialGradient id="bgGrad" cx="50%" cy="50%" r="70%">
-          <stop offset="0%" stopColor="#0E2030"/>
-          <stop offset="100%" stopColor="#060E18"/>
-        </radialGradient>
-      </defs>
-      {/* Background */}
-      <rect width="140" height="160" fill="url(#bgGrad)"/>
-      {/* Subtle ocean horizon */}
-      <line x1="0" y1="118" x2="140" y2="118" stroke="#1A4050" strokeWidth="1" opacity="0.5"/>
-      {/* Stars */}
-      {[[12,8],[28,14],[95,6],[118,20],[130,10],[8,30],[125,35]].map(([x,y],i)=>(
-        <circle key={i} cx={x} cy={y} r="0.8" fill="#C8D8E8" opacity={0.4+i*0.07}/>
-      ))}
-      {/* Shoulders / clothing — dark bark cloth */}
-      <ellipse cx="70" cy="148" rx="52" ry="28" fill="#1A1208"/>
-      <ellipse cx="70" cy="142" rx="44" ry="22" fill="#221A0A"/>
-      {/* Neck */}
-      <rect x="58" y="108" width="24" height="22" rx="8" fill="url(#skinGrad)"/>
-      {/* Head */}
-      <ellipse cx="70" cy="82" rx="34" ry="36" fill="url(#skinGrad)"/>
-      {/* Silver hair */}
-      <path d="M36,76 Q34,54 52,46 Q70,38 88,46 Q106,54 104,76" fill="#8A9AA0" opacity="0.9"/>
-      <path d="M36,76 Q30,90 38,104 Q42,96 40,80Z" fill="#8A9AA0" opacity="0.7"/>
-      <path d="M104,76 Q110,90 102,104 Q98,96 100,80Z" fill="#8A9AA0" opacity="0.7"/>
-      {/* Face details — weathered lines */}
-      <path d="M52,76 Q52,70 58,68" stroke="#4A2E14" strokeWidth="1" fill="none" opacity="0.5"/>
-      <path d="M88,76 Q88,70 82,68" stroke="#4A2E14" strokeWidth="1" fill="none" opacity="0.5"/>
-      {/* Eyes */}
-      <ellipse cx="58" cy="78" rx="5" ry="4" fill="#1A0E06"/>
-      <ellipse cx="82" cy="78" rx="5" ry="4" fill="#1A0E06"/>
-      <circle cx="57" cy="77" r="1.2" fill="#FFFFFF" opacity="0.7"/>
-      <circle cx="81" cy="77" r="1.2" fill="#FFFFFF" opacity="0.7"/>
-      {/* Eyebrows — thick, grey */}
-      <path d="M52,72 Q58,69 64,72" stroke="#9AACA8" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-      <path d="M76,72 Q82,69 88,72" stroke="#9AACA8" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-      {/* Nose */}
-      <path d="M68,80 Q66,90 62,94 Q70,97 78,94 Q74,90 72,80Z" fill="#7A4E28" opacity="0.6"/>
-      {/* Mouth — slight knowing smile */}
-      <path d="M60,100 Q70,106 80,100" stroke="#5C3010" strokeWidth="2" fill="none" strokeLinecap="round"/>
-      <path d="M63,100 Q70,104 77,100" stroke="#C8886050" strokeWidth="1" fill="none"/>
-      {/* Beard / facial lines */}
-      <path d="M52,96 Q48,108 54,118" stroke="#7A8A88" strokeWidth="1.5" fill="none" opacity="0.5"/>
-      <path d="M88,96 Q92,108 86,118" stroke="#7A8A88" strokeWidth="1.5" fill="none" opacity="0.5"/>
-      <path d="M58,104 Q70,112 82,104" stroke="#8A9A90" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.4"/>
-      {/* Traditional necklace */}
-      <path d="M52,118 Q70,128 88,118" stroke="#C8941A" strokeWidth="1.5" fill="none" opacity="0.7"/>
-      <circle cx="70" cy="128" r="3" fill="#C8941A" opacity="0.6"/>
-      {/* Name tag */}
+      <rect width="140" height="160" fill="#060E18" rx="8"/>
+      <circle cx="14" cy="8" r="0.9" fill="#C8D8E8" opacity="0.5"/>
+      <circle cx="120" cy="14" r="0.7" fill="#C8D8E8" opacity="0.4"/>
+      <circle cx="130" cy="30" r="0.8" fill="#C8D8E8" opacity="0.45"/>
+      {/* teal bg panel — lifts figure off dark background */}
+      <ellipse cx="70" cy="80" rx="45" ry="48" fill="#071820"/>
+      {/* body */}
+      <ellipse cx="70" cy="150" rx="46" ry="24" fill="#181008"/>
+      <ellipse cx="70" cy="143" rx="38" ry="19" fill="#201808"/>
+      <rect x="60" y="108" width="20" height="22" rx="7" fill="#8A6038"/>
+      {/* head */}
+      <path d="M38,76 Q38,52 54,41 Q70,32 86,41 Q102,52 102,76 Q102,106 88,114 Q70,120 52,114 Q38,106 38,76Z" fill="#8A6038"/>
+      {/* hair — medium brown, clearly distinct from background */}
+      <path d="M38,74 Q36,50 54,39 Q70,30 86,39 Q104,50 102,74" fill="#3A2A18" opacity="0.98"/>
+      <path d="M38,74 Q30,54 38,74Z" fill="#3A2A18" opacity="0.9"/>
+      <path d="M102,74 Q110,54 102,74Z" fill="#3A2A18" opacity="0.9"/>
+      {/* hair edge — separates from background */}
+      <path d="M38,74 Q36,50 54,39 Q70,30 86,39 Q104,50 102,74" fill="none" stroke="#4A3A28" strokeWidth="1" opacity="0.6"/>
+      {/* silver streak */}
+      <path d="M52,44 Q54,55 50,72" stroke="#9AAAA8" strokeWidth="1.5" fill="none" opacity="0.45"/>
+      {/* eyes */}
+      <ellipse cx="57" cy="77" rx="4.5" ry="3.8" fill="#150B04"/>
+      <ellipse cx="83" cy="77" rx="4.5" ry="3.8" fill="#150B04"/>
+      <circle cx="56" cy="76" r="1.3" fill="#FFFFFF" opacity="0.85"/>
+      <circle cx="82" cy="76" r="1.3" fill="#FFFFFF" opacity="0.85"/>
+      {/* brows */}
+      <path d="M52,70 Q57,68 63,70" stroke="#6A4828" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      <path d="M77,70 Q83,68 88,70" stroke="#6A4828" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      {/* cheekbones */}
+      <ellipse cx="47" cy="84" rx="7" ry="4" fill="#9A6838" opacity="0.3"/>
+      <ellipse cx="93" cy="84" rx="7" ry="4" fill="#9A6838" opacity="0.3"/>
+      {/* nose */}
+      <path d="M68,80 L68,91" stroke="#7A5030" strokeWidth="1.3" fill="none" opacity="0.55"/>
+      <path d="M64,93 Q70,96 76,93" stroke="#7A5030" strokeWidth="1.1" fill="none" opacity="0.6"/>
+      {/* mouth */}
+      <path d="M62,101 Q70,105 78,101" stroke="#6A3010" strokeWidth="2.2" fill="none" strokeLinecap="round"/>
+      {/* tattoo lines on chin */}
+      <path d="M64,110 L65,118" stroke="#4A7858" strokeWidth="1.2" opacity="0.7"/>
+      <path d="M70,111 L70,119" stroke="#4A7858" strokeWidth="1.2" opacity="0.7"/>
+      <path d="M76,110 L75,118" stroke="#4A7858" strokeWidth="1.2" opacity="0.7"/>
+      {/* necklace */}
+      <path d="M56,117 Q70,129 84,117" stroke="#C8941A" strokeWidth="1.5" fill="none" opacity="0.75"/>
+      <rect x="67" y="126" width="6" height="4" rx="1" fill="#C8941A" opacity="0.65"/>
       <text x="70" y="154" textAnchor="middle" fontFamily="Cinzel,serif" fontSize="7" fill="#C8941A" opacity="0.8" letterSpacing="0.1em">PALU HEMI</text>
     </svg>
   );
