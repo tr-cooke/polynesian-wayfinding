@@ -203,20 +203,22 @@ function BridgeScreen({ moduleNum, name, unlocked, onReturn }) {
     setLineIdx(3); setShowStory(true); setShowBag(true); setShowReturn(true);
   };
 
-  const stars = Array.from({length:50},(_,i)=>({ x:((i*137+41)%97)/97*100, y:((i*79+23)%89)/89*100, r:i%7===0?1.1:0.5, op:0.06+(i%5)*0.05 }));
+  // Warm daytime arrival colours — this is a success screen, not ocean black
+  const arrivalBg = "#08100A";
+  const particles = Array.from({length:40},(_,i)=>({ x:((i*137+41)%97)/97*100, y:((i*79+23)%89)/89*100, r:i%7===0?1.2:0.6, op:0.08+(i%5)*0.06 }));
 
   return (
-    <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", flexDirection:"column", overflow:"hidden", position:"relative" }}>
+    <div style={{ width:"100%", height:"100%", background:arrivalBg, display:"flex", flexDirection:"column", overflow:"hidden", position:"relative" }}>
 
       {/* Header */}
-      <div style={{ height:"44px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0, zIndex:2 }}>
+      <div style={{ height:"44px", borderBottom:`1px solid ${accent}44`, background:"rgba(8,16,10,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0, zIndex:2 }}>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
-        <button onClick={handleSkip} style={{ background:"none", border:`1px solid ${accent}22`, borderRadius:"5px", padding:"5px 14px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:`${accent}88`, letterSpacing:"0.1em" }}>SKIP ↓</button>
+        <button onClick={handleSkip} style={{ background:"none", border:`1px solid ${accent}33`, borderRadius:"5px", padding:"5px 14px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:`${accent}99`, letterSpacing:"0.1em" }}>SKIP ↓</button>
       </div>
 
-      {/* Star field */}
+      {/* Ambient light particles — warm shore tones */}
       <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none", zIndex:0 }}>
-        {stars.map((s,i)=><circle key={i} cx={`${s.x}%`} cy={`${s.y}%`} r={s.r} fill={accent} opacity={s.op}/>)}
+        {particles.map((s,i)=><circle key={i} cx={`${s.x}%`} cy={`${s.y}%`} r={s.r} fill={accent} opacity={s.op}/>)}
       </svg>
 
       {/* Content */}
@@ -343,51 +345,51 @@ function BridgeScreen({ moduleNum, name, unlocked, onReturn }) {
    BAG INTRO POPUP — shown once on first map visit
 ══════════════════════════════════════════════════════════════ */
 
-function BagIntroPopup({ onDismiss, onOpenBag, unlocked }) {
+function BagIntroPopup({ onDismiss, onOpenBag }) {
   return (
     <div style={{ position:"fixed", inset:0, zIndex:90, pointerEvents:"none" }}>
-      {/* Spotlight backdrop — semi-transparent with a gap top-right for bag button */}
       <div style={{ position:"absolute", inset:0, background:"rgba(2,5,12,0.55)", backdropFilter:"blur(1px)", pointerEvents:"auto" }} onClick={onDismiss}/>
-
-      {/* Popup card — anchored top-right near the bag button */}
       <div style={{
         position:"absolute", top:"56px", right:"16px",
         width:"280px", background:"rgba(6,12,24,0.98)", border:"1px solid #C8941A55",
         borderRadius:"12px", padding:"20px", zIndex:91, pointerEvents:"auto",
         boxShadow:"0 0 40px rgba(200,148,26,0.2)",
       }}>
-        {/* Arrow pointing up toward bag button */}
-        <div style={{ position:"absolute", top:"-10px", right:"22px", width:0, height:0,
-          borderLeft:"9px solid transparent", borderRight:"9px solid transparent",
-          borderBottom:"10px solid #C8941A55" }}/>
-        <div style={{ position:"absolute", top:"-8px", right:"23px", width:0, height:0,
-          borderLeft:"8px solid transparent", borderRight:"8px solid transparent",
-          borderBottom:"9px solid rgba(6,12,24,0.98)" }}/>
-
-        <div style={{ fontFamily:"Cinzel,serif", fontSize:"13px", fontWeight:"700", color:"#C8941A", marginBottom:"10px" }}>
-          ✦ Navigator's Bag
-        </div>
+        <div style={{ position:"absolute", top:"-10px", right:"22px", width:0, height:0, borderLeft:"9px solid transparent", borderRight:"9px solid transparent", borderBottom:"10px solid #C8941A55" }}/>
+        <div style={{ position:"absolute", top:"-8px", right:"23px", width:0, height:0, borderLeft:"8px solid transparent", borderRight:"8px solid transparent", borderBottom:"9px solid rgba(6,12,24,0.98)" }}/>
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"13px", fontWeight:"700", color:"#C8941A", marginBottom:"10px" }}>✦ Navigator's Bag</div>
         <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", lineHeight:"1.75", fontStyle:"italic", marginBottom:"12px" }}>
           "Everything you collect on this voyage lives here — tools, knowledge, and gifts. Check it whenever you need a reminder of what you carry."
         </div>
-        <div style={{ fontFamily:"Georgia,serif", fontSize:"12px", color:"#8ABCB0", lineHeight:"1.65", fontStyle:"italic", marginBottom:"12px" }}>
+        <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#8ABCB0", lineHeight:"1.65", fontStyle:"italic", marginBottom:"18px" }}>
           "To start, you are carrying the chief's sweet potato cuttings. Guard them well."
         </div>
-        <div style={{ fontFamily:"Georgia,serif", fontSize:"12px", color:"#5A8090", lineHeight:"1.65", fontStyle:"italic", marginBottom:"18px" }}>
+        <div style={{ display:"flex", gap:"8px" }}>
+          <button onClick={onOpenBag} style={{ flex:1, padding:"10px 14px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A" }}>OPEN BAG →</button>
+          <button onClick={onDismiss} style={{ flex:1, padding:"10px 14px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:"1px solid #1A3050", background:"none", color:"#3A6070" }}>UNDERSTOOD</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MapNavPopup({ onDismiss }) {
+  return (
+    <div style={{ position:"fixed", inset:0, zIndex:90, pointerEvents:"none" }}>
+      <div style={{ position:"absolute", inset:0, background:"rgba(2,5,12,0.45)", backdropFilter:"blur(1px)", pointerEvents:"auto" }} onClick={onDismiss}/>
+      <div style={{
+        position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)",
+        width:"320px", background:"rgba(6,12,24,0.98)", border:"1px solid #C8941A55",
+        borderRadius:"12px", padding:"24px", zIndex:91, pointerEvents:"auto",
+        boxShadow:"0 0 60px rgba(200,148,26,0.15)",
+      }}>
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:"#C8941A", letterSpacing:"0.18em", opacity:0.7, marginBottom:"12px" }}>PALU HEMI</div>
+        <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8C0", lineHeight:"1.75", fontStyle:"italic", marginBottom:"20px" }}>
           "Now — see that glowing island to the northeast? That is our first destination, Sāmoa. Click it on the map to begin your first navigation challenge."
         </div>
-        <div style={{ display:"flex", gap:"8px" }}>
-          <button onClick={onOpenBag} style={{
-            flex:1, padding:"10px 14px", borderRadius:"6px", cursor:"pointer",
-            fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em",
-            border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A",
-          }}>OPEN BAG →</button>
-          <button onClick={onDismiss} style={{
-            flex:1, padding:"10px 14px", borderRadius:"6px", cursor:"pointer",
-            fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em",
-            border:"1px solid #1A3050", background:"none", color:"#3A6070",
-          }}>UNDERSTOOD</button>
-        </div>
+        <button onClick={onDismiss} style={{ width:"100%", padding:"12px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A" }}>
+          I SEE IT →
+        </button>
       </div>
     </div>
   );
@@ -971,15 +973,17 @@ function CompassLearnDiagram({ step }) {
       })}
       <circle cx={CX} cy={CY} r={R} fill="none" stroke="#253850" strokeWidth="1.5"/>
 
-      {/* Step 1+: quadrant colours */}
+      {/* Step 1+: quadrant colours (no names yet) */}
       {step >= 1 && qAngles.map((a,i) => {
         const r1=(a-90)*Math.PI/180, r2=(a+90-90)*Math.PI/180;
         return <path key={i} d={`M${CX},${CY} L${(CX+R*Math.cos(r1)).toFixed(1)},${(CY+R*Math.sin(r1)).toFixed(1)} A${R},${R} 0 0,1 ${(CX+R*Math.cos(r2)).toFixed(1)},${(CY+R*Math.sin(r2)).toFixed(1)} Z`} fill={qFill[i]}/>;
       })}
 
-      {/* Step 1+: inner hub + cardinal labels + quadrant names */}
-      {step >= 1 && <>
-        <circle cx={CX} cy={CY} r={RI} fill="#060D1C" stroke="#1A2840" strokeWidth="1"/>
+      {/* Step 1+: inner hub — always, but no text labels until step 3 */}
+      {step >= 1 && <circle cx={CX} cy={CY} r={RI} fill="#060D1C" stroke="#1A2840" strokeWidth="1"/>}
+
+      {/* Step 3+: cardinal labels + quadrant names appear */}
+      {step >= 3 && <>
         {[["Ākau",0],["Hikina",90],["Hema",180],["Komohana",270]].map(([n,a])=>{
           const pos=p(a, 162);
           return <text key={n} x={pos.x.toFixed(1)} y={pos.y.toFixed(1)} textAnchor="middle" dominantBaseline="middle"
@@ -992,16 +996,14 @@ function CompassLearnDiagram({ step }) {
         })}
       </>}
 
-      {/* Step 2: Nāleo-Koʻolau highlighted at 22.5° */}
-      {step >= 2 && <>
-        {/* Wedge highlight */}
+      {/* Step 4+: Nāleo-Koʻolau highlighted */}
+      {step >= 4 && <>
         <path d={`M${CX},${CY} L${p(22.5-5.625,R).x.toFixed(1)},${p(22.5-5.625,R).y.toFixed(1)} A${R},${R} 0 0,1 ${p(22.5+5.625,R).x.toFixed(1)},${p(22.5+5.625,R).y.toFixed(1)} Z`}
           fill="rgba(200,148,26,0.18)" stroke="#C8941A" strokeWidth="1.5"/>
-        {/* Bearing line */}
         <line x1={CX} y1={CY} x2={p(22.5,R-4).x.toFixed(1)} y2={p(22.5,R-4).y.toFixed(1)}
           stroke="#C8941A" strokeWidth="2" strokeDasharray="6,4" opacity="0.8"/>
-        {/* Label — only on steps 2 and 3 to avoid crowding with stars */}
-        {step <= 4 && (()=>{
+        {/* Label — only on steps 4 and 5 to avoid crowding with stars */}
+        {step <= 5 && (()=>{
           const lp=p(22.5, R+42);
           return <>
             <text x={lp.x.toFixed(1)} y={lp.y.toFixed(1)} textAnchor="middle"
@@ -1016,16 +1018,16 @@ function CompassLearnDiagram({ step }) {
         })()}
       </>}
 
-      {/* Step 4+: all 5 stars appear — larger, clear dots, no labels yet */}
-      {step >= 4 && STARS.map(star => {
+      {/* Step 5+: all 5 stars appear */}
+      {step >= 5 && STARS.map(star => {
         const sp=p(star.angle, 195);
         const isFocus = star.id === "manaiakalani";
         return <circle key={star.id} cx={sp.x.toFixed(1)} cy={sp.y.toFixed(1)}
           r={star.r + (isFocus ? 2 : 0)} fill={star.color}
-          opacity={step >= 6 ? (isFocus ? 1 : 0.25) : step >= 5 ? 0.9 : 0.55}/>;
+          opacity={step >= 6 ? (isFocus ? 1 : 0.25) : 0.9}/>;
       })}
 
-      {/* Step 5: anchor stars labelled (not Mānaiakalani yet) */}
+      {/* Step 5: anchor stars labelled */}
       {step >= 5 && step < 6 && [
         {id:"hokule_a", label:"Hōkūleʻa",   note:"ʻĀina-Koʻolau"},
         {id:"tawera",   label:"Tāwera",      note:"Koʻolau"},
@@ -1085,6 +1087,49 @@ function CompassLearnDiagram({ step }) {
 
 const COMPASS_LEARN_STEPS = MODULE_CONTENT[1].learn.concepts;
 
+/* ══════════════════════════════════════════════════════════════
+   SHORE INTRO POPUP — shown once before Module 1 learning
+══════════════════════════════════════════════════════════════ */
+
+function ShoreIntroPopup({ onDismiss }) {
+  return (
+    <div style={{ position:"fixed", inset:0, zIndex:95, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px" }}>
+      <div style={{ position:"absolute", inset:0, background:"rgba(2,6,4,0.75)", backdropFilter:"blur(3px)" }} onClick={onDismiss}/>
+      <div style={{
+        position:"relative", zIndex:1, background:"rgba(4,10,6,0.98)",
+        border:"1px solid rgba(200,148,26,0.35)", borderRadius:"14px",
+        padding:"32px 36px", maxWidth:"480px", width:"100%",
+        display:"flex", flexDirection:"column", gap:"20px",
+        boxShadow:"0 0 80px rgba(200,148,26,0.12)",
+      }}>
+        {/* Location tag */}
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#C8941A", letterSpacing:"0.2em", opacity:0.7 }}>
+          TONGATAPU, TONGA · BEACH AT DUSK
+        </div>
+        {/* Scene */}
+        <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#8ABCB0", lineHeight:"1.75", fontStyle:"italic" }}>
+          You stand on the shore. The sun is setting behind you, turning the sand the colour of embers.
+        </div>
+        <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8C0", lineHeight:"1.75", fontStyle:"italic" }}>
+          Palu Hemi crouches in front of you and begins laying shells in a circle on the sand — one by one, methodical, deliberate. Matala watches from a nearby palm.
+        </div>
+        <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#C8941A", lineHeight:"1.75", fontStyle:"italic" }}>
+          "Before we leave, you need to understand the stars. Not where they are — where they rise."
+        </div>
+        <button onClick={onDismiss} style={{
+          padding:"13px", borderRadius:"6px", cursor:"pointer",
+          fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700",
+          letterSpacing:"0.14em", border:"1px solid #C8941A",
+          background:"rgba(200,148,26,0.14)", color:"#C8941A",
+        }}>
+          I'M LISTENING →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
 function CompassLearnScreen({ name, onReady, onBack, onOpenBag, unlocked }) {
   const [conceptIdx, setConceptIdx] = useState(0);
   const total   = COMPASS_LEARN_STEPS.length;
@@ -1140,12 +1185,12 @@ function CompassLearnScreen({ name, onReady, onBack, onOpenBag, unlocked }) {
             </div>
 
             {/* Concept heading */}
-            <div style={{ fontFamily:"Cinzel,serif", fontSize:"16px", fontWeight:"700", color:accent, lineHeight:"1.3" }}>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"19px", fontWeight:"700", color:accent, lineHeight:"1.3" }}>
               {concept.heading}
             </div>
 
             {/* Concept body */}
-            <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", lineHeight:"1.78", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"14px" }}>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#7AACBE", lineHeight:"1.82", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"16px" }}>
               {concept.body}
             </div>
 
@@ -4309,15 +4354,11 @@ function StoryCard({ name, onComplete }) {
   const [pageIdx,  setPageIdx]  = useState(0);
   const [revealed, setRevealed] = useState(0);
   const [choice,   setChoice]   = useState(null);
-  // TODO: Replace with proper ambient audio before launch — current implementation
-  // disabled because AudioContext requires careful browser handling. Consider
-  // using a hosted .mp3 file via <audio> tag with user-controlled play/pause.
 
   const pages = STORY_PAGES(name);
   const page  = pages[pageIdx];
   const isLast = pageIdx === pages.length - 1;
 
-  // Auto-reveal lines with stagger — key={pageIdx} on the container guarantees fresh mount
   useEffect(() => {
     const timers = page.text.map((_, i) =>
       setTimeout(() => setRevealed(r => Math.max(r, i + 1)), 350 + i * 1100)
@@ -4330,26 +4371,32 @@ function StoryCard({ name, onComplete }) {
   const handleNext = () => {
     if (!allRevealed) { setRevealed(page.text.length); return; }
     if (isLast) return;
-    setRevealed(0);          // reset synchronously — no flash
+    setRevealed(0);
     setPageIdx(p => p + 1);
     setChoice(null);
   };
 
+  const handleBack = () => {
+    if (pageIdx === 0) return;
+    setRevealed(pages[pageIdx - 1].text.length);
+    setPageIdx(p => p - 1);
+    setChoice(null);
+  };
+
   const handleDotClick = (i) => {
-    if (i > pageIdx) return; // can't skip forward
-    setRevealed(pages[i].text.length); // show all text instantly on revisit
+    if (i > pageIdx) return;
+    setRevealed(pages[i].text.length);
     setPageIdx(i);
     setChoice(null);
   };
 
   const handleChoice = (c) => {
     setChoice(c.id);
-    // joke response: don't auto-advance — wait for "What the heck?" button
     if (c.advance && !c.joke) setTimeout(() => onComplete(), 600);
   };
 
+  const isMatala = page.id === "matala";
   const stars = Array.from({length:60},(_,i)=>({ x:((i*137+41)%97)/97*100, y:((i*79+23)%89)/89*100, r:i%5===0?1.1:0.5, op:0.08+(i%5)*0.06 }));
-
 
   return (
     <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", alignItems:"center", justifyContent:"center", position:"relative", overflow:"hidden" }}>
@@ -4362,7 +4409,7 @@ function StoryCard({ name, onComplete }) {
       {/* Card */}
       <div style={{ position:"relative", zIndex:1, width:"min(680px, 95%)", background:"rgba(6,12,22,0.96)", border:"1px solid #1A3050", borderRadius:"14px", overflow:"hidden", boxShadow:"0 0 80px rgba(200,148,26,0.08)" }}>
 
-        {/* Progress dots — click to revisit previous pages */}
+        {/* Progress dots */}
         <div style={{ display:"flex", justifyContent:"center", gap:"10px", padding:"16px 0 0" }}>
           {pages.map((_,i) => (
             <div key={i} onClick={() => handleDotClick(i)} style={{
@@ -4381,25 +4428,32 @@ function StoryCard({ name, onComplete }) {
         {/* Main content row */}
         <div style={{ display:"flex", gap:"0", minHeight:"340px" }}>
 
-          {/* Left — Palu portrait */}
+          {/* Left — portrait */}
           <div style={{ width:"180px", flexShrink:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"20px 16px", borderRight:"1px solid #0E1E30", gap:"12px" }}>
-            <div style={{ width:"140px", height:"160px", borderRadius:"10px", overflow:"hidden", border:"1px solid #1A3040" }}>
-              <PaluPortrait />
+            <div style={{ width:"140px", height:"160px", borderRadius:"10px", overflow:"hidden", border:"1px solid #1A3040", display:"flex", alignItems:"center", justifyContent:"center" }}>
+              {isMatala
+                ? <div style={{ fontSize:"80px", lineHeight:1, filter:"drop-shadow(0 0 12px rgba(200,148,26,0.5))" }}>🦜</div>
+                : <PaluPortrait />}
             </div>
             <div style={{ textAlign:"center" }}>
-              <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", color:"#C8941A" }}>{page.speaker}</div>
-              <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A4050", letterSpacing:"0.06em", marginTop:"3px" }}>Master Navigator · Tongatapu</div>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", color: isMatala ? "#2AB870" : "#C8941A" }}>
+                {page.speaker}
+              </div>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A4050", letterSpacing:"0.06em", marginTop:"3px" }}>
+                {isMatala ? "Palu's Parrot · Tongatapu" : "Master Navigator · Tongatapu"}
+              </div>
             </div>
           </div>
 
           {/* Right — text */}
           <div style={{ flex:1, padding:"20px 24px 20px", display:"flex", flexDirection:"column", justifyContent:"space-between", gap:"16px", position:"relative" }}>
-            {/* Parrot — top right corner */}
-            <div style={{ position:"absolute", top:"12px", right:"16px", fontSize:"22px", opacity:0.85, lineHeight:1, filter:"drop-shadow(0 0 6px rgba(200,148,26,0.4))" }}>🦜</div>
+            {!isMatala && <div style={{ position:"absolute", top:"12px", right:"16px", fontSize:"22px", opacity:0.85, lineHeight:1, filter:"drop-shadow(0 0 6px rgba(200,148,26,0.4))" }}>🦜</div>}
             <div key={pageIdx} style={{ display:"flex", flexDirection:"column", gap:"14px" }}>
               {page.text.map((line, i) => (
                 <p key={i} style={{
-                  fontFamily:"Georgia,serif", fontSize:"16px", color:"#A8C8C0", lineHeight:"1.72", fontStyle:"italic", margin:0,
+                  fontFamily:"Georgia,serif", fontSize:"17px",
+                  color: isMatala ? "#80D8A0" : "#A8C8C0",
+                  lineHeight:"1.72", fontStyle:"italic", margin:0,
                   opacity: i < revealed ? 1 : 0,
                   transform: i < revealed ? "translateY(0)" : "translateY(6px)",
                   transition:"opacity 0.5s ease, transform 0.5s ease",
@@ -4409,10 +4463,18 @@ function StoryCard({ name, onComplete }) {
               ))}
             </div>
 
-            {/* Choices or Next */}
-            <div style={{ paddingTop:"12px", borderTop:"1px solid #0E1E30" }}>
+            {/* Choices or navigation buttons */}
+            <div style={{ paddingTop:"12px", borderTop:"1px solid #0E1E30", display:"flex", gap:"8px", flexWrap:"wrap" }}>
+              {/* Back button — always show if not first page */}
+              {pageIdx > 0 && (
+                <button onClick={handleBack} style={{
+                  padding:"10px 18px", borderRadius:"6px", cursor:"pointer",
+                  fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em",
+                  border:"1px solid #1A3050", background:"none", color:"#3A5060",
+                }}>← Back</button>
+              )}
               {isLast && allRevealed && page.choices ? (
-                <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
+                <div style={{ display:"flex", flexDirection:"column", gap:"8px", flex:1 }}>
                   {page.choices.map(c => (
                     <button key={c.id} onClick={() => handleChoice(c)} style={{
                       padding:"12px 18px", borderRadius:"6px", cursor:"pointer",
@@ -4429,7 +4491,7 @@ function StoryCard({ name, onComplete }) {
                 </div>
               ) : !isLast ? (
                 <button onClick={handleNext} style={{
-                  padding:"10px 22px", borderRadius:"6px", cursor:"pointer",
+                  flex:1, padding:"10px 22px", borderRadius:"6px", cursor:"pointer",
                   fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em",
                   border:"1px solid #C8941A44", background:"rgba(200,148,26,0.08)", color:"#C8941A",
                   opacity: allRevealed ? 1 : 0.4,
@@ -4451,17 +4513,17 @@ function StoryCard({ name, onComplete }) {
         </div>
       </div>
 
-      {/* Joke popup — appears over card when "not ready" is chosen */}
+      {/* Joke popup — beach setting */}
       {choice && page.choices?.find(c => c.id === choice)?.joke && (
         <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", zIndex:10, padding:"24px" }}>
           <div style={{ background:"rgba(4,8,18,0.7)", position:"absolute", inset:0, backdropFilter:"blur(2px)" }}/>
           <div style={{ position:"relative", zIndex:1, background:"rgba(6,12,24,0.98)", border:"1px solid #C8941A55", borderRadius:"12px", padding:"28px 32px", maxWidth:"460px", width:"100%", display:"flex", flexDirection:"column", gap:"18px", boxShadow:"0 0 60px rgba(200,148,26,0.15)" }}>
             <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:"#C8941A", letterSpacing:"0.18em", opacity:0.7 }}>PALU HEMI</div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8C0", lineHeight:"1.75", fontStyle:"italic" }}>
-              "Nobody is born ready! Bravery is a learned skill — something I am sure you will pick up along the way. Let us get you in this boat."
+              "Nobody is born ready! Bravery is a learned skill — something I am sure you will pick up along the way. Let us begin right here on this beach."
             </div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#5A8090", lineHeight:"1.7", fontStyle:"italic" }}>
-              You feel a sharp pain at the back of your head, and wake up the next morning to sunlight on your face and the rocking of a canoe beneath you.
+              You feel a sharp pain at the back of your head. You wake up on a strange beach just as the sun is setting. You may still be on Tonga, but you're disoriented — and Palu Hemi is already drawing something in the sand.
             </div>
             <button onClick={() => onComplete()} style={{ padding:"13px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A" }}>
               What the heck? →
@@ -4485,6 +4547,7 @@ export default function AppWithBoundary() {
 }
 
 function App() {
+  const [screen,   setScreen]   = useState("loading");
   const [name,     setName]     = useState("");
   const [step,     setStep]     = useState(1);
   const [selHouse, setSelHouse] = useState(null);
@@ -4493,14 +4556,17 @@ function App() {
   const [hovStar,  setHovStar]  = useState(null);
   const [bagOpen,  setBagOpen]  = useState(false);
   const [unlocked, setUnlocked] = useState([]);
-  const [bagIntroSeen, setBagIntroSeen] = useState(true); // true = don't show until we check localStorage
+  const [bagIntroSeen, setBagIntroSeen] = useState(true);
+  const [mapNavSeen,   setMapNavSeen]   = useState(true);
 
   useEffect(() => {
     const savedName = localStorage.getItem("pvs_haumana");
     const savedBag  = JSON.parse(localStorage.getItem("pvs_bag") || "[]");
     const introSeen = localStorage.getItem("pvs_bag_intro") === "1";
+    const navSeen   = localStorage.getItem("pvs_map_nav")   === "1";
     setUnlocked(savedBag);
     setBagIntroSeen(introSeen);
+    setMapNavSeen(navSeen);
     if (savedName) { setName(savedName); setScreen("map"); }
     else setScreen("welcome");
   }, []);
@@ -4523,6 +4589,7 @@ function App() {
   };
 
   const [compassPhase, setCompassPhase] = useState("intro");
+  const [shoreIntroSeen, setShoreIntroSeen] = useState(false);
 
   const handleSubmit = n => {
     localStorage.setItem("pvs_haumana", n);
@@ -4537,8 +4604,9 @@ function App() {
     localStorage.removeItem("pvs_haumana");
     localStorage.removeItem("pvs_bag");
     localStorage.removeItem("pvs_bag_intro");
+    localStorage.removeItem("pvs_map_nav");
     setName(""); setUnlocked([]); setStep(1); setCompassPhase("intro");
-    setSelHouse(null); setSelStar(null); setBagIntroSeen(false);
+    setSelHouse(null); setSelStar(null); setBagIntroSeen(false); setMapNavSeen(false); setKeepGoing(false);
     setScreen("welcome");
   };
 
@@ -4559,13 +4627,14 @@ function App() {
     { id:"atutahi",      ...toXY(146.25,175) },
   ];
 
+  const [keepGoing, setKeepGoing] = useState(false);
+
   const handleStarClick = s => {
-    if (step !== 1) return;
+    if (step !== 1 || keepGoing) return;
     setSelStar(s);
     if (s.correct) {
       unlock("star_compass"); unlock("samoan_star_map");
-      setTimeout(() => { setStep(2); }, 1200);   // step 2 = success/re-orient
-      setTimeout(() => setCompassPhase("bridge"), 3500);
+      setKeepGoing(true);
     }
   };
 
@@ -4608,7 +4677,13 @@ function App() {
           localStorage.setItem("pvs_bag_intro", "1");
           setBagIntroSeen(true);
           setBagOpen(true);
-        }} unlocked={unlocked} />
+        }} />
+      )}
+      {screen === "map" && bagIntroSeen && !mapNavSeen && (
+        <MapNavPopup onDismiss={() => {
+          localStorage.setItem("pvs_map_nav", "1");
+          setMapNavSeen(true);
+        }} />
       )}
 
       {screen === "compass" && compassPhase === "intro" && (
@@ -4617,13 +4692,78 @@ function App() {
           onBack={() => setScreen("map")} />
       )}
       {screen === "compass" && compassPhase === "learn" && (
-        <CompassLearnScreen
-          name={name}
-          onReady={() => setCompassPhase("activity")}
-          onBack={() => setScreen("map")}
-          onOpenBag={() => setBagOpen(true)}
-          unlocked={unlocked}
-        />
+        <>
+          <CompassLearnScreen
+            name={name}
+            onReady={() => setCompassPhase("depart")}
+            onBack={() => setScreen("map")}
+            onOpenBag={() => setBagOpen(true)}
+            unlocked={unlocked}
+          />
+          {!shoreIntroSeen && (
+            <ShoreIntroPopup onDismiss={() => setShoreIntroSeen(true)} />
+          )}
+        </>
+      )}
+      {screen === "compass" && compassPhase === "depart" && (
+        <div style={{ width:"100%", height:"100%", background:"#04070E", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", position:"relative", overflow:"hidden" }}>
+          {/* Star field */}
+          <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none" }}>
+            {bgStars.map((s,i) => <circle key={i} cx={`${s.x}%`} cy={`${s.y}%`} r={s.r} fill="#6A9AB8" opacity={s.op} />)}
+          </svg>
+          {/* Departure illustration */}
+          <div style={{ position:"relative", zIndex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:"32px", maxWidth:"520px", padding:"32px", textAlign:"center" }}>
+            {/* Waka SVG silhouette */}
+            <svg viewBox="0 0 400 160" style={{ width:"min(100%, 400px)", opacity:0.9 }}>
+              <defs>
+                <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#041018"/><stop offset="100%" stopColor="#020810"/>
+                </linearGradient>
+                <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#02060E"/><stop offset="100%" stopColor="#041828"/>
+                </linearGradient>
+              </defs>
+              {/* Sky */}
+              <rect width="400" height="100" fill="url(#skyG)"/>
+              {/* Stars */}
+              {[[40,20,1.2],[80,35,0.8],[130,15,1.4],[200,25,0.9],[270,18,1.1],[320,40,0.7],[360,22,1.3],[170,45,0.8],[60,55,0.6]].map(([x,y,r],i)=>(
+                <circle key={i} cx={x} cy={y} r={r} fill="#C0E8FF" opacity="0.8"/>
+              ))}
+              {/* Horizon */}
+              <line x1="0" y1="100" x2="400" y2="100" stroke="#0A3848" strokeWidth="1"/>
+              {/* Sea */}
+              <rect y="100" width="400" height="60" fill="url(#seaG)"/>
+              {/* Wave hints */}
+              {[0,1,2,3].map(i=>(
+                <path key={i} d={`M${i*110},108 Q${i*110+28},104 ${i*110+55},108`} fill="none" stroke="#0A4050" strokeWidth="1" opacity="0.6"/>
+              ))}
+              {/* Waka hull */}
+              <path d="M80,96 Q200,86 320,96 L310,104 Q200,100 90,104 Z" fill="#0A1E18" stroke="#1A4030" strokeWidth="1.5"/>
+              {/* Outrigger */}
+              <path d="M120,104 L110,112 Q180,110 250,112 L240,104" fill="none" stroke="#1A4030" strokeWidth="1.2"/>
+              <line x1="140" y1="104" x2="130" y2="112" stroke="#1A4030" strokeWidth="1"/>
+              <line x1="220" y1="104" x2="210" y2="112" stroke="#1A4030" strokeWidth="1"/>
+              {/* Mast */}
+              <line x1="200" y1="96" x2="200" y2="38" stroke="#2A5040" strokeWidth="2"/>
+              {/* Sail */}
+              <path d="M200,40 Q235,58 230,90 L200,90 Z" fill="#1A3828" stroke="#2A5040" strokeWidth="1" opacity="0.9"/>
+              {/* Palu figure silhouette */}
+              <circle cx="185" cy="90" r="4" fill="#2A5040"/>
+              <rect x="183" y="90" width="4" height="8" fill="#2A5040"/>
+            </svg>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:"#C8941A", letterSpacing:"0.2em", opacity:0.8 }}>
+              TONGA → SĀMOA · NIGHT 1
+            </div>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"17px", color:"#A8C8C0", lineHeight:"1.75", fontStyle:"italic" }}>
+              "We've left Tonga. The shore is behind us now. Find our heading."
+            </div>
+            <button
+              onClick={() => setCompassPhase("activity")}
+              style={{ padding:"14px 36px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", letterSpacing:"0.14em", border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A" }}>
+              I'M ON THE POLA →
+            </button>
+          </div>
+        </div>
       )}
       {screen === "compass" && compassPhase === "activity" && (
         <div style={{ width:"100%",height:"100%",background:"#04070E",display:"flex",flexDirection:"column",overflow:"hidden" }}>
@@ -4656,10 +4796,10 @@ function App() {
                     <div style={{ fontSize:"11px",color:"#365060",fontFamily:"Cinzel,serif",letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
                     <span style={{ fontSize:"16px",opacity:0.75 }}>🦜</span>
                   </div>
-                  {step === 1 && !selStar && !hovStar && (
+                  {step === 1 && !selStar && !hovStar && !keepGoing && (
                     <>
-                      <div style={{ fontSize:"17px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>OK {name}. Your turn to guide us.</div>
-                      <div style={{ fontSize:"14px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>You stand on the pola at midnight. The sky is full of stars — but the canoe is drifting, not yet oriented. You know from my story that Sāmoa lies in the Nāleo-Koʻolau house. To set our heading, you need to find the star that rises there.</div>
+                      <div style={{ fontSize:"20px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>OK {name}. Your turn to guide us.</div>
+                      <div style={{ fontSize:"15px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>We've left Tonga. You stand on the pola at midnight. The sky is full of stars — but the canoe is drifting, not yet oriented. You know from my story that Sāmoa lies in the Nāleo-Koʻolau house. Find the star that rises there.</div>
                       <div style={{ padding:"9px 12px",background:"rgba(18,55,80,0.4)",borderLeft:"2px solid #1A7A6E",borderRadius:"0 4px 4px 0",fontSize:"11px",color:"#5AABB8",fontFamily:"Georgia,serif" }}>Hover each star to learn its name and house. Then choose the one that rises in Nāleo-Koʻolau.</div>
                     </>
                   )}
@@ -4675,10 +4815,19 @@ function App() {
                       <div style={{ fontSize:"14px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>{selStar.desc} We need the one that rises in Nāleo-Koʻolau.</div>
                     </>
                   )}
-                  {step === 1 && selStar?.correct && (
+                  {step === 1 && selStar?.correct && !keepGoing && (
                     <>
-                      <div style={{ fontSize:"17px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>Mānaiakalani!</div>
-                      <div style={{ fontSize:"14px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>That is the one. The compass is finding its orientation now...</div>
+                      <div style={{ fontSize:"20px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>Mānaiakalani!</div>
+                      <div style={{ fontSize:"15px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>That is the one. The compass is finding its orientation now...</div>
+                    </>
+                  )}
+                  {keepGoing && step === 1 && (
+                    <>
+                      <div style={{ fontSize:"20px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>Mānaiakalani!</div>
+                      <div style={{ fontSize:"15px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>That is the one. Keep it on your starboard bow all night and we hold our heading for Sāmoa.</div>
+                      <button onClick={() => { setStep(2); setTimeout(() => setCompassPhase("bridge"), 2500); }} style={{ marginTop:"8px", padding:"12px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A" }}>
+                        KEEP GOING →
+                      </button>
                     </>
                   )}
                   {step === 2 && (

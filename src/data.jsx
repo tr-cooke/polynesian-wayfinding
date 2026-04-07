@@ -44,7 +44,7 @@ export const STARS = [
   {
     id: "manaiakalani", name: "Mānaiakalani", western: "Vega",
     angle: 22.5, r: 7, color: "#C0E8FF", correct: true,
-    desc: "The hook of Māui. Rises in Nāleo-Koʻolau — just north-northeast. From Tonga, keeping Mānaiakalani on your starboard bow through the night holds your heading toward Sāmoa.",
+    desc: "Rises in Nāleo-Koʻolau — just north-northeast. In the old stories shared between Tonga and Sāmoa, this star marked the path the first voyagers followed when the two islands first met. Keep it in mind.",
   },
   {
     id: "hokule_a", name: "Hōkūleʻa", western: "Arcturus",
@@ -609,13 +609,13 @@ export const MODULE_CONTENT = {
     learn: {
       title: "The Star Compass",
       concepts: [
-        { heading: "Why not just follow one star?", body: "In the north, sailors follow Polaris — the north star — because it sits directly above the Earth's pole and barely moves. From Tonga, Polaris is below the horizon. We cannot use it. There is no bright star above the south pole either. So our ancestors asked a different question: not 'which star stays still?' but 'what about a star never changes?'" },
-        { heading: "The rising point never moves", body: "A star moves across the sky all night — it rises, arcs overhead, and sets. That moving position is useless for navigation. But the point on the horizon where it rises is fixed. It rises in exactly the same place tonight as it did last night, last season, and a hundred years ago. That fixed point on the horizon is our compass. We do not navigate by where a star is in the sky. We navigate by where it touches the horizon." },
-        { heading: "32 houses", body: "The horizon is divided into 32 equal houses, each spanning 11.25°. Every star rises in one house and sets in the opposite house — every night, for centuries. The compass does not move. You learn it on the beach, using shells laid in a circle in the sand to represent the houses. Then you hold it in your mind and carry it to sea." },
-        { heading: "Four quadrants", body: "There are four quadrants: Koʻolau (NE), Malanai (SE), Kona (SW), and Hoʻolua (NW). The four cardinal points are Ākau (N), Hikina (E), Hema (S), and Komohana (W). The house names come from Hawaiian oral tradition — Nāleo means 'voices' or 'sounds.' These names were passed down through chant and memorised, not derived from a formula." },
-        { heading: "How to find Sāmoa", body: "The last Wayfinder shared a story with us of his voyage to Sāmoa, and named its house as Nāleo-Koʻolau. This means we know Sāmoa lies in that direction — about 22.5° from north. We are trusting he told the story right, and that my memory is not too full of beach sand to remember it." },
-        { heading: "Reading with anchor stars", body: "Different stars are visible on different nights — seasons change which ones rise before dawn. So a navigator learns many stars for each part of the horizon, not just one. Hōkūleʻa anchors the ENE. Takurua anchors the ESE. Atutahi anchors the deep south. When one guide star sets or climbs too high, you switch to another in the same house, or use a different star to cross-check your heading." },
-        { heading: "Mānaiakalani — your guide", body: "Mānaiakalani rises in Nāleo-Koʻolau — north-northeast, exactly where Sāmoa lies. Keep it on your starboard bow as it rises from the horizon and you hold your heading. When it climbs too high to give direction, check it against Hōkūleʻa to your right and Ākau (north) above — you should be holding the angle between them. Mānaiakalani is the hook of Māui, and tonight it hooks us toward Sāmoa." },
+        { heading: "Using the Stars", body: "Your first skill will be to learn the stars to help you navigate. In the north, sailors follow Polaris — the north star — because it sits directly above the Earth's pole and barely moves. From Tonga, Polaris is below the horizon. We cannot use it. There is no bright star above the south pole either. So our ancestors asked a different question: not 'which star stays still?' but 'what about a star never changes?'" },
+        { heading: "Star Rise and Star Set", body: "A star moves across the sky all night — it rises, arcs overhead, and sets. That moving position is useless for navigation. But the point on the horizon where it rises is fixed. It rises in exactly the same place tonight as it did last night, last season, and a hundred years ago. That fixed point on the horizon is our compass. We do not navigate by where a star is in the sky. We navigate by where it touches the horizon." },
+        { heading: "Dividing the Sky", body: "Palu Hemi points to the shells on the sand and starts drawing lines through the circle with his finger. The horizon is divided into 32 equal houses, each spanning 11.25°. Every star rises in one house and sets in the opposite — every night, for centuries. The compass does not move. You hold it in your mind and carry it to sea." },
+        { heading: "The Four Quadrants", body: "There are four quadrants: Koʻolau (NE), Malanai (SE), Kona (SW), and Hoʻolua (NW). The four cardinal points are Ākau (N), Hikina (E), Hema (S), and Komohana (W). The house names come from Hawaiian oral tradition — Nāleo means 'voices' or 'sounds.' These names were passed down through chant and memorised, not derived from a formula." },
+        { heading: "How to Find Sāmoa", body: "The last Wayfinder shared a story with us of his voyage to Sāmoa, and named its house as Nāleo-Koʻolau. This means we know Sāmoa lies in that direction — about 22.5° from north. We are trusting he told the story right, and that my memory is not too full of beach sand to remember it." },
+        { heading: "Reading with Anchor Stars", body: "Different stars are visible on different nights — seasons change which ones rise before dawn. So a navigator learns many stars for each part of the horizon, not just one. Hōkūleʻa anchors the ENE. Takurua anchors the ESE. Atutahi anchors the deep south. When one guide star sets or climbs too high, you switch to another in the same house, or use a different star to cross-check your heading." },
+        { heading: "Mānaiakalani — Your Guide", body: "Mānaiakalani rises in Nāleo-Koʻolau — north-northeast, exactly where Sāmoa lies. Keep it on your starboard bow as it rises from the horizon and you hold your heading. When it climbs too high to give direction, check it against Hōkūleʻa to your right and Ākau (north) above — you should be holding the angle between them. Mānaiakalani is the hook of Māui, and tonight it hooks us toward Sāmoa." },
       ],
     },
   },
@@ -801,7 +801,7 @@ export const STORY_PAGES = (name) => [
     image: "🦜",
     imageAlt: "Matala the parrot",
     speaker: "Palu Hemi",
-    location: "Tongatapu, Tonga",
+    location: "Tongatapu, Tonga · beach at sunset",
     text: [
       `Hello, ${name}. My parrot Matala told me you volunteered as a navigation apprentice — she has an eye for promising young people, and recommended we speak.`,
       `I heard you once made the crossing from Vava'u in a canoe. That was a passenger's voyage. From here on, I am going to teach you something different — the skills of a Wayfinder.`,
@@ -813,12 +813,23 @@ export const STORY_PAGES = (name) => [
     image: "🍠",
     imageAlt: "Sweet potato",
     speaker: "Palu Hemi",
-    location: "Tongatapu, Tonga",
+    location: "Tongatapu, Tonga · beach at sunset",
     text: [
       `We have an important task, and you will be the one to carry it out as you build your wayfinding skills.`,
-      `The king of our Tongan islands has cultivated a new variety of sweet potato — hardy, plentiful, and resistant to drought. In the years ahead, when the rains fail, this crop may be the difference between hunger and survival for communities across the ocean. But the chief knows our people will eventually tire of a sweet potato diet — we need to bring home new foods from the islands we visit.`,
-      `There is one more matter. You may have noticed Matala. She is one of the last parrots left on our island, and she cannot find a mate. If we come across birds on our journey who might help our flock recover, we should bring them home. She would never forgive me if I did not mention it.`,
-      `Your voyage will take you to Sāmoa, Tahiti, the Marquesas, Hawaiʻi, and Fiji — sharing what we have grown, bringing back knowledge, new foods, and perhaps new birds. Along the way, you may make discoveries of your own.`,
+      `The king of our Tongan islands has cultivated a new variety of sweet potato — hardy, plentiful, and resistant to drought. In the years ahead, when the rains fail, this crop may be the difference between hunger and survival for communities across the ocean.`,
+      `Your voyage will take you to Sāmoa, Tahiti, the Marquesas, Hawaiʻi, and Fiji — sharing what we have grown, bringing back knowledge, new foods, and perhaps new companions for the journey home.`,
+    ],
+  },
+  {
+    id: "matala",
+    image: "🦜",
+    imageAlt: "Matala the parrot",
+    speaker: "Matala",
+    location: "Tongatapu, Tonga · beach at sunset",
+    text: [
+      `SKRAWWK. You there. Yes, you. Listen closely because I will not repeat myself.`,
+      `I am Matala. I have flown with Palu Hemi for twelve years and I know every island between here and the far north. I am also the last of my kind on this island, and I intend to do something about that.`,
+      `If we encounter any birds on this voyage who might make a suitable companion — bring them home. I am not asking. SKRAWWK.`,
     ],
   },
   {
@@ -826,11 +837,11 @@ export const STORY_PAGES = (name) => [
     image: "🌊",
     imageAlt: "Open ocean",
     speaker: "Palu Hemi",
-    location: "Tongatapu, Tonga",
+    location: "Tongatapu, Tonga · beach at sunset",
     text: [
       `${name}, I will be honest with you. This is not a task for the faint-hearted.`,
       `The ocean is vast and unpredictable. There are no charts, no compass, no engine. Only sky, sea, wind, and everything I am about to teach you.`,
-      `The voyages ahead will test everything you have. Are you ready to begin?`,
+      `The sun is setting behind us. In a moment, the stars will appear — and your first lesson begins right here, on this beach. Are you ready?`,
     ],
     choices: [
       { id: "yes", label: "I am ready. Let us begin.", advance: true },
