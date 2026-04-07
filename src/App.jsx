@@ -350,13 +350,14 @@ function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
           {/* Palm-clicked bubble */}
           {palmClicked && (
             <g>
-              <rect x={palmX-8} y={palmY-218} width="210" height="62" rx="8"
+              <rect x={palmX-8} y={palmY-236} width="210" height="82" rx="8"
                 fill="#05100A" stroke="#C8941A55" strokeWidth="1.5"/>
-              <path d={`M${palmX+22},${palmY-156} L${palmX+32},${palmY-144} L${palmX+44},${palmY-156}`}
+              <path d={`M${palmX+22},${palmY-154} L${palmX+32},${palmY-142} L${palmX+44},${palmY-154}`}
                 fill="#05100A" stroke="#C8941A55" strokeWidth="1.5"/>
-              <text x={palmX+97} y={palmY-196} textAnchor="middle" fill="#A8C8A0" fontSize="10.5" fontFamily="Georgia,serif" fontStyle="italic">This is a good place</text>
-              <text x={palmX+97} y={palmY-180} textAnchor="middle" fill="#A8C8A0" fontSize="10.5" fontFamily="Georgia,serif" fontStyle="italic">to rest. Go say hello.</text>
-              <text x={palmX+97} y={palmY-165} textAnchor="middle" fill="#C8941A" fontSize="8" fontFamily="Cinzel,serif" letterSpacing="0.06em">— PALU HEMI</text>
+              <text x={palmX+97} y={palmY-214} textAnchor="middle" fill="#A8C8A0" fontSize="10.5" fontFamily="Georgia,serif" fontStyle="italic">Let's rest our eyes for a minute</text>
+              <text x={palmX+97} y={palmY-198} textAnchor="middle" fill="#A8C8A0" fontSize="10.5" fontFamily="Georgia,serif" fontStyle="italic">under this tree. Maybe someone</text>
+              <text x={palmX+97} y={palmY-182} textAnchor="middle" fill="#A8C8A0" fontSize="10.5" fontFamily="Georgia,serif" fontStyle="italic">will find us here.</text>
+              <text x={palmX+97} y={palmY-166} textAnchor="middle" fill="#C8941A" fontSize="8" fontFamily="Cinzel,serif" letterSpacing="0.06em">— PALU HEMI</text>
             </g>
           )}
 
@@ -414,29 +415,7 @@ function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
             </g>
           )}
 
-          {/* Palu speech bubbles — BOTTOM of scene, click to advance */}
-          {phase === "palu" && (
-            <g style={{ cursor:"pointer" }} onClick={handlePaluClick}>
-              {/* Full-width dim backdrop to make text readable */}
-              <rect x="0" y={H - 110} width={W} height="110" fill="#05100A" opacity="0.82"/>
-              <line x1="0" y1={H-110} x2={W} y2={H-110} stroke={accent} strokeWidth="1" opacity="0.3"/>
-              {/* Current line */}
-              <text x="36" y={H-76} fill="#A8C8A0" fontSize="15" fontFamily="Georgia,serif" fontStyle="italic">
-                {`"${b.paluLines[lineIdx]}"`}
-              </text>
-              <text x="36" y={H-54} fill="#C8941A" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.08em">— PALU HEMI</text>
-              {/* Progress dots */}
-              {b.paluLines.map((_,i) => (
-                <circle key={i} cx={W/2 - (b.paluLines.length-1)*10 + i*20} cy={H-20}
-                  r={i===lineIdx?5:3.5}
-                  fill={i<=lineIdx?"#C8941A":"#2A4030"}/>
-              ))}
-              {/* Click hint */}
-              <text x={W-20} y={H-20} textAnchor="end" fill="#C8941A" fontSize="9" fontFamily="Cinzel,serif" opacity="0.6">
-                {lineIdx < b.paluLines.length - 1 ? "click to continue →" : "click to look around →"}
-              </text>
-            </g>
-          )}
+          {/* Palu lines moved to HTML overlay below for proper text wrapping */}
 
           {/* Exchange speech bubble over greeter */}
           {shared && (
@@ -467,6 +446,31 @@ function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
 
         </svg>
 
+        {/* ── PALU ARRIVAL LINES — HTML overlay for proper text wrapping ── */}
+        {phase === "palu" && (
+          <div
+            onClick={handlePaluClick}
+            style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(3,10,6,0.88)", borderTop:`1px solid ${accent}22`, padding:"18px 28px 14px", cursor:"pointer", userSelect:"none" }}
+          >
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#A8C8A0", lineHeight:"1.75", fontStyle:"italic", marginBottom:"8px" }}>
+              {`"${b.paluLines[lineIdx]}"`}
+            </div>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+              <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.08em" }}>— PALU HEMI</span>
+              <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+                <div style={{ display:"flex", gap:"6px" }}>
+                  {b.paluLines.map((_,i) => (
+                    <div key={i} style={{ width:i===lineIdx?14:7, height:7, borderRadius:4, background:i<=lineIdx?accent:"#2A4030", transition:"all 0.25s" }}/>
+                  ))}
+                </div>
+                <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, opacity:0.6, letterSpacing:"0.06em" }}>
+                  {lineIdx < b.paluLines.length - 1 ? "click to continue →" : "click to look around →"}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── DIALOGUE PANEL — greeter clicked ── */}
         {phase === "dialogue" && (
           <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,6,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"16px" }}>
@@ -478,7 +482,7 @@ function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
               <button onClick={handleShare} style={{ flex:1, padding:"14px 18px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}`, background:`rgba(200,148,26,0.14)`, color:accent }}>
                 Share the sweet potato cuttings →
               </button>
-              <button onClick={handleDecline} style={{ flex:"0 0 auto", padding:"14px 22px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"600", letterSpacing:"0.08em", border:"1px solid #2A4830", background:"rgba(255,255,255,0.03)", color:"#5A8060" }}>
+              <button onClick={handleDecline} style={{ flex:1, padding:"14px 18px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"600", letterSpacing:"0.08em", border:"1px solid #2A4830", background:"rgba(255,255,255,0.03)", color:"#5A8060" }}>
                 Not yet
               </button>
             </div>
@@ -498,8 +502,8 @@ function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
                 </div>
                 <div style={{ fontFamily:"Cinzel,serif", fontSize:"8.5px", color:`${accent}55`, letterSpacing:"0.1em", marginTop:"8px" }}>— {b.storyCitation}</div>
               </div>
-              {/* Bag item */}
-              <div style={{ width:"210px", flexShrink:0, display:"flex", flexDirection:"column", gap:"10px" }}>
+              {/* Bag item + OK */}
+              <div style={{ width:"220px", flexShrink:0, display:"flex", flexDirection:"column", gap:"12px" }}>
                 <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", opacity:0.7 }}>ADDED TO YOUR BAG</div>
                 {samoanStarMap && (
                   <div style={{ display:"flex", alignItems:"center", gap:"12px", padding:"12px 14px", background:`${samoanStarMap.color}10`, border:`1px solid ${samoanStarMap.color}33`, borderRadius:"8px" }}>
@@ -510,8 +514,7 @@ function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
                     </div>
                   </div>
                 )}
-                <div style={{ fontFamily:"Georgia,serif", fontSize:"12px", color:"#5A8090", lineHeight:"1.65", fontStyle:"italic" }}>{b.bagNote}</div>
-                <button onClick={handleOkAfterStory} style={{ padding:"12px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`rgba(200,148,26,0.14)`, color:accent, marginTop:"4px" }}>
+                <button onClick={handleOkAfterStory} style={{ padding:"12px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`rgba(200,148,26,0.14)`, color:accent }}>
                   OK →
                 </button>
               </div>
@@ -1258,7 +1261,7 @@ function CompassLearnDiagram({ step }) {
   const qAngles = [0,90,180,270]; // starting angles of quadrants
 
   return (
-    <svg viewBox="-60 -60 720 720" style={{ width:"100%", maxWidth:"480px", filter:"drop-shadow(0 0 24px rgba(200,148,26,0.15))" }}>
+    <svg viewBox="-60 -60 720 720" style={{ width:"100%", maxWidth:"640px", filter:"drop-shadow(0 0 24px rgba(200,148,26,0.15))" }}>
       <defs>
         <radialGradient id="clBg"><stop offset="0%" stopColor="#0D1B30"/><stop offset="100%" stopColor="#060D1C"/></radialGradient>
         <filter id="clGlow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
@@ -5514,7 +5517,7 @@ function App() {
                     <>
                       <div style={{ fontSize:"20px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>Mānaiakalani!</div>
                       <div style={{ fontSize:"15px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>That is the one. Keep it on your starboard bow all night and we hold our heading for Sāmoa.</div>
-                      <button onClick={() => { setStep(2); setTimeout(() => setCompassPhase("bridge"), 2500); }} style={{ marginTop:"8px", padding:"12px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A" }}>
+                      <button onClick={() => setStep(2)} style={{ marginTop:"8px", padding:"12px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A" }}>
                         KEEP GOING →
                       </button>
                     </>
@@ -5523,7 +5526,10 @@ function App() {
                     <>
                       <div style={{ fontSize:"17px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>Mānaiakalani. You found it.</div>
                       <div style={{ fontSize:"14px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>See how it sits in the Nāleo-Koʻolau house — north-northeast. Keep it on your starboard bow all night and we hold our heading for Sāmoa.</div>
-                      <div style={{ marginTop:"auto",padding:"11px",background:"rgba(200,148,26,0.10)",border:"1px solid rgba(200,148,26,0.28)",borderRadius:"6px",textAlign:"center",fontFamily:"Cinzel,serif",fontSize:"10px",color:"#C8941A",letterSpacing:"0.09em" }}>✦ STAR COMPASS ADDED TO YOUR BAG ✦</div>
+                      <div style={{ padding:"11px",background:"rgba(200,148,26,0.10)",border:"1px solid rgba(200,148,26,0.28)",borderRadius:"6px",textAlign:"center",fontFamily:"Cinzel,serif",fontSize:"10px",color:"#C8941A",letterSpacing:"0.09em" }}>✦ STAR COMPASS ADDED TO YOUR BAG ✦</div>
+                      <button onClick={() => setCompassPhase("bridge")} style={{ padding:"12px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A" }}>
+                        SAIL TO SĀMOA →
+                      </button>
                     </>
                   )}
                 </div>

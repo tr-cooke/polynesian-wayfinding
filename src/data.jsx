@@ -507,7 +507,7 @@ export const BRIDGE_CONTENT = {
     storyCitation: "Polynesian Voyaging Society tradition",
     bagItems: ["star_compass", "samoan_star_map"],
     bagNote: "The Samoan wayfinders were impressed. Before we left, they gifted us their seasonal star map — a record of star positions as seen from the central Pacific. It joins the star compass in your bag.",
-    bridgeLine: "Tomorrow the Samoan wayfinders want to show us something. But the morning after — we sail southeast. Tahiti is waiting.",
+    bridgeLine: "We've been able to rest and exchange knowledge with the Samoans. But we cannot stay — we have more people to meet and we have not yet found a companion for our feathered friend. Let's prepare to sail. Tahiti is waiting.",
   },
   2: {
     destination: "Tahiti",
