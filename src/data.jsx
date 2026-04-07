@@ -49,22 +49,22 @@ export const STARS = [
   {
     id: "hokule_a", name: "Hōkūleʻa", western: "Arcturus",
     angle: 67.5, r: 7, color: "#FFD060", correct: false,
-    desc: "Zenith star of Hawaiʻi. Rises in ʻĀina-Koʻolau — east-northeast. Too far east for our NNE heading to Sāmoa. Save it for the return journey when we sail north.",
+    desc: "The zenith star of Hawaiʻi — it passes directly overhead there. Rises in ʻĀina-Koʻolau, east-northeast. Too far east for our NNE heading to Sāmoa.",
   },
   {
     id: "tawera", name: "Tāwera", western: "Venus",
     angle: 78.75, r: 10, color: "#FFE840", correct: false,
-    desc: "The morning star. Rises in Koʻolau — but Venus drifts nightly. Reliable only for short windows, not a multi-day voyage.",
+    desc: "The morning star — the brightest object in the sky on many nights. But Tāwera is a planet and drifts across houses over weeks. Reliable only in short windows, not for a multi-day voyage.",
   },
   {
     id: "takurua", name: "Takurua", western: "Sirius",
     angle: 101.25, r: 8, color: "#A0C8FF", correct: false,
-    desc: "Brightest star in the sky. Rises in Lā-Malanai — southeast of east. Far too far south — this heading would take us away from Sāmoa.",
+    desc: "The brightest true star in the sky. Rises in Lā-Malanai — east-southeast. A beautiful star, but this heading would carry us southeast, away from Sāmoa.",
   },
   {
     id: "atutahi", name: "Atutahi", western: "Canopus",
     angle: 146.25, r: 6, color: "#FFFCE0", correct: false,
-    desc: "Deep south anchor. Rises far south of east. Use it to check latitude — never as a northward guide star.",
+    desc: "The great southern anchor — it barely moves all night because it sits close to the south celestial pole. Rises far south of east. Use it to check your latitude, never as a northbound guide.",
   },
 ];
 
@@ -496,6 +496,7 @@ export const VOYAGE_WAYPOINTS = [
 
 export const BRIDGE_CONTENT = {
   1: {
+    destination: "Sāmoa",
     arrivalScene: "🏝",
     paluLines: [
       "We've arrived. Pull the bow up — there, into that cove. The sand is soft and the palms give shade.",
@@ -595,6 +596,7 @@ export const MODULE_CONTENT = {
     accent: "#C8941A",
     hawaiian: "Ka Pā Hōkū",
     destination: "Sāmoa",
+    departure: { location: "Tongatapu, Tonga", note: "The beach at dusk. Shells laid in a circle in the sand." },
     intro: {
       quote: "First, apprentice — let us travel together to Sāmoa. It is a shorter crossing, a good place to begin your training. The stars will guide us.",
       attribution: "Palu Hemi, Tongatapu",
@@ -607,10 +609,13 @@ export const MODULE_CONTENT = {
     learn: {
       title: "The Star Compass",
       concepts: [
-        { heading: "32 houses", body: "The horizon is divided into 32 equal houses, each spanning 11.25°. Every star rises in one house and sets in the opposite — the same house, every night, for centuries." },
-        { heading: "Four quadrants", body: "Koʻolau (NE) · Malanai (SE) · Kona (SW) · Hoʻolua (NW). The four cardinal points have Hawaiian names: Ākau (N), Hikina (E), Hema (S), Komohana (W)." },
-        { heading: "Sāmoa is NNE", body: "From Tonga, Sāmoa lies in the Nāleo-Koʻolau house — about 22.5° from north. We need a star rising in that exact house to lock our heading through the night." },
-        { heading: "Mānaiakalani (Vega)", body: "Vega rises in Nāleo-Koʻolau from Tonga's latitude. Keep it on your starboard bow all night and you are holding your heading toward Sāmoa. It is your guide star for this crossing." },
+        { heading: "Why not just follow one star?", body: "In the north, sailors follow Polaris — the north star — because it sits directly above the Earth's pole and barely moves. From Tonga, Polaris is below the horizon. We cannot use it. There is no bright star above the south pole either. So our ancestors asked a different question: not 'which star stays still?' but 'what about a star never changes?'" },
+        { heading: "The rising point never moves", body: "A star moves across the sky all night — it rises, arcs overhead, and sets. That moving position is useless for navigation. But the point on the horizon where it rises is fixed. It rises in exactly the same place tonight as it did last night, last season, and a hundred years ago. That fixed point on the horizon is our compass. We do not navigate by where a star is in the sky. We navigate by where it touches the horizon." },
+        { heading: "32 houses", body: "The horizon is divided into 32 equal houses, each spanning 11.25°. Every star rises in one house and sets in the opposite house — every night, for centuries. The compass does not move. You learn it on the beach, using shells laid in a circle in the sand to represent the houses. Then you hold it in your mind and carry it to sea." },
+        { heading: "Four quadrants", body: "There are four quadrants: Koʻolau (NE), Malanai (SE), Kona (SW), and Hoʻolua (NW). The four cardinal points are Ākau (N), Hikina (E), Hema (S), and Komohana (W). The house names come from Hawaiian oral tradition — Nāleo means 'voices' or 'sounds.' These names were passed down through chant and memorised, not derived from a formula." },
+        { heading: "How to find Sāmoa", body: "The last Wayfinder shared a story with us of his voyage to Sāmoa, and named its house as Nāleo-Koʻolau. This means we know Sāmoa lies in that direction — about 22.5° from north. We are trusting he told the story right, and that my memory is not too full of beach sand to remember it." },
+        { heading: "Reading with anchor stars", body: "Different stars are visible on different nights — seasons change which ones rise before dawn. So a navigator learns many stars for each part of the horizon, not just one. Hōkūleʻa anchors the ENE. Takurua anchors the ESE. Atutahi anchors the deep south. When one guide star sets or climbs too high, you switch to another in the same house, or use a different star to cross-check your heading." },
+        { heading: "Mānaiakalani — your guide", body: "Mānaiakalani rises in Nāleo-Koʻolau — north-northeast, exactly where Sāmoa lies. Keep it on your starboard bow as it rises from the horizon and you hold your heading. When it climbs too high to give direction, check it against Hōkūleʻa to your right and Ākau (north) above — you should be holding the angle between them. Mānaiakalani is the hook of Māui, and tonight it hooks us toward Sāmoa." },
       ],
     },
   },
@@ -618,6 +623,7 @@ export const MODULE_CONTENT = {
     accent: "#D06030",
     hawaiian: "Tama-nui-te-rā",
     destination: "Tahiti",
+    departure: { location: "Apia, Sāmoa", note: "The harbour at sunrise. Palu traces the sun's arc in the air with his hand." },
     intro: {
       quote: "Great work on our first trip. The Samoan wayfinders were impressed — and they have given us a new star map to help with future journeys. Now for a new challenge: we travel farther, and by day. Our next destination is Tahiti.",
       attribution: "Palu Hemi, at sea",
@@ -641,6 +647,7 @@ export const MODULE_CONTENT = {
     accent: "#2A90A8",
     hawaiian: "Te Moana",
     destination: "Marquesas",
+    departure: { location: "Papeete, Tahiti", note: "The shore before dawn. Palu sketches a cross-section in the wet sand with a stick." },
     intro: {
       quote: "You are learning fast. The old wayfaring master of Tahiti has passed on — but his successor gifted us a cutting from a rare taro plant that can weather stormy springs and dry summers. We will carry it home. But first: northeast, to the Marquesas.",
       attribution: "Palu Hemi, Tahiti",
@@ -664,6 +671,7 @@ export const MODULE_CONTENT = {
     accent: "#4A70C0",
     hawaiian: "Hau me Matagi",
     destination: "Hawaiʻi",
+    departure: { location: "Atuona, Marquesas", note: "The valley floor at evening. A fire, a map drawn in ash." },
     intro: {
       quote: "Now for the longest crossing of our journey — northwest to Hawaiʻi. Last night around the fire, one of the Marquesan elders told the story of Makanikeoe, a trickster wind spirit who disguised himself as a traveller and led a navigator off-course by shifting direction whenever the navigator relied on wind alone. A story — but a useful one. Never trust wind as your only guide.",
       attribution: "Palu Hemi, Marquesas",
@@ -686,6 +694,7 @@ export const MODULE_CONTENT = {
     accent: "#00C896",
     hawaiian: "Ngā Manu",
     destination: "Fiji",
+    departure: { location: "Hilo, Hawaiʻi", note: "The reef's edge at low tide. Matala perched nearby." },
     intro: {
       quote: "We have traveled far, and our mission has been a success. I know these sweet potato seeds will help in years when the rains fail. Before we go home, we should stop by our neighbours in Fiji — to check in and see what is new.",
       attribution: "Palu Hemi, Hawaiʻi",
@@ -709,6 +718,7 @@ export const MODULE_CONTENT = {
     accent: "#7A9EC8",
     hawaiian: "Kapua me te Moana",
     destination: "Tonga",
+    departure: { location: "Suva, Fiji", note: "The headland above the harbour. The sky and ocean spread before you." },
     intro: {
       quote: "We are ready to return home now — and we carry new stories, a star map from Sāmoa, and a taro plant from the Marquesas. The clouds and the sea itself will guide us back to Tonga.",
       attribution: "Palu Hemi, Fiji",
@@ -793,8 +803,8 @@ export const STORY_PAGES = (name) => [
     speaker: "Palu Hemi",
     location: "Tongatapu, Tonga",
     text: [
-      `Welcome, ${name}. My parrot Matala told me you had just arrived — she has an eye for promising young people.`,
-      `I hear you made the crossing from Vava'u in a canoe. That was a passenger's voyage. From here on, I am going to teach you something different — the skills of a Wayfinder.`,
+      `Hello, ${name}. My parrot Matala told me you volunteered as a navigation apprentice — she has an eye for promising young people, and recommended we speak.`,
+      `I heard you once made the crossing from Vava'u in a canoe. That was a passenger's voyage. From here on, I am going to teach you something different — the skills of a Wayfinder.`,
       `I have been navigating these waters for fifty years. My knees are telling me it is time to pass that knowledge on. You have arrived at exactly the right moment.`,
     ],
   },
@@ -806,8 +816,9 @@ export const STORY_PAGES = (name) => [
     location: "Tongatapu, Tonga",
     text: [
       `We have an important task, and you will be the one to carry it out as you build your wayfinding skills.`,
-      `The king of our Tongan islands has cultivated a new variety of sweet potato — hardy, plentiful, and resistant to drought. In the years ahead, when the rains fail, this crop may be the difference between hunger and survival for communities across the ocean.`,
-      `Your voyage will take you to Sāmoa, Tahiti, the Marquesas, Hawaiʻi, and Fiji — to share what we have grown, and to bring back knowledge and gifts from friends across the sea. Along the way, you may make discoveries of your own to carry home.`,
+      `The king of our Tongan islands has cultivated a new variety of sweet potato — hardy, plentiful, and resistant to drought. In the years ahead, when the rains fail, this crop may be the difference between hunger and survival for communities across the ocean. But the chief knows our people will eventually tire of a sweet potato diet — we need to bring home new foods from the islands we visit.`,
+      `There is one more matter. You may have noticed Matala. She is one of the last parrots left on our island, and she cannot find a mate. If we come across birds on our journey who might help our flock recover, we should bring them home. She would never forgive me if I did not mention it.`,
+      `Your voyage will take you to Sāmoa, Tahiti, the Marquesas, Hawaiʻi, and Fiji — sharing what we have grown, bringing back knowledge, new foods, and perhaps new birds. Along the way, you may make discoveries of your own.`,
     ],
   },
   {
@@ -827,4 +838,3 @@ export const STORY_PAGES = (name) => [
     ],
   },
 ];
-

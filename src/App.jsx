@@ -72,7 +72,7 @@ function BridgeScreen({ moduleNum, name, unlocked, onReturn }) {
 
             {/* Arrival tag */}
             <div style={{ display:"flex", alignItems:"center", gap:"12px" }}>
-              <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.2em", opacity:0.7 }}>ARRIVED · {b.destination.toUpperCase()}</div>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.2em", opacity:0.7 }}>ARRIVED · {(b.destination || "").toUpperCase()}</div>
               <div style={{ flex:1, height:"1px", background:`linear-gradient(to right, ${accent}44, transparent)` }}/>
             </div>
 
@@ -159,7 +159,7 @@ function BridgeScreen({ moduleNum, name, unlocked, onReturn }) {
                   <div key={itemId} style={{ display:"flex", alignItems:"center", gap:"14px", padding:"11px 14px", background:`${item.color}10`, border:`1px solid ${item.color}33`, borderRadius:"8px" }}>
                     <span style={{ fontSize:"22px", flexShrink:0 }}>{item.icon}</span>
                     <div>
-                      <div style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#D0C8A8" }}>{item.name}</div>
+                      <div style={{ fontFamily:"Cinzel,serif", fontSize:"13px", fontWeight:"700", color:"#D0C8A8" }}>{item.name}</div>
                       <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:`${item.color}99`, letterSpacing:"0.06em", marginTop:"2px" }}>{item.hawaiian}</div>
                     </div>
                   </div>
@@ -183,10 +183,67 @@ function BridgeScreen({ moduleNum, name, unlocked, onReturn }) {
    NAVIGATOR'S BAG
 ══════════════════════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════════════
+   BAG INTRO POPUP — shown once on first map visit
+══════════════════════════════════════════════════════════════ */
+
+function BagIntroPopup({ onDismiss, onOpenBag, unlocked }) {
+  return (
+    <div style={{ position:"fixed", inset:0, zIndex:90, pointerEvents:"none" }}>
+      {/* Spotlight backdrop — semi-transparent with a gap top-right for bag button */}
+      <div style={{ position:"absolute", inset:0, background:"rgba(2,5,12,0.55)", backdropFilter:"blur(1px)", pointerEvents:"auto" }} onClick={onDismiss}/>
+
+      {/* Popup card — anchored top-right near the bag button */}
+      <div style={{
+        position:"absolute", top:"56px", right:"16px",
+        width:"280px", background:"rgba(6,12,24,0.98)", border:"1px solid #C8941A55",
+        borderRadius:"12px", padding:"20px", zIndex:91, pointerEvents:"auto",
+        boxShadow:"0 0 40px rgba(200,148,26,0.2)",
+      }}>
+        {/* Arrow pointing up toward bag button */}
+        <div style={{ position:"absolute", top:"-10px", right:"22px", width:0, height:0,
+          borderLeft:"9px solid transparent", borderRight:"9px solid transparent",
+          borderBottom:"10px solid #C8941A55" }}/>
+        <div style={{ position:"absolute", top:"-8px", right:"23px", width:0, height:0,
+          borderLeft:"8px solid transparent", borderRight:"8px solid transparent",
+          borderBottom:"9px solid rgba(6,12,24,0.98)" }}/>
+
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"13px", fontWeight:"700", color:"#C8941A", marginBottom:"10px" }}>
+          ✦ Navigator's Bag
+        </div>
+        <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", lineHeight:"1.75", fontStyle:"italic", marginBottom:"12px" }}>
+          "Everything you collect on this voyage lives here — tools, knowledge, and gifts. Check it whenever you need a reminder of what you carry."
+        </div>
+        <div style={{ fontFamily:"Georgia,serif", fontSize:"12px", color:"#8ABCB0", lineHeight:"1.65", fontStyle:"italic", marginBottom:"12px" }}>
+          "To start, you are carrying the chief's sweet potato cuttings. Guard them well."
+        </div>
+        <div style={{ fontFamily:"Georgia,serif", fontSize:"12px", color:"#5A8090", lineHeight:"1.65", fontStyle:"italic", marginBottom:"18px" }}>
+          "Now — see that glowing island to the northeast? That is our first destination, Sāmoa. Click it on the map to begin your first navigation challenge."
+        </div>
+        <div style={{ display:"flex", gap:"8px" }}>
+          <button onClick={onOpenBag} style={{
+            flex:1, padding:"10px 14px", borderRadius:"6px", cursor:"pointer",
+            fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em",
+            border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A",
+          }}>OPEN BAG →</button>
+          <button onClick={onDismiss} style={{
+            flex:1, padding:"10px 14px", borderRadius:"6px", cursor:"pointer",
+            fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em",
+            border:"1px solid #1A3050", background:"none", color:"#3A6070",
+          }}>UNDERSTOOD</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 function NavigatorsBag({ open, onClose, unlocked }) {
   const [activeItem, setActiveItem] = useState(null);
   if (!open) return null;
   const item = activeItem ? BAG_ITEMS.find(b => b.id === activeItem) : null;
+  const unlockedItems = BAG_ITEMS.filter(it => unlocked.includes(it.id));
+  const remaining = BAG_ITEMS.length - unlockedItems.length;
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", justifyContent: "flex-end" }}>
@@ -202,34 +259,52 @@ function NavigatorsBag({ open, onClose, unlocked }) {
         </div>
 
         {!activeItem ? (
-          <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
-            <div style={{ fontSize: "9.5px", color: "#1E3448", fontFamily: "Cinzel,serif", letterSpacing: "0.14em", marginBottom: "12px" }}>
-              {unlocked.length} OF {BAG_ITEMS.length} ITEMS COLLECTED
+          <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: "14px" }}>
+
+            {/* Intro blurb */}
+            <div style={{ padding: "12px 14px", background: "rgba(200,148,26,0.06)", border: "1px solid #C8941A22", borderRadius: "7px" }}>
+              <div style={{ fontFamily: "Georgia,serif", fontSize: "12px", color: "#7AACBE", lineHeight: "1.65", fontStyle: "italic" }}>
+                Everything you collect on the voyage lives here — tools, gifts, knowledge. Each item has a story. Tap any item to read it.
+              </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {BAG_ITEMS.map(it => {
-                const isUnlocked = unlocked.includes(it.id);
-                return (
-                  <div key={it.id} onClick={() => isUnlocked && setActiveItem(it.id)} style={{
+
+            {/* Collected items */}
+            {unlockedItems.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div style={{ fontSize: "9px", color: "#2A4860", fontFamily: "Cinzel,serif", letterSpacing: "0.14em" }}>
+                  {unlockedItems.length} ITEM{unlockedItems.length !== 1 ? "S" : ""} COLLECTED
+                </div>
+                {unlockedItems.map(it => (
+                  <div key={it.id} onClick={() => setActiveItem(it.id)} style={{
                     padding: "13px 15px", borderRadius: "7px",
-                    border: `1px solid ${isUnlocked ? it.color + "44" : "#0E1E30"}`,
-                    background: isUnlocked ? `${it.color}0C` : "rgba(255,255,255,0.02)",
-                    cursor: isUnlocked ? "pointer" : "default",
+                    border: `1px solid ${it.color}44`,
+                    background: `${it.color}0C`,
+                    cursor: "pointer",
                     display: "flex", alignItems: "center", gap: "13px",
-                    opacity: isUnlocked ? 1 : 0.38,
                   }}>
-                    <div style={{ fontSize: "22px", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: isUnlocked ? `${it.color}18` : "transparent", borderRadius: "6px", flexShrink: 0, filter: isUnlocked ? `drop-shadow(0 0 8px ${it.color}66)` : "none" }}>
+                    <div style={{ fontSize: "22px", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: `${it.color}18`, borderRadius: "6px", flexShrink: 0, filter: `drop-shadow(0 0 8px ${it.color}66)` }}>
                       {it.icon}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontFamily: "Cinzel,serif", fontSize: "12px", fontWeight: "700", color: isUnlocked ? "#D0C8A8" : "#2A3A50" }}>{it.name}</div>
-                      <div style={{ fontFamily: "Cinzel,serif", fontSize: "9px", color: isUnlocked ? it.color : "#1A2A3A", letterSpacing: "0.06em", marginTop: "2px" }}>{isUnlocked ? it.hawaiian : "— locked —"}</div>
+                      <div style={{ fontFamily: "Cinzel,serif", fontSize: "12px", fontWeight: "700", color: "#D0C8A8" }}>{it.name}</div>
+                      <div style={{ fontFamily: "Cinzel,serif", fontSize: "9px", color: it.color, letterSpacing: "0.06em", marginTop: "2px" }}>{it.hawaiian}</div>
                     </div>
-                    {isUnlocked && <div style={{ color: "#2A4860", fontSize: "14px" }}>›</div>}
+                    <div style={{ color: "#2A4860", fontSize: "14px" }}>›</div>
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            )}
+
+            {/* Remaining count hint */}
+            {remaining > 0 && (
+              <div style={{ padding: "10px 14px", border: "1px solid #0E1E30", borderRadius: "7px", display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ fontSize: "18px", opacity: 0.3 }}>✦</div>
+                <div style={{ fontFamily: "Cinzel,serif", fontSize: "10px", color: "#1E3448", letterSpacing: "0.08em" }}>
+                  {remaining} more item{remaining !== 1 ? "s" : ""} to discover on the voyage
+                </div>
+              </div>
+            )}
+
           </div>
         ) : (
           <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
@@ -306,7 +381,7 @@ function VoyageMap({ name, onNavigate, unlocked, onOpenBag, onReset }) {
     { label:"Komohana",  angle:270, abbr:"W"   },
     { label:"Hoʻolua",   angle:315, abbr:"NW"  },
   ];
-  const RCX = W - 52, RCY = 52, RR = 32;
+  const RCX = W - 68, RCY = 64, RR = 30;
 
   return (
     <div style={{ width: "100%", height: "100%", background: "#051C2C", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -381,7 +456,8 @@ function VoyageMap({ name, onNavigate, unlocked, onOpenBag, onReset }) {
             })}
 
             {/* Islands */}
-            {ISLANDS.map(island => {
+            {/* Islands — locked islands hidden, but home (Tonga) always visible */}
+            {ISLANDS.filter(island => island.module !== null && (island.isHome || !isLocked(island))).map(island => {
               const hov      = hovIsland === island.id;
               const home     = island.isHome && island.module === 0 || island.isHome;
               const completed = isCompleted(island);
@@ -470,15 +546,18 @@ function VoyageMap({ name, onNavigate, unlocked, onOpenBag, onReset }) {
                   {/* Hover tooltip */}
                   {hov && island.label && (
                     <g>
-                      <rect x={island.x - 70} y={island.y + (island.isHome ? 18 : dotR + 7)}
-                        width="140" height="20" rx="3"
+                      <rect x={island.x - 110} y={island.y + (island.isHome ? 18 : dotR + 7)}
+                        width="220" height="20" rx="3"
                         fill="#041220" stroke={current ? "#C8941A55" : completed ? "#2AB87055" : "#1A304055"} strokeWidth="1" />
                       <text x={island.x} y={island.y + (island.isHome ? 32 : dotR + 21)}
                         textAnchor="middle"
                         fill={current ? "#C8941A" : completed ? "#2AB870" : "#1A6070"}
                         fontSize="8" fontFamily="Cinzel,serif" letterSpacing="0.06em"
                         style={{ pointerEvents: "none" }}>
-                        {locked ? "🔒 COMPLETE PREVIOUS STOP" : island.label}
+                        {island.isHome && completedCount < 6
+                          ? "🔒 Locked until our mission is complete"
+                          : locked ? "🔒 COMPLETE PREVIOUS STOP"
+                          : island.label}
                       </text>
                     </g>
                   )}
@@ -548,7 +627,7 @@ function CompassDial({ step, selHouse, selStar, hovHouse, hovStar, onHouseClick,
   const selC = ok => ok ? "#FFD700" : "#FF5533";
 
   return (
-    <svg viewBox="0 0 600 618" style={{ width: "100%", height: "100%", filter: "drop-shadow(0 0 40px rgba(15,90,150,0.4))" }}>
+    <svg viewBox="-55 -55 710 728" style={{ width: "100%", height: "100%", filter: "drop-shadow(0 0 40px rgba(15,90,150,0.4))" }}>
       <defs>
         <radialGradient id="bgGC" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#0D1B30" /><stop offset="100%" stopColor="#060D1C" />
@@ -601,6 +680,13 @@ function CompassDial({ step, selHouse, selStar, hovHouse, hovStar, onHouseClick,
         return <text key={n} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fill={c} fontSize="11" fontFamily="Cinzel,serif" fontWeight="700" style={{ letterSpacing: "0.18em", pointerEvents: "none" }}>{n}</text>;
       })}
 
+      {/* Nāleo-Koʻolau label — only shown on success (step 3) */}
+      {step >= 3 && (()=>{ const lp = pt(22.5, R + 28, CX, CY); return (
+        <text x={lp.x.toFixed(1)} y={lp.y.toFixed(1)} textAnchor="middle"
+          fill="#C8941A" fontSize="10" fontFamily="Cinzel,serif" fontWeight="700"
+          style={{ pointerEvents:"none" }}>Nāleo-Koʻolau</text>
+      );})()}
+
       {step >= 2 && STARS.map(star => {
         const p = pt(star.angle, 228, CX, CY);
         const isHov = hovStar?.id === star.id, isSel = selStar?.id === star.id;
@@ -613,8 +699,7 @@ function CompassDial({ step, selHouse, selStar, hovHouse, hovStar, onHouseClick,
             {(isHov || isSel) && <circle cx={p.x} cy={p.y} r={star.r + 13} fill="none" stroke={isSel ? selC(correct) : star.color} strokeWidth="1.5" opacity="0.4" />}
             <circle cx={p.x} cy={p.y} r={isHov || isSel ? star.r + 2 : star.r} fill={star.color} filter="url(#glowC)" />
             {(isHov || isSel) && <>
-              <text x={p.x} y={p.y - star.r - 17} textAnchor="middle" fill="#EEE5C8" fontSize="11" fontFamily="Cinzel,serif" fontWeight="600" style={{ pointerEvents: "none" }}>{star.name}</text>
-              <text x={p.x} y={p.y - star.r - 7}  textAnchor="middle" fill="#6A9BAA" fontSize="9"  fontFamily="Cinzel,serif" style={{ pointerEvents: "none" }}>{star.western}</text>
+              <text x={p.x} y={p.y - star.r - 12} textAnchor="middle" fill="#EEE5C8" fontSize="11" fontFamily="Cinzel,serif" fontWeight="600" style={{ pointerEvents: "none" }}>{star.name}</text>
             </>}
           </g>
         );
@@ -631,8 +716,309 @@ function CompassDial({ step, selHouse, selStar, hovHouse, hovStar, onHouseClick,
 }
 
 /* ══════════════════════════════════════════════════════════════
-   PALU PANEL
+   MODULE 1 — COMPASS LEARN (step-through progressive diagram)
 ══════════════════════════════════════════════════════════════ */
+
+function CompassLearnDiagram({ step }) {
+  // CX/CY=300, R=248. viewBox gives 60px padding on each side
+  const CX=300, CY=300, R=248, RI=52;
+  const p = (deg, r) => {
+    const rad=(deg-90)*Math.PI/180;
+    return { x: CX+r*Math.cos(rad), y: CY+r*Math.sin(rad) };
+  };
+  const qFill = ["rgba(200,120,20,0.11)","rgba(155,145,15,0.09)","rgba(15,95,155,0.12)","rgba(90,35,170,0.09)"];
+  const qAngles = [0,90,180,270]; // starting angles of quadrants
+
+  return (
+    <svg viewBox="-60 -60 720 720" style={{ width:"100%", maxWidth:"480px", filter:"drop-shadow(0 0 24px rgba(200,148,26,0.15))" }}>
+      <defs>
+        <radialGradient id="clBg"><stop offset="0%" stopColor="#0D1B30"/><stop offset="100%" stopColor="#060D1C"/></radialGradient>
+        <filter id="clGlow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+
+      {/* Background circle — always */}
+      <circle cx={CX} cy={CY} r={R+8} fill="url(#clBg)"/>
+
+      {/* Step 0: Rising point insight — arc animation showing star path vs fixed horizon point */}
+      {step === 0 && (()=>{
+        const horizY = CY + 210;
+        const arcSteps = 9;
+        // Star arc positions (rise ESE, peak overhead, set WSW)
+        const arcPts = Array.from({length:arcSteps},(_,i)=>{
+          const t = i/(arcSteps-1); // 0=rise, 1=set
+          const angle = (t * 180) * Math.PI/180; // 0=right horizon, 180=left horizon
+          const rx = 220, ry = 160;
+          return { x: CX + rx*Math.cos(Math.PI - angle), y: horizY - ry*Math.sin(angle) };
+        });
+        const risePt = arcPts[0];
+        const peakPt = arcPts[Math.floor(arcSteps/2)];
+        const setPt  = arcPts[arcSteps-1];
+        const arcD   = arcPts.map((p,i) => `${i===0?"M":"L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+        return (
+          <g>
+            {/* Horizon line */}
+            <line x1={CX-260} y1={horizY} x2={CX+260} y2={horizY} stroke="#1A4050" strokeWidth="2"/>
+            <text x={CX+268} y={horizY+4} fill="#1A4050" fontSize="10" fontFamily="Cinzel,serif">HORIZON</text>
+
+            {/* Ocean below */}
+            <rect x={CX-260} y={horizY} width={520} height={60} fill="#030A14" opacity="0.5" rx="4"/>
+
+            {/* Star arc — dashed, showing movement */}
+            <path d={arcD} fill="none" stroke="#C0E8FF" strokeWidth="1.5" strokeDasharray="8,5" opacity="0.5"/>
+
+            {/* Star at different positions along arc — fading */}
+            {arcPts.slice(1,-1).map((p,i)=>(
+              <circle key={i} cx={p.x.toFixed(1)} cy={p.y.toFixed(1)} r={4}
+                fill="#C0E8FF" opacity={(0.15 + i*0.04).toFixed(2)}/>
+            ))}
+
+            {/* Star at rise — bright */}
+            <circle cx={risePt.x.toFixed(1)} cy={risePt.y.toFixed(1)} r={9} fill="#C0E8FF" opacity="0.95"/>
+            <text x={(risePt.x+14).toFixed(1)} y={(risePt.y-12).toFixed(1)} fill="#C0E8FF" fontSize="11" fontFamily="Cinzel,serif" fontWeight="600">rising</text>
+
+            {/* Fixed rising point marker on horizon */}
+            <circle cx={risePt.x.toFixed(1)} cy={horizY} r={8} fill="#C8941A" stroke="#E8C060" strokeWidth="2"/>
+            <line x1={risePt.x.toFixed(1)} y1={(horizY-8).toFixed(1)} x2={risePt.x.toFixed(1)} y2={(risePt.y+9).toFixed(1)}
+              stroke="#C8941A" strokeWidth="1.5" strokeDasharray="4,3" opacity="0.6"/>
+            <text x={(risePt.x).toFixed(1)} y={(horizY+22).toFixed(1)} textAnchor="middle"
+              fill="#C8941A" fontSize="12" fontFamily="Cinzel,serif" fontWeight="700">this point</text>
+            <text x={(risePt.x).toFixed(1)} y={(horizY+36).toFixed(1)} textAnchor="middle"
+              fill="#C8941A" fontSize="12" fontFamily="Cinzel,serif" fontWeight="700">never moves</text>
+
+            {/* Peak label */}
+            <text x={peakPt.x.toFixed(1)} y={(peakPt.y-16).toFixed(1)} textAnchor="middle"
+              fill="#4A7090" fontSize="10" fontFamily="Cinzel,serif">overhead — useless for direction</text>
+            <circle cx={peakPt.x.toFixed(1)} cy={peakPt.y.toFixed(1)} r={5} fill="#C0E8FF" opacity="0.4"/>
+
+            {/* Polaris comparison — top left */}
+            <circle cx={CX-180} cy={CY-160} r={7} fill="#FFD060" opacity="0.9"/>
+            <text x={CX-180} y={CY-175} textAnchor="middle" fill="#FFD060" fontSize="10" fontFamily="Cinzel,serif">Polaris</text>
+            <text x={CX-180} y={CY-140} textAnchor="middle" fill="#4A6080" fontSize="9" fontFamily="Cinzel,serif">barely moves</text>
+            <text x={CX-180} y={CY-128} textAnchor="middle" fill="#4A6080" fontSize="9" fontFamily="Cinzel,serif">below our horizon</text>
+            <line x1={CX-180} y1={CY-120} x2={CX-180} y2={horizY-4}
+              stroke="#4A6080" strokeWidth="1" strokeDasharray="4,6" opacity="0.3"/>
+          </g>
+        );
+      })()}
+
+      {/* Step 1+: 32 house division lines (was step 0) */}
+      {step >= 1 && Array.from({length:32},(_,i) => {
+        const rad=(i*11.25-90)*Math.PI/180;
+        const isCard=i%8===0, isManu=i%4===0&&!isCard;
+        const r1=isCard?RI-2:isManu?RI+20:RI+45;
+        const r2=R;
+        return <line key={i}
+          x1={(CX+r1*Math.cos(rad)).toFixed(1)} y1={(CY+r1*Math.sin(rad)).toFixed(1)}
+          x2={(CX+r2*Math.cos(rad)).toFixed(1)} y2={(CY+r2*Math.sin(rad)).toFixed(1)}
+          stroke={isCard?"#3A5A80":isManu?"#253860":"#162840"}
+          strokeWidth={isCard?1.8:isManu?1.1:0.5}/>;
+      })}
+      <circle cx={CX} cy={CY} r={R} fill="none" stroke="#253850" strokeWidth="1.5"/>
+
+      {/* Step 1+: quadrant colours */}
+      {step >= 1 && qAngles.map((a,i) => {
+        const r1=(a-90)*Math.PI/180, r2=(a+90-90)*Math.PI/180;
+        return <path key={i} d={`M${CX},${CY} L${(CX+R*Math.cos(r1)).toFixed(1)},${(CY+R*Math.sin(r1)).toFixed(1)} A${R},${R} 0 0,1 ${(CX+R*Math.cos(r2)).toFixed(1)},${(CY+R*Math.sin(r2)).toFixed(1)} Z`} fill={qFill[i]}/>;
+      })}
+
+      {/* Step 1+: inner hub + cardinal labels + quadrant names */}
+      {step >= 1 && <>
+        <circle cx={CX} cy={CY} r={RI} fill="#060D1C" stroke="#1A2840" strokeWidth="1"/>
+        {[["Ākau",0],["Hikina",90],["Hema",180],["Komohana",270]].map(([n,a])=>{
+          const pos=p(a, 162);
+          return <text key={n} x={pos.x.toFixed(1)} y={pos.y.toFixed(1)} textAnchor="middle" dominantBaseline="middle"
+            fill="#5A92BC" fontSize="14" fontFamily="Cinzel,serif" fontWeight="600">{n}</text>;
+        })}
+        {[["KOʻOLAU","#B07825",45],["MALANAI","#9A9A20",135],["KONA","#2090C0",225],["HOʻOLUA","#8040C8",315]].map(([n,c,a])=>{
+          const pos=p(a, R+32);
+          return <text key={n} x={pos.x.toFixed(1)} y={pos.y.toFixed(1)} textAnchor="middle" dominantBaseline="middle"
+            fill={c} fontSize="11" fontFamily="Cinzel,serif" fontWeight="700" letterSpacing="0.15em">{n}</text>;
+        })}
+      </>}
+
+      {/* Step 2: Nāleo-Koʻolau highlighted at 22.5° */}
+      {step >= 2 && <>
+        {/* Wedge highlight */}
+        <path d={`M${CX},${CY} L${p(22.5-5.625,R).x.toFixed(1)},${p(22.5-5.625,R).y.toFixed(1)} A${R},${R} 0 0,1 ${p(22.5+5.625,R).x.toFixed(1)},${p(22.5+5.625,R).y.toFixed(1)} Z`}
+          fill="rgba(200,148,26,0.18)" stroke="#C8941A" strokeWidth="1.5"/>
+        {/* Bearing line */}
+        <line x1={CX} y1={CY} x2={p(22.5,R-4).x.toFixed(1)} y2={p(22.5,R-4).y.toFixed(1)}
+          stroke="#C8941A" strokeWidth="2" strokeDasharray="6,4" opacity="0.8"/>
+        {/* Label — only on steps 2 and 3 to avoid crowding with stars */}
+        {step <= 4 && (()=>{
+          const lp=p(22.5, R+42);
+          return <>
+            <text x={lp.x.toFixed(1)} y={lp.y.toFixed(1)} textAnchor="middle"
+              fill="#C8941A" fontSize="12" fontFamily="Cinzel,serif" fontWeight="700" letterSpacing="0.06em">
+              Nāleo-Koʻolau
+            </text>
+            <text x={(lp.x).toFixed(1)} y={(lp.y + 16).toFixed(1)} textAnchor="middle"
+              fill="#C8941A88" fontSize="10" fontFamily="Cinzel,serif">
+              ← Sāmoa
+            </text>
+          </>;
+        })()}
+      </>}
+
+      {/* Step 4+: all 5 stars appear — larger, clear dots, no labels yet */}
+      {step >= 4 && STARS.map(star => {
+        const sp=p(star.angle, 195);
+        const isFocus = star.id === "manaiakalani";
+        return <circle key={star.id} cx={sp.x.toFixed(1)} cy={sp.y.toFixed(1)}
+          r={star.r + (isFocus ? 2 : 0)} fill={star.color}
+          opacity={step >= 6 ? (isFocus ? 1 : 0.25) : step >= 5 ? 0.9 : 0.55}/>;
+      })}
+
+      {/* Step 5: anchor stars labelled (not Mānaiakalani yet) */}
+      {step >= 5 && step < 6 && [
+        {id:"hokule_a", label:"Hōkūleʻa",   note:"ʻĀina-Koʻolau"},
+        {id:"tawera",   label:"Tāwera",      note:"Koʻolau"},
+        {id:"takurua",  label:"Takurua",     note:"Lā-Malanai"},
+        {id:"atutahi",  label:"Atutahi",     note:"Nālani-Malanai"},
+      ].map(({id, label, note}) => {
+        const star = STARS.find(s=>s.id===id);
+        const sp = p(star.angle, 195);
+        const lp = p(star.angle, 258);
+        const anchor = lp.x > CX + 20 ? "start" : lp.x < CX - 20 ? "end" : "middle";
+        return (
+          <g key={id}>
+            <circle cx={sp.x.toFixed(1)} cy={sp.y.toFixed(1)} r={star.r+3} fill={star.color} opacity="0.9"/>
+            <text x={lp.x.toFixed(1)} y={(lp.y - 4).toFixed(1)} textAnchor={anchor}
+              fill={star.color} fontSize="13" fontFamily="Cinzel,serif" fontWeight="700">{label}</text>
+            <text x={lp.x.toFixed(1)} y={(lp.y + 12).toFixed(1)} textAnchor={anchor}
+              fill={star.color} fontSize="10" fontFamily="Cinzel,serif" opacity="0.6">{note}</text>
+          </g>
+        );
+      })}
+
+      {/* Step 5+: Mānaiakalani also labelled */}
+      {step >= 5 && (()=>{
+        const star = STARS.find(s=>s.id==="manaiakalani");
+        const sp = p(star.angle, 195);
+        const lp = p(star.angle, 258);
+        return (
+          <g>
+            <circle cx={sp.x.toFixed(1)} cy={sp.y.toFixed(1)} r={star.r+3} fill={star.color} opacity={step >= 6 ? 1 : 0.9}/>
+            <text x={(lp.x + 4).toFixed(1)} y={(lp.y - 4).toFixed(1)} textAnchor="start"
+              fill={star.color} fontSize="13" fontFamily="Cinzel,serif" fontWeight="700">Mānaiakalani</text>
+            {step >= 6 && <text x={(lp.x + 4).toFixed(1)} y={(lp.y + 12).toFixed(1)} textAnchor="start"
+              fill={star.color} fontSize="10" fontFamily="Cinzel,serif" opacity="0.65">Nāleo-Koʻolau · your guide</text>}
+          </g>
+        );
+      })()}
+
+      {/* Step 6: Mānaiakalani spotlight — glow rings */}
+      {step >= 6 && (()=>{
+        const star = STARS.find(s=>s.id==="manaiakalani");
+        const sp = p(star.angle, 195);
+        return (
+          <g>
+            <circle cx={sp.x.toFixed(1)} cy={sp.y.toFixed(1)} r={star.r+20}
+              fill="none" stroke="#C0E8FF" strokeWidth="1.2" opacity="0.2" filter="url(#clGlow)"/>
+            <circle cx={sp.x.toFixed(1)} cy={sp.y.toFixed(1)} r={star.r+11}
+              fill="none" stroke="#C0E8FF" strokeWidth="1" opacity="0.4"/>
+          </g>
+        );
+      })()}
+
+      {/* Centre dot — always */}
+      <circle cx={CX} cy={CY} r={5} fill="#5A92BC"/>
+    </svg>
+  );
+}
+
+const COMPASS_LEARN_STEPS = MODULE_CONTENT[1].learn.concepts;
+
+function CompassLearnScreen({ name, onReady, onBack, onOpenBag, unlocked }) {
+  const [conceptIdx, setConceptIdx] = useState(0);
+  const total   = COMPASS_LEARN_STEPS.length;
+  const concept = COMPASS_LEARN_STEPS[conceptIdx];
+  const accent  = "#C8941A";
+  const isLast  = conceptIdx === total - 1;
+  const dep     = MODULE_CONTENT[1].departure;
+
+  const shoreBg    = "#060E08";
+  const shoreMid   = "rgba(6,14,8,0.96)";
+  const shorePanel = "rgba(4,10,6,0.85)";
+
+  return (
+    <div style={{ width:"100%", height:"100%", background:shoreBg, display:"flex", flexDirection:"column", overflow:"hidden" }}>
+
+      {/* Header */}
+      <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:shoreMid, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em", opacity:0.8 }}>HAUMĀNA · {name.toUpperCase()}</span>
+      </div>
+
+      {/* Location bar */}
+      <div style={{ padding:"7px 22px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,10,6,0.7)", flexShrink:0, display:"flex", alignItems:"center", gap:"14px" }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em", opacity:0.9 }}>ON SHORE · {dep.location.toUpperCase()}</span>
+        <span style={{ fontFamily:"Georgia,serif", fontSize:"9px", color:`${accent}66`, fontStyle:"italic" }}>{dep.note}</span>
+      </div>
+
+      {/* Body */}
+      <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
+
+        {/* Left — concept panel */}
+        <div style={{ width:"320px", flexShrink:0, borderRight:`1px solid ${accent}18`, overflowY:"auto", background:shorePanel, display:"flex", flexDirection:"column" }}>
+          <div style={{ padding:"22px 20px", display:"flex", flexDirection:"column", gap:"16px", flex:1 }}>
+
+            {/* Nav */}
+            <div style={{ display:"flex", gap:"8px" }}>
+              <button onClick={onBack} style={{ flex:1, background:"none", border:`1px solid ${accent}22`, borderRadius:"4px", color:"#2A3A28", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
+              <button onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":accent+"22"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#2A3A28", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>
+                {unlocked.length>0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
+              </button>
+            </div>
+
+            {/* Step dots */}
+            <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
+              {Array.from({length:total},(_,i)=>(
+                <div key={i} onClick={() => setConceptIdx(i)} style={{
+                  width: i===conceptIdx ? "18px" : "7px", height:"7px", borderRadius:"4px",
+                  background: i===conceptIdx ? accent : i<conceptIdx ? "#2A8860" : "#1A2820",
+                  cursor:"pointer", transition:"all 0.25s",
+                }}/>
+              ))}
+              <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A3A28", marginLeft:"4px" }}>{conceptIdx+1}/{total}</span>
+            </div>
+
+            {/* Concept heading */}
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"16px", fontWeight:"700", color:accent, lineHeight:"1.3" }}>
+              {concept.heading}
+            </div>
+
+            {/* Concept body */}
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", lineHeight:"1.78", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"14px" }}>
+              {concept.body}
+            </div>
+
+            {/* Prev / Next / Set Sail */}
+            <div style={{ display:"flex", gap:"8px", marginTop:"auto" }}>
+              {conceptIdx > 0 && (
+                <button onClick={() => setConceptIdx(i=>i-1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}33`, background:"none", color:`${accent}88` }}>← PREV</button>
+              )}
+              {!isLast ? (
+                <button onClick={() => setConceptIdx(i=>i+1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>NEXT →</button>
+              ) : (
+                <button onClick={onReady} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`linear-gradient(135deg,${accent}22,${accent}0A)`, color:accent }}>SET SAIL →</button>
+              )}
+            </div>
+
+          </div>
+        </div>
+
+        {/* Right — progressive compass — shore background */}
+        <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px", background:"rgba(4,10,5,0.4)" }}>
+          <CompassLearnDiagram step={conceptIdx} />
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+
 
 /* ══════════════════════════════════════════════════════════════
    MODULE NARRATIVE CONTENT
@@ -997,7 +1383,7 @@ function FinalVoyageModule({ name, onBack, onOpenBag, unlocked }) {
             {/* Palu's note */}
             <div style={{ background:"rgba(4,10,20,0.7)", border:`1px solid ${accent}18`, borderRadius:"7px", padding:"14px" }}>
               <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:`${accent}88`, letterSpacing:"0.14em", marginBottom:"8px" }}>PALU'S NOTES</div>
-              <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#7AACBE", lineHeight:"1.7", fontStyle:"italic" }}>
+              <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", lineHeight:"1.75", fontStyle:"italic" }}>
                 {phase === "hint"
                   ? node.hint
                   : phase === "advancing"
@@ -1155,63 +1541,70 @@ function ModuleIntroScreen({ moduleNum, name, onBegin, onBack }) {
 ══════════════════════════════════════════════════════════════ */
 
 function ModuleLearnScreen({ moduleNum, name, onReady, onBack, onOpenBag, unlocked, children }) {
-  const content = MODULE_CONTENT[moduleNum];
-  const accent  = content.accent;
+  const content  = MODULE_CONTENT[moduleNum];
+  const accent   = content.accent;
   const { title, concepts } = content.learn;
+  const dep      = content.departure;
+
+  // Shore colour palette — warm dark greens and earthy tones
+  const shoreBg    = "#060E08";
+  const shoreMid   = "rgba(6,14,8,0.96)";
+  const shorePanel = "rgba(4,10,6,0.85)";
+  const shoreAccentDim = `${accent}22`;
 
   return (
-    <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+    <div style={{ width:"100%", height:"100%", background:shoreBg, display:"flex", flexDirection:"column", overflow:"hidden" }}>
 
       {/* Header */}
-      <div style={{ height:"44px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
+      <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:shoreMid, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em", opacity:0.8 }}>HAUMĀNA · {name.toUpperCase()}</span>
       </div>
 
-      {/* Module bar */}
-      <div style={{ padding:"7px 22px", borderBottom:`1px solid ${accent}18`, background:"rgba(4,8,18,0.6)", flexShrink:0 }}>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em", opacity:0.8 }}>MODULE {String(moduleNum).padStart(2,"0")} · LEARNING</span>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#2A3A50", marginLeft:"14px", letterSpacing:"0.1em" }}>{title.toUpperCase()}</span>
+      {/* Location bar — on shore */}
+      <div style={{ padding:"7px 22px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,10,6,0.7)", flexShrink:0, display:"flex", alignItems:"center", gap:"14px" }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em", opacity:0.9 }}>ON SHORE · {dep.location.toUpperCase()}</span>
+        <span style={{ fontFamily:"Georgia,serif", fontSize:"9px", color:`${accent}66`, fontStyle:"italic" }}>{dep.note}</span>
       </div>
 
       {/* Body */}
       <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
 
         {/* Left — concept list */}
-        <div style={{ width:"320px", flexShrink:0, borderRight:`1px solid ${accent}18`, overflowY:"auto", background:"rgba(4,8,14,0.6)" }}>
+        <div style={{ width:"320px", flexShrink:0, borderRight:`1px solid ${accent}18`, overflowY:"auto", background:shorePanel }}>
           <div style={{ padding:"22px 20px", display:"flex", flexDirection:"column", gap:"16px" }}>
 
             {/* Nav */}
             <div style={{ display:"flex", gap:"8px" }}>
-              <button onClick={onBack} style={{ flex:1, background:"none", border:`1px solid ${accent}22`, borderRadius:"4px", color:"#2A3A50", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
-              <button onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":accent+"22"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#2A3A50", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>
+              <button onClick={onBack} style={{ flex:1, background:"none", border:`1px solid ${accent}22`, borderRadius:"4px", color:"#2A3A28", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
+              <button onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":accent+"22"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#2A3A28", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>
                 {unlocked.length>0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
               </button>
             </div>
 
             {/* Section label */}
-            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.18em", opacity:0.7 }}>CORE CONCEPTS</div>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.18em", opacity:0.7 }}>PALU TEACHES</div>
 
             {/* Concept cards */}
             {concepts.map((c,i) => (
               <div key={i} style={{ borderLeft:`2px solid ${accent}55`, paddingLeft:"14px", display:"flex", flexDirection:"column", gap:"6px" }}>
-                <div style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#D0C8A8", letterSpacing:"0.04em" }}>{c.heading}</div>
-                <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#7AACBE", lineHeight:"1.7", fontStyle:"italic" }}>{c.body}</div>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"13px", fontWeight:"700", color:"#C8B880", letterSpacing:"0.04em" }}>{c.heading}</div>
+                <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", lineHeight:"1.75", fontStyle:"italic" }}>{c.body}</div>
               </div>
             ))}
 
-            {/* Ready button */}
-            <div style={{ paddingTop:"8px", borderTop:`1px solid ${accent}18` }}>
-              <button onClick={onReady} style={{ width:"100%", padding:"14px", borderRadius:"6px", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.14em", cursor:"pointer", border:`1px solid ${accent}`, background:`${accent}14`, color:accent }}>
-                I UNDERSTAND — BEGIN ACTIVITY →
+            {/* Set sail button */}
+            <div style={{ paddingTop:"8px", borderTop:`1px solid ${accent}22` }}>
+              <button onClick={onReady} style={{ width:"100%", padding:"14px", borderRadius:"6px", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.14em", cursor:"pointer", border:`1px solid ${accent}`, background:`linear-gradient(135deg, ${accent}22, ${accent}0A)`, color:accent }}>
+                SET SAIL →
               </button>
             </div>
 
           </div>
         </div>
 
-        {/* Right — visual/illustration */}
-        <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"28px 32px", background:"rgba(4,8,14,0.3)" }}>
+        {/* Right — visual/illustration — shore light */}
+        <div style={{ flex:1, overflowY:"auto", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"28px 32px", background:"rgba(4,10,5,0.4)" }}>
           {children}
         </div>
 
@@ -1227,7 +1620,7 @@ function PaluPanel({ step, selHouse, selStar, hovHouse, hovStar, name, onBack, o
 
   let title = "", body = "";
   if (step === 3) {
-    title = "Mānaiakalani. Vega — our guide to Sāmoa.";
+    title = "Mānaiakalani. Our guide to Sāmoa.";
     body  = `It rises in Nāleo-Koʻolau — just north-northeast. Keep it on your starboard bow through the night and you hold your heading. You carry this knowledge now, ${name}. Let us set sail.`;
   } else if (step === 2) {
     if (selStar && !correctStar) {
@@ -1235,10 +1628,10 @@ function PaluPanel({ step, selHouse, selStar, hovHouse, hovStar, name, onBack, o
       body  = selStar.desc + " We need a star rising in Nāleo-Koʻolau for our NNE heading.";
     } else if (hovStar) {
       title = hovStar.name;
-      body  = `${hovStar.western} — ${hovStar.desc}`;
+      body  = hovStar.desc;
     } else {
       title = "Find the right star.";
-      body  = "Sāmoa lies NNE — in the Nāleo-Koʻolau house. Five stars are visible tonight. Which one rises in that house? Hover each — then choose.";
+      body  = "Sāmoa lies in the Nāleo-Koʻolau house — 22.5° north-northeast. Five stars are visible tonight. Which one rises in that house? Hover each to hear where it sits — then choose.";
     }
   } else {
     if (!selHouse) {
@@ -1277,7 +1670,7 @@ function PaluPanel({ step, selHouse, selStar, hovHouse, hovStar, name, onBack, o
       </div>
 
       <div style={{ flex: 1, background: "rgba(6,11,22,0.7)", border: "1px solid #161F34", borderRadius: "7px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px", minHeight: 0, overflowY: "auto" }}>
-        <div style={{ fontSize: "11px", color: "#365060", fontFamily: "Cinzel,serif", letterSpacing: "0.14em" }}>THE PALU SPEAKS</div>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}><div style={{ fontSize: "11px", color: "#365060", fontFamily: "Cinzel,serif", letterSpacing: "0.14em" }}>THE PALU SPEAKS</div><span style={{ fontSize:"16px", opacity:0.75 }}>🦜</span></div>
         <div style={{ fontSize: "17px", color: "#D0A838", fontFamily: "Cinzel,serif", fontWeight: "700", lineHeight: "1.4" }}>{title}</div>
         <div style={{ fontSize: "14px", color: "#7AACBE", fontFamily: "Georgia,serif", fontStyle: "italic", lineHeight: "1.7" }}>{body}</div>
         {step === 2 && !selStar && !hovStar && (
@@ -1505,6 +1898,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
   const [selAlt,      setSelAlt]     = useState(null);
   const [selLat,      setSelLat]     = useState(null);
   const [confirming,  setConfirming] = useState(false);
+  const [niceWork,    setNiceWork]   = useState(null); // null | "step2" | "step3" | "done"
 
   if (phase === "intro") return (
     <ModuleIntroScreen moduleNum={2} name={name}
@@ -1560,27 +1954,36 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
     setTimeVal(val);
     if (Math.abs(val - 360) <= 10) {
       setConfirming(true);
-      setTimeout(() => { setStep(s => s === 1 ? 2 : s); setConfirming(false); }, 1800);
+      setTimeout(() => { setConfirming(false); setNiceWork("step2"); }, 600);
     }
   };
 
   const handleAltSelect = alt => {
-    if (confirming) return;
+    if (confirming || niceWork) return;
     setSelAlt(alt);
     if (alt === sc.noonAlt) {
       setConfirming(true);
-      setTimeout(() => { setStep(3); setConfirming(false); }, 1800);
+      setTimeout(() => { setConfirming(false); setNiceWork("step3"); }, 600);
     }
   };
 
+  const handleClearAlt = () => { setSelAlt(null); };
+
   const handleLatSelect = lat => {
-    if (confirming) return;
+    if (confirming || niceWork) return;
     setSelLat(lat);
     if (lat === sc.lat) {
       setConfirming(true);
-      onComplete();
-      setTimeout(() => { setPhase("bridge"); setConfirming(false); }, 1800);
+      setTimeout(() => { setConfirming(false); setNiceWork("done"); onComplete(); }, 600);
     }
+  };
+
+  const handleClearLat = () => { setSelLat(null); };
+
+  const handleNiceWorkContinue = () => {
+    if (niceWork === "step2") { setStep(2); setNiceWork(null); }
+    else if (niceWork === "step3") { setStep(3); setNiceWork(null); }
+    else if (niceWork === "done") { setPhase("bridge"); }
   };
 
   if (phase === "bridge") return (
@@ -1663,18 +2066,40 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
             </div>
 
             {/* Palu speech */}
-            <div style={{ background:"rgba(6,11,22,0.7)", border:"1px solid #161F34", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px", overflowY:"auto" }}>
-              <div style={{ fontSize:"11px", color:"#365060", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
-              <div style={{ fontSize:"17px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{title}</div>
-              <div style={{ fontSize:"14px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.7" }}>{body}</div>
-              {step === 1 && (
+            <div style={{ background:"rgba(6,11,22,0.7)", border:"1px solid #161F34", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px", overflowY:"auto", position:"relative" }}>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}><div style={{ fontSize:"11px", color:"#365060", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div><span style={{ fontSize:"16px", opacity:0.75 }}>🦜</span></div>
+              <div style={{ fontSize:"20px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{title}</div>
+              <div style={{ fontSize:"15px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.75" }}>{body}</div>
+              {step === 1 && !niceWork && (
                 <div style={{ padding:"9px 12px", background:"rgba(18,55,80,0.4)", borderLeft:"2px solid #D06030", borderRadius:"0 4px 4px 0", fontSize:"11px", color:"#D08060", fontFamily:"Georgia,serif" }}>
                   Drag the time slider below the sky to find noon.
                 </div>
               )}
+              {/* Wrong answer try-again */}
+              {step === 2 && selAlt && selAlt !== sc.noonAlt && !niceWork && (
+                <button onClick={handleClearAlt} style={{ padding:"9px", borderRadius:"5px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:"1px solid #D0603055", background:"rgba(208,96,48,0.08)", color:"#D06030" }}>TRY AGAIN ↩</button>
+              )}
+              {step === 3 && selLat && selLat !== sc.lat && !niceWork && (
+                <button onClick={handleClearLat} style={{ padding:"9px", borderRadius:"5px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:"1px solid #D0603055", background:"rgba(208,96,48,0.08)", color:"#D06030" }}>TRY AGAIN ↩</button>
+              )}
               {step === 4 && (
                 <div style={{ padding:"11px", background:"rgba(208,96,48,0.10)", border:"1px solid rgba(208,96,48,0.28)", borderRadius:"6px", textAlign:"center", fontFamily:"Cinzel,serif", fontSize:"10px", color:"#D06030", letterSpacing:"0.09em" }}>
                   ☀ SUN ARC ADDED TO YOUR BAG ☀
+                </div>
+              )}
+              {/* Nice work overlay */}
+              {niceWork && (
+                <div style={{ position:"absolute", inset:0, background:"rgba(4,8,18,0.92)", borderRadius:"7px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"14px", padding:"20px" }}>
+                  <div style={{ fontSize:"28px" }}>☀</div>
+                  <div style={{ fontFamily:"Cinzel,serif", fontSize:"15px", fontWeight:"700", color:"#D06030", textAlign:"center" }}>
+                    {niceWork === "done" ? "You know your position." : "Correct."}
+                  </div>
+                  <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#7AACBE", fontStyle:"italic", textAlign:"center", lineHeight:"1.6" }}>
+                    {niceWork === "step2" ? "Local noon found. Now read the altitude." : niceWork === "step3" ? "Good altitude reading. Now calculate your latitude." : "Tama-nui-te-rā has spoken. No sextant, no instrument — only the angle and the season."}
+                  </div>
+                  <button onClick={handleNiceWorkContinue} style={{ padding:"11px 24px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #D06030", background:"rgba(208,96,48,0.14)", color:"#D06030" }}>
+                    {niceWork === "done" ? "CONTINUE →" : "NEXT →"}
+                  </button>
                 </div>
               )}
             </div>
@@ -1959,6 +2384,18 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
   const [headingLocked, setHeadingLocked]= useState(false);
   const [animOffset,    setAnimOffset]   = useState(0);
   const [confirming,    setConfirming]   = useState(false);
+  const [niceWork,      setNiceWork]     = useState(null);
+
+  // Animate swells — must be before any early return (Rules of Hooks)
+  useEffect(() => {
+    let frame;
+    const tick = () => {
+      setAnimOffset(o => (o + 0.55) % 400);
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   if (phase === "intro") return (
     <ModuleIntroScreen moduleNum={3} name={name}
@@ -2014,42 +2451,37 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
 
   const sc = SWELL_SCENARIOS[0];
 
-  // Animate swells
-  useEffect(() => {
-    let frame;
-    const tick = () => {
-      setAnimOffset(o => (o + 0.55) % 400);
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, []);
-
   const handleDirSelect = dir => {
     if (confirming) return;
     setSelDir(dir);
     if (dir === sc.correctDir) {
       setConfirming(true);
-      setTimeout(() => { setStep(2); setConfirming(false); }, 1800);
+      setTimeout(() => { setConfirming(false); setNiceWork("step2"); }, 600);
     }
   };
 
   const handleLockHeading = () => {
-    if (confirming) return;
+    if (confirming || niceWork) return;
     if (Math.abs(canoeHeading - sc.correctHeading) <= 12) {
       setHeadingLocked(true);
       setConfirming(true);
-      setTimeout(() => { setStep(3); setConfirming(false); }, 1800);
+      setTimeout(() => { setConfirming(false); setNiceWork("step3"); }, 600);
     }
   };
 
   const handleInterference = type => {
-    if (confirming) return;
+    if (confirming || niceWork) return;
     if (type === sc.interferenceType) {
       setConfirming(true);
       onComplete();
-      setTimeout(() => { setPhase("bridge"); setConfirming(false); }, 1800);
+      setTimeout(() => { setConfirming(false); setNiceWork("done"); }, 600);
     }
+  };
+
+  const handleNiceWorkContinue = () => {
+    if (niceWork === "step2") { setStep(2); setNiceWork(null); }
+    else if (niceWork === "step3") { setStep(3); setNiceWork(null); }
+    else if (niceWork === "done") { setPhase("bridge"); }
   };
 
   // Palu speech per step
@@ -2134,18 +2566,28 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
             </div>
 
             {/* Palu speech */}
-            <div style={{ background:"rgba(4,10,20,0.7)", border:"1px solid #0E1E2E", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px" }}>
-              <div style={{ fontSize:"11px", color:"#1A4050", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
-              <div style={{ fontSize:"17px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{palu.title}</div>
-              <div style={{ fontSize:"14px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.7" }}>{palu.body}</div>
-              {palu.hint && (
+            <div style={{ background:"rgba(4,10,20,0.7)", border:"1px solid #0E1E2E", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px", position:"relative" }}>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}><div style={{ fontSize:"11px", color:"#1A4050", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div><span style={{ fontSize:"16px", opacity:0.75 }}>🦜</span></div>
+              <div style={{ fontSize:"20px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{palu.title}</div>
+              <div style={{ fontSize:"15px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.75" }}>{palu.body}</div>
+              {palu.hint && !niceWork && (
                 <div style={{ padding:"9px 12px", background:"rgba(18,55,70,0.4)", borderLeft:"2px solid #2A90A8", borderRadius:"0 4px 4px 0", fontSize:"11px", color:"#2A90A8", fontFamily:"Georgia,serif" }}>
                   {palu.hint}
                 </div>
               )}
-              {step === 4 && (
-                <div style={{ padding:"11px", background:"rgba(42,144,168,0.10)", border:"1px solid rgba(42,144,168,0.28)", borderRadius:"6px", textAlign:"center", fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A90A8", letterSpacing:"0.09em" }}>
-                  〰 WAVE READER ADDED TO YOUR BAG 〰
+              {/* Nice work overlay */}
+              {niceWork && (
+                <div style={{ position:"absolute", inset:0, background:"rgba(4,10,20,0.93)", borderRadius:"7px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"14px", padding:"20px" }}>
+                  <div style={{ fontSize:"28px" }}>〰</div>
+                  <div style={{ fontFamily:"Cinzel,serif", fontSize:"15px", fontWeight:"700", color:"#2A90A8", textAlign:"center" }}>
+                    {niceWork === "done" ? "You have read the ocean." : "Correct."}
+                  </div>
+                  <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#7AACBE", fontStyle:"italic", textAlign:"center", lineHeight:"1.6" }}>
+                    {niceWork === "step2" ? "Good. Southeast. The trade swell — steady as breathing. Now set your heading." : niceWork === "step3" ? "Heading locked. Now read what the island does to the swell ahead." : "Block, refract, reflect. Mau knew an island was close two days before he could see it."}
+                  </div>
+                  <button onClick={handleNiceWorkContinue} style={{ padding:"11px 24px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #2A90A8", background:"rgba(42,144,168,0.14)", color:"#2A90A8" }}>
+                    {niceWork === "done" ? "CONTINUE →" : "NEXT →"}
+                  </button>
                 </div>
               )}
             </div>
@@ -2453,6 +2895,10 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
   const [selBearing,  setSelBearing] = useState(null);
   const [selElNino,   setSelElNino]  = useState(null);
   const [confirming,  setConfirming] = useState(false);
+  const [niceWork,    setNiceWork]   = useState(null);
+
+  // Auto-switch map to El Niño when step 3 starts — must be before any early return
+  useEffect(() => { if (step === 3) setMode("elnino"); }, [step]);
 
   if (phase === "intro") return (
     <ModuleIntroScreen moduleNum={4} name={name}
@@ -2478,26 +2924,28 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
   const sc = WIND_SCENARIO;
 
   const handleBearingSelect = b => {
-    if (confirming) return;
+    if (confirming || niceWork) return;
     setSelBearing(b);
     if (b === sc.correctBearing) {
       setConfirming(true);
-      setTimeout(() => { setStep(3); setConfirming(false); }, 1800);
+      setTimeout(() => { setConfirming(false); setNiceWork("step3"); }, 600);
     }
   };
 
   const handleElNinoSelect = opt => {
-    if (confirming) return;
+    if (confirming || niceWork) return;
     setSelElNino(opt);
     if (opt === sc.correctElNino) {
       setConfirming(true);
       onComplete();
-      setTimeout(() => { setPhase("bridge"); setConfirming(false); }, 1800);
+      setTimeout(() => { setConfirming(false); setNiceWork("done"); }, 600);
     }
   };
 
-  // Auto-switch map to El Niño when step 3 starts
-  useEffect(() => { if (step === 3) setMode("elnino"); }, [step]);
+  const handleNiceWorkContinue = () => {
+    if (niceWork === "step3") { setStep(3); setNiceWork(null); }
+    else if (niceWork === "done") { setPhase("bridge"); }
+  };
 
   const palus = {
     1: {
@@ -2576,18 +3024,30 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
             </div>
 
             {/* Palu speech */}
-            <div style={{ background:"rgba(4,8,20,0.7)", border:"1px solid #0E1E34", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px" }}>
-              <div style={{ fontSize:"11px", color:"#1A3050", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
-              <div style={{ fontSize:"17px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{palu.title}</div>
-              <div style={{ fontSize:"14px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.7" }}>{palu.body}</div>
-              {palu.hint && (
+            <div style={{ background:"rgba(4,8,20,0.7)", border:"1px solid #0E1E34", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px", position:"relative" }}>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}><div style={{ fontSize:"11px", color:"#1A3050", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div><span style={{ fontSize:"16px", opacity:0.75 }}>🦜</span></div>
+              <div style={{ fontSize:"20px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{palu.title}</div>
+              <div style={{ fontSize:"15px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.75" }}>{palu.body}</div>
+              {palu.hint && !niceWork && (
                 <div style={{ padding:"9px 12px", background:"rgba(20,40,90,0.4)", borderLeft:"2px solid #4A70C0", borderRadius:"0 4px 4px 0", fontSize:"11px", color:"#6090C0", fontFamily:"Georgia,serif" }}>
                   {palu.hint}
                 </div>
               )}
-              {step === 4 && (
-                <div style={{ padding:"11px", background:"rgba(74,112,192,0.10)", border:"1px solid rgba(74,112,192,0.28)", borderRadius:"6px", textAlign:"center", fontFamily:"Cinzel,serif", fontSize:"10px", color:"#4A70C0", letterSpacing:"0.09em" }}>
-                  ≋ WIND READER ADDED TO YOUR BAG ≋
+              {/* Nice work overlay */}
+              {niceWork && (
+                <div style={{ position:"absolute", inset:0, background:"rgba(4,8,20,0.93)", borderRadius:"7px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"14px", padding:"20px" }}>
+                  <div style={{ fontSize:"28px" }}>≋</div>
+                  <div style={{ fontFamily:"Cinzel,serif", fontSize:"15px", fontWeight:"700", color:"#4A70C0", textAlign:"center" }}>
+                    {niceWork === "done" ? "The wind is read." : "Correct bearing."}
+                  </div>
+                  <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#7AACBE", fontStyle:"italic", textAlign:"center", lineHeight:"1.6" }}>
+                    {niceWork === "step3"
+                      ? "335°. Now — once you cross the doldrums into the NE trade belt, the wind shifts. You will need to adjust your bearing to compensate. Watch the map change."
+                      : "Trade winds, ITCZ, El Niño shifts. A navigator who knows this changes their calendar, not their courage."}
+                  </div>
+                  <button onClick={handleNiceWorkContinue} style={{ padding:"11px 24px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #4A70C0", background:"rgba(74,112,192,0.14)", color:"#7AAAE0" }}>
+                    {niceWork === "done" ? "CONTINUE →" : "NEXT →"}
+                  </button>
                 </div>
               )}
             </div>
@@ -2909,9 +3369,9 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
 
             {/* Palu speech */}
             <div style={{ background:"rgba(4,10,8,0.7)", border:"1px solid #0E1E14", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px" }}>
-              <div style={{ fontSize:"11px", color:"#1A3828", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
-              <div style={{ fontSize:"17px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{palu.title}</div>
-              <div style={{ fontSize:"14px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.7" }}>{palu.body}</div>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}><div style={{ fontSize:"11px", color:"#1A3828", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div><span style={{ fontSize:"16px", opacity:0.75 }}>🦜</span></div>
+              <div style={{ fontSize:"20px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{palu.title}</div>
+              <div style={{ fontSize:"15px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.75" }}>{palu.body}</div>
               {step === 3 && (
                 <div style={{ padding:"11px", background:"rgba(42,154,112,0.10)", border:`1px solid ${accent}44`, borderRadius:"6px", textAlign:"center", fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.09em" }}>
                   🐦 BIRD GUIDE ADDED TO YOUR BAG 🐦
@@ -3353,6 +3813,14 @@ function CloudsModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
   const [confirming, setConfirming]= useState(false);
   const [animOffset, setAnimOffset]= useState(0);
 
+  // Animate clouds — must be before any early return (Rules of Hooks)
+  useEffect(() => {
+    let frame;
+    const tick = () => { setAnimOffset(o => (o + 0.6) % 1000); frame = requestAnimationFrame(tick); };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   if (phase === "intro") return (
     <ModuleIntroScreen moduleNum={6} name={name}
       onBegin={() => setPhase("learn")}
@@ -3404,13 +3872,6 @@ function CloudsModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
       </div>
     </ModuleLearnScreen>
   );
-
-  useEffect(() => {
-    let frame;
-    const tick = () => { setAnimOffset(o => (o + 0.6) % 1000); frame = requestAnimationFrame(tick); };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, []);
 
   const signIdx   = Math.min(step - 1, CLOUD_SIGNS.length - 1);
   const sign      = CLOUD_SIGNS[signIdx];
@@ -3491,9 +3952,9 @@ function CloudsModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
 
             {/* Palu speech */}
             <div style={{ background:"rgba(4,8,20,0.7)", border:"1px solid #0E1E34", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px" }}>
-              <div style={{ fontSize:"11px", color:"#1A2A40", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
-              <div style={{ fontSize:"17px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{speech.title}</div>
-              <div style={{ fontSize:"14px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.7" }}>{speech.body}</div>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}><div style={{ fontSize:"11px", color:"#1A2A40", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div><span style={{ fontSize:"16px", opacity:0.75 }}>🦜</span></div>
+              <div style={{ fontSize:"20px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{speech.title}</div>
+              <div style={{ fontSize:"15px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.75" }}>{speech.body}</div>
 
               {/* Sign explanation — shows after correct answer */}
               {answered && isCorrect && step <= CLOUD_SIGNS.length && (
@@ -3606,7 +4067,7 @@ function WelcomeScreen({ onSubmit }) {
         </div>
         <div style={{ width: "52px", height: "1px", background: "linear-gradient(to right, transparent, #C8941A, transparent)" }} />
         <div style={{ fontSize: "14px", color: "#7AABBB", fontFamily: "Georgia,serif", fontStyle: "italic", lineHeight: "1.72", maxWidth: "400px" }}>
-          For 3,000 years, navigators crossed 10 million km² of open ocean without instruments. Do you have what it takes to make this voyage?
+          Do you have what it takes to become an expert navigator?
         </div>
         <div style={{ width: "100%", background: "rgba(8,14,28,0.88)", border: "1px solid #1E3050", borderRadius: "10px", padding: "24px 26px", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div>
@@ -3626,68 +4087,84 @@ function WelcomeScreen({ onSubmit }) {
 ══════════════════════════════════════════════════════════════ */
 
 
+function PaluPortrait() {
+  // SVG illustration of Palu Hemi — older Polynesian master navigator
+  return (
+    <svg viewBox="0 0 140 160" style={{ width:"100%", height:"100%", borderRadius:"10px" }}>
+      <defs>
+        <radialGradient id="skinGrad" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stopColor="#8B5E3C"/>
+          <stop offset="100%" stopColor="#5C3A1E"/>
+        </radialGradient>
+        <radialGradient id="bgGrad" cx="50%" cy="50%" r="70%">
+          <stop offset="0%" stopColor="#0E2030"/>
+          <stop offset="100%" stopColor="#060E18"/>
+        </radialGradient>
+      </defs>
+      {/* Background */}
+      <rect width="140" height="160" fill="url(#bgGrad)"/>
+      {/* Subtle ocean horizon */}
+      <line x1="0" y1="118" x2="140" y2="118" stroke="#1A4050" strokeWidth="1" opacity="0.5"/>
+      {/* Stars */}
+      {[[12,8],[28,14],[95,6],[118,20],[130,10],[8,30],[125,35]].map(([x,y],i)=>(
+        <circle key={i} cx={x} cy={y} r="0.8" fill="#C8D8E8" opacity={0.4+i*0.07}/>
+      ))}
+      {/* Shoulders / clothing — dark bark cloth */}
+      <ellipse cx="70" cy="148" rx="52" ry="28" fill="#1A1208"/>
+      <ellipse cx="70" cy="142" rx="44" ry="22" fill="#221A0A"/>
+      {/* Neck */}
+      <rect x="58" y="108" width="24" height="22" rx="8" fill="url(#skinGrad)"/>
+      {/* Head */}
+      <ellipse cx="70" cy="82" rx="34" ry="36" fill="url(#skinGrad)"/>
+      {/* Silver hair */}
+      <path d="M36,76 Q34,54 52,46 Q70,38 88,46 Q106,54 104,76" fill="#8A9AA0" opacity="0.9"/>
+      <path d="M36,76 Q30,90 38,104 Q42,96 40,80Z" fill="#8A9AA0" opacity="0.7"/>
+      <path d="M104,76 Q110,90 102,104 Q98,96 100,80Z" fill="#8A9AA0" opacity="0.7"/>
+      {/* Face details — weathered lines */}
+      <path d="M52,76 Q52,70 58,68" stroke="#4A2E14" strokeWidth="1" fill="none" opacity="0.5"/>
+      <path d="M88,76 Q88,70 82,68" stroke="#4A2E14" strokeWidth="1" fill="none" opacity="0.5"/>
+      {/* Eyes */}
+      <ellipse cx="58" cy="78" rx="5" ry="4" fill="#1A0E06"/>
+      <ellipse cx="82" cy="78" rx="5" ry="4" fill="#1A0E06"/>
+      <circle cx="57" cy="77" r="1.2" fill="#FFFFFF" opacity="0.7"/>
+      <circle cx="81" cy="77" r="1.2" fill="#FFFFFF" opacity="0.7"/>
+      {/* Eyebrows — thick, grey */}
+      <path d="M52,72 Q58,69 64,72" stroke="#9AACA8" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      <path d="M76,72 Q82,69 88,72" stroke="#9AACA8" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      {/* Nose */}
+      <path d="M68,80 Q66,90 62,94 Q70,97 78,94 Q74,90 72,80Z" fill="#7A4E28" opacity="0.6"/>
+      {/* Mouth — slight knowing smile */}
+      <path d="M60,100 Q70,106 80,100" stroke="#5C3010" strokeWidth="2" fill="none" strokeLinecap="round"/>
+      <path d="M63,100 Q70,104 77,100" stroke="#C8886050" strokeWidth="1" fill="none"/>
+      {/* Beard / facial lines */}
+      <path d="M52,96 Q48,108 54,118" stroke="#7A8A88" strokeWidth="1.5" fill="none" opacity="0.5"/>
+      <path d="M88,96 Q92,108 86,118" stroke="#7A8A88" strokeWidth="1.5" fill="none" opacity="0.5"/>
+      <path d="M58,104 Q70,112 82,104" stroke="#8A9A90" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.4"/>
+      {/* Traditional necklace */}
+      <path d="M52,118 Q70,128 88,118" stroke="#C8941A" strokeWidth="1.5" fill="none" opacity="0.7"/>
+      <circle cx="70" cy="128" r="3" fill="#C8941A" opacity="0.6"/>
+      {/* Name tag */}
+      <text x="70" y="154" textAnchor="middle" fontFamily="Cinzel,serif" fontSize="7" fill="#C8941A" opacity="0.8" letterSpacing="0.1em">PALU HEMI</text>
+    </svg>
+  );
+}
+
 function StoryCard({ name, onComplete }) {
   const [pageIdx,  setPageIdx]  = useState(0);
   const [revealed, setRevealed] = useState(0);
   const [choice,   setChoice]   = useState(null);
-  const [muted,    setMuted]    = useState(false);
-  const audioRef = useRef(null);
-
-  // Ambient ocean drone via Web Audio — gentle, unobtrusive
-  useEffect(() => {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const master = ctx.createGain();
-    master.gain.setValueAtTime(0, ctx.currentTime);
-    master.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 2);
-    master.connect(ctx.destination);
-
-    const nodes = [];
-    // Low ocean rumble — layered sine tones
-    [55, 82.4, 110].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      gain.gain.value = 0.3 - i * 0.08;
-      osc.connect(gain);
-      gain.connect(master);
-      osc.start();
-      nodes.push(osc);
-    });
-
-    // Slow LFO to give it a breathing, wave-like quality
-    const lfo = ctx.createOscillator();
-    const lfoGain = ctx.createGain();
-    lfo.frequency.value = 0.08;
-    lfoGain.gain.value = 0.025;
-    lfo.connect(lfoGain);
-    lfoGain.connect(master.gain);
-    lfo.start();
-    nodes.push(lfo);
-
-    audioRef.current = { ctx, master, nodes };
-
-    return () => {
-      master.gain.linearRampToValueAtTime(0, ctx.currentTime + 1);
-      setTimeout(() => { nodes.forEach(n => { try { n.stop(); } catch {} }); ctx.close(); }, 1100);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!audioRef.current) return;
-    const { master, ctx } = audioRef.current;
-    master.gain.linearRampToValueAtTime(muted ? 0 : 0.07, ctx.currentTime + 0.5);
-  }, [muted]);
+  // TODO: Replace with proper ambient audio before launch — current implementation
+  // disabled because AudioContext requires careful browser handling. Consider
+  // using a hosted .mp3 file via <audio> tag with user-controlled play/pause.
 
   const pages = STORY_PAGES(name);
   const page  = pages[pageIdx];
   const isLast = pageIdx === pages.length - 1;
 
-  // Auto-reveal lines with a short stagger
+  // Auto-reveal lines with stagger — key={pageIdx} on the container guarantees fresh mount
   useEffect(() => {
-    setRevealed(0);
     const timers = page.text.map((_, i) =>
-      setTimeout(() => setRevealed(r => Math.max(r, i + 1)), 400 + i * 700)
+      setTimeout(() => setRevealed(r => Math.max(r, i + 1)), 350 + i * 1100)
     );
     return () => timers.forEach(clearTimeout);
   }, [pageIdx]);
@@ -3697,19 +4174,26 @@ function StoryCard({ name, onComplete }) {
   const handleNext = () => {
     if (!allRevealed) { setRevealed(page.text.length); return; }
     if (isLast) return;
+    setRevealed(0);          // reset synchronously — no flash
     setPageIdx(p => p + 1);
+    setChoice(null);
+  };
+
+  const handleDotClick = (i) => {
+    if (i > pageIdx) return; // can't skip forward
+    setRevealed(pages[i].text.length); // show all text instantly on revisit
+    setPageIdx(i);
     setChoice(null);
   };
 
   const handleChoice = (c) => {
     setChoice(c.id);
-    if (c.advance) setTimeout(() => onComplete(), c.joke ? 1200 : 600);
+    // joke response: don't auto-advance — wait for "What the heck?" button
+    if (c.advance && !c.joke) setTimeout(() => onComplete(), 600);
   };
 
   const stars = Array.from({length:60},(_,i)=>({ x:((i*137+41)%97)/97*100, y:((i*79+23)%89)/89*100, r:i%5===0?1.1:0.5, op:0.08+(i%5)*0.06 }));
 
-  // Parrot image — using a real Wikimedia tropical parrot
-  const PARROT_URL = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Rainbow_lorikeet_at_Airlie_Beach_P1030623.jpg/400px-Rainbow_lorikeet_at_Airlie_Beach_P1030623.jpg";
 
   return (
     <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", alignItems:"center", justifyContent:"center", position:"relative", overflow:"hidden" }}>
@@ -3722,10 +4206,14 @@ function StoryCard({ name, onComplete }) {
       {/* Card */}
       <div style={{ position:"relative", zIndex:1, width:"min(680px, 95%)", background:"rgba(6,12,22,0.96)", border:"1px solid #1A3050", borderRadius:"14px", overflow:"hidden", boxShadow:"0 0 80px rgba(200,148,26,0.08)" }}>
 
-        {/* Progress dots */}
-        <div style={{ display:"flex", justifyContent:"center", gap:"8px", padding:"16px 0 0" }}>
+        {/* Progress dots — click to revisit previous pages */}
+        <div style={{ display:"flex", justifyContent:"center", gap:"10px", padding:"16px 0 0" }}>
           {pages.map((_,i) => (
-            <div key={i} style={{ width:"6px", height:"6px", borderRadius:"50%", background: i === pageIdx ? "#C8941A" : i < pageIdx ? "#2A8860" : "#1A2840", transition:"background 0.3s" }}/>
+            <div key={i} onClick={() => handleDotClick(i)} style={{
+              width: i === pageIdx ? "20px" : "8px", height:"8px", borderRadius:"4px",
+              background: i === pageIdx ? "#C8941A" : i < pageIdx ? "#2A8860" : "#1A2840",
+              transition:"all 0.3s", cursor: i <= pageIdx ? "pointer" : "default",
+            }}/>
           ))}
         </div>
 
@@ -3737,29 +4225,25 @@ function StoryCard({ name, onComplete }) {
         {/* Main content row */}
         <div style={{ display:"flex", gap:"0", minHeight:"340px" }}>
 
-          {/* Left — image */}
-          <div style={{ width:"200px", flexShrink:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"20px 16px", borderRight:"1px solid #0E1E30", gap:"16px" }}>
-            {page.id === "meeting" ? (
-              <div style={{ width:"150px", height:"150px", borderRadius:"10px", overflow:"hidden", border:"1px solid #1A3040" }}>
-                <img src={PARROT_URL} alt="Matala the parrot"
-                  style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"center" }}
-                  onError={e => { e.target.parentNode.innerHTML = '<div style="font-size:72px;display:flex;align-items:center;justify-content:center;height:100%;background:#07110A">🦜</div>'; }}/>
-              </div>
-            ) : (
-              <div style={{ fontSize:"72px", lineHeight:1, filter:"drop-shadow(0 0 20px rgba(200,148,26,0.3))" }}>{page.image}</div>
-            )}
+          {/* Left — Palu portrait */}
+          <div style={{ width:"180px", flexShrink:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"20px 16px", borderRight:"1px solid #0E1E30", gap:"12px" }}>
+            <div style={{ width:"140px", height:"160px", borderRadius:"10px", overflow:"hidden", border:"1px solid #1A3040" }}>
+              <PaluPortrait />
+            </div>
             <div style={{ textAlign:"center" }}>
               <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", color:"#C8941A" }}>{page.speaker}</div>
-              <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A4050", letterSpacing:"0.06em", marginTop:"3px" }}>Master Navigator</div>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A4050", letterSpacing:"0.06em", marginTop:"3px" }}>Master Navigator · Tongatapu</div>
             </div>
           </div>
 
           {/* Right — text */}
-          <div style={{ flex:1, padding:"28px 28px 20px", display:"flex", flexDirection:"column", justifyContent:"space-between", gap:"16px" }}>
-            <div style={{ display:"flex", flexDirection:"column", gap:"14px" }}>
+          <div style={{ flex:1, padding:"20px 24px 20px", display:"flex", flexDirection:"column", justifyContent:"space-between", gap:"16px", position:"relative" }}>
+            {/* Parrot — top right corner */}
+            <div style={{ position:"absolute", top:"12px", right:"16px", fontSize:"22px", opacity:0.85, lineHeight:1, filter:"drop-shadow(0 0 6px rgba(200,148,26,0.4))" }}>🦜</div>
+            <div key={pageIdx} style={{ display:"flex", flexDirection:"column", gap:"14px" }}>
               {page.text.map((line, i) => (
                 <p key={i} style={{
-                  fontFamily:"Georgia,serif", fontSize:"14.5px", color:"#A8C8C0", lineHeight:"1.72", fontStyle:"italic", margin:0,
+                  fontFamily:"Georgia,serif", fontSize:"16px", color:"#A8C8C0", lineHeight:"1.72", fontStyle:"italic", margin:0,
                   opacity: i < revealed ? 1 : 0,
                   transform: i < revealed ? "translateY(0)" : "translateY(6px)",
                   transition:"opacity 0.5s ease, transform 0.5s ease",
@@ -3778,39 +4262,57 @@ function StoryCard({ name, onComplete }) {
                       padding:"12px 18px", borderRadius:"6px", cursor:"pointer",
                       fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.08em",
                       textAlign:"left",
-                      border:`1px solid ${choice===c.id ? "#C8941A" : "#1A3050"}`,
-                      background: choice===c.id ? "rgba(200,148,26,0.14)" : "rgba(255,255,255,0.02)",
-                      color: choice===c.id ? "#C8941A" : "#3A6070",
+                      border:`1px solid ${choice===c.id && !c.joke ? "#C8941A" : "#1A3050"}`,
+                      background: choice===c.id && !c.joke ? "rgba(200,148,26,0.14)" : "rgba(255,255,255,0.02)",
+                      color: choice===c.id && !c.joke ? "#C8941A" : "#3A6070",
                       transition:"all 0.2s",
                     }}>
-                      {c.joke && choice===c.id ? "Too late — you already signed up. Let's go." : c.label}
+                      {c.label}
                     </button>
                   ))}
                 </div>
-              ) : (
+              ) : !isLast ? (
                 <button onClick={handleNext} style={{
                   padding:"10px 22px", borderRadius:"6px", cursor:"pointer",
                   fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em",
                   border:"1px solid #C8941A44", background:"rgba(200,148,26,0.08)", color:"#C8941A",
                   opacity: allRevealed ? 1 : 0.4,
                 }}>
-                  {!allRevealed ? "…" : isLast ? "Hear more →" : "Continue →"}
+                  {!allRevealed ? "…" : "Continue →"}
                 </button>
+              ) : (
+                <div style={{ height:"8px" }} />
               )}
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div style={{ padding:"12px 28px", borderTop:"1px solid #0A1828", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <div style={{ padding:"10px 24px", borderTop:"1px solid #0A1828", display:"flex", alignItems:"center", justifyContent:"center" }}>
           <div style={{ fontFamily:"Cinzel,serif", fontSize:"8.5px", color:"#1A2A40", letterSpacing:"0.1em" }}>
             OCEAN ADVENTURE · A POLYNESIAN VOYAGING EXPERIENCE
           </div>
-          <button onClick={() => setMuted(m => !m)} style={{ background:"none", border:"1px solid #1A2A40", borderRadius:"4px", padding:"4px 10px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A4050", letterSpacing:"0.08em" }}>
-            {muted ? "♪ UNMUTE" : "♪ MUTE"}
-          </button>
         </div>
       </div>
+
+      {/* Joke popup — appears over card when "not ready" is chosen */}
+      {choice && page.choices?.find(c => c.id === choice)?.joke && (
+        <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", zIndex:10, padding:"24px" }}>
+          <div style={{ background:"rgba(4,8,18,0.7)", position:"absolute", inset:0, backdropFilter:"blur(2px)" }}/>
+          <div style={{ position:"relative", zIndex:1, background:"rgba(6,12,24,0.98)", border:"1px solid #C8941A55", borderRadius:"12px", padding:"28px 32px", maxWidth:"460px", width:"100%", display:"flex", flexDirection:"column", gap:"18px", boxShadow:"0 0 60px rgba(200,148,26,0.15)" }}>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:"#C8941A", letterSpacing:"0.18em", opacity:0.7 }}>PALU HEMI</div>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8C0", lineHeight:"1.75", fontStyle:"italic" }}>
+              "Nobody is born ready! Bravery is a learned skill — something I am sure you will pick up along the way. Let us get you in this boat."
+            </div>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#5A8090", lineHeight:"1.7", fontStyle:"italic" }}>
+              You feel a sharp pain at the back of your head, and wake up the next morning to sunlight on your face and the rocking of a canoe beneath you.
+            </div>
+            <button onClick={() => onComplete()} style={{ padding:"13px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A" }}>
+              What the heck? →
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -3827,11 +4329,14 @@ export default function App() {
   const [hovStar,  setHovStar]  = useState(null);
   const [bagOpen,  setBagOpen]  = useState(false);
   const [unlocked, setUnlocked] = useState([]);
+  const [bagIntroSeen, setBagIntroSeen] = useState(true); // true = don't show until we check localStorage
 
   useEffect(() => {
     const savedName = localStorage.getItem("pvs_haumana");
     const savedBag  = JSON.parse(localStorage.getItem("pvs_bag") || "[]");
+    const introSeen = localStorage.getItem("pvs_bag_intro") === "1";
     setUnlocked(savedBag);
+    setBagIntroSeen(introSeen);
     if (savedName) { setName(savedName); setScreen("map"); }
     else setScreen("welcome");
   }, []);
@@ -3859,21 +4364,36 @@ export default function App() {
   const handleReset = () => {
     localStorage.removeItem("pvs_haumana");
     localStorage.removeItem("pvs_bag");
+    localStorage.removeItem("pvs_bag_intro");
     setName(""); setUnlocked([]); setStep(1); setCompassPhase("intro");
-    setSelHouse(null); setSelStar(null);
+    setSelHouse(null); setSelStar(null); setBagIntroSeen(false);
     setScreen("welcome");
   };
 
-  const handleHouseClick = h => {
-    setSelHouse(h);
-    if (Math.abs(h.angle - 22.5) < 6) setTimeout(() => setStep(2), 900);
+  // Scattered star positions — defined by angle+distance from center, then rotated
+  // so the pattern doesn't match the compass orientation (canoe is drifting)
+  // Mānaiakalani ends up on the left side after 140° rotation
+  const ROTATION_OFFSET = 140; // degrees — rotate whole sky so it's disorienting
+  const toXY = (angleDeg, dist, rot=ROTATION_OFFSET) => {
+    const rad = (angleDeg + rot - 90) * Math.PI / 180;
+    return { x: 300 + dist * Math.cos(rad), y: 300 + dist * Math.sin(rad) };
   };
+  // Positions: [star_id, compass_angle_deg, distance_from_center]
+  const SCATTERED_STARS = [
+    { id:"manaiakalani", ...toXY(22.5,  200) },
+    { id:"hokule_a",     ...toXY(67.5,  185) },
+    { id:"tawera",       ...toXY(78.75, 165) },
+    { id:"takurua",      ...toXY(101.25,190) },
+    { id:"atutahi",      ...toXY(146.25,175) },
+  ];
 
   const handleStarClick = s => {
+    if (step !== 1) return;
     setSelStar(s);
     if (s.correct) {
       unlock("star_compass"); unlock("samoan_star_map");
-      setTimeout(() => setCompassPhase("bridge"), 900);
+      setTimeout(() => { setStep(2); }, 1200);   // step 2 = success/re-orient
+      setTimeout(() => setCompassPhase("bridge"), 3500);
     }
   };
 
@@ -3908,6 +4428,16 @@ export default function App() {
           if (m===7) setScreen("voyage");
         }} unlocked={unlocked} onOpenBag={() => setBagOpen(true)} onReset={handleReset} />
       )}
+      {screen === "map" && !bagIntroSeen && (
+        <BagIntroPopup onDismiss={() => {
+          localStorage.setItem("pvs_bag_intro", "1");
+          setBagIntroSeen(true);
+        }} onOpenBag={() => {
+          localStorage.setItem("pvs_bag_intro", "1");
+          setBagIntroSeen(true);
+          setBagOpen(true);
+        }} unlocked={unlocked} />
+      )}
 
       {screen === "compass" && compassPhase === "intro" && (
         <ModuleIntroScreen moduleNum={1} name={name}
@@ -3915,86 +4445,182 @@ export default function App() {
           onBack={() => setScreen("map")} />
       )}
       {screen === "compass" && compassPhase === "learn" && (
-        <ModuleLearnScreen moduleNum={1} name={name}
+        <CompassLearnScreen
+          name={name}
           onReady={() => setCompassPhase("activity")}
           onBack={() => setScreen("map")}
           onOpenBag={() => setBagOpen(true)}
-          unlocked={unlocked}>
-          {/* Learn visual — annotated compass dial */}
-          <div style={{ width:"min(100%,500px)", display:"flex", flexDirection:"column", gap:"16px" }}>
-            <svg viewBox="0 0 500 500" style={{ width:"100%", filter:"drop-shadow(0 0 30px rgba(200,148,26,0.2))" }}>
-              <defs>
-                <radialGradient id="learnBg"><stop offset="0%" stopColor="#0D1B30"/><stop offset="100%" stopColor="#060D1C"/></radialGradient>
-              </defs>
-              <circle cx="250" cy="250" r="245" fill="url(#learnBg)" stroke="#1A2840" strokeWidth="1.5"/>
-              {/* Quadrant fills */}
-              {[{a:0,c:"rgba(200,120,20,0.12)"},{a:90,c:"rgba(160,145,15,0.10)"},{a:180,c:"rgba(15,95,155,0.13)"},{a:270,c:"rgba(90,35,170,0.10)"}].map(({a,c},i)=>{
-                const r1=(a-90)*Math.PI/180, r2=(a+90-90)*Math.PI/180;
-                return <path key={i} d={`M250,250 L${(250+220*Math.cos(r1)).toFixed(1)},${(250+220*Math.sin(r1)).toFixed(1)} A220,220 0 0,1 ${(250+220*Math.cos(r2)).toFixed(1)},${(250+220*Math.sin(r2)).toFixed(1)} Z`} fill={c}/>;
-              })}
-              {/* Tick marks */}
-              {Array.from({length:32},(_,i)=>{
-                const rad=(i*11.25-90)*Math.PI/180;
-                const isCard=i%8===0, isManu=i%4===0&&!isCard;
-                const r1=isCard?60:isManu?80:100, r2=220;
-                return <line key={i} x1={(250+(r1)*Math.cos(rad)).toFixed(1)} y1={(250+(r1)*Math.sin(rad)).toFixed(1)} x2={(250+r2*Math.cos(rad)).toFixed(1)} y2={(250+r2*Math.sin(rad)).toFixed(1)} stroke={isCard?"#3A5A80":isManu?"#2A4060":"#1A2840"} strokeWidth={isCard?2:isManu?1.2:0.6}/>;
-              })}
-              <circle cx="250" cy="250" r="220" fill="none" stroke="#253850" strokeWidth="1.5"/>
-              <circle cx="250" cy="250" r="60"  fill="#090F1E" stroke="#1A2840" strokeWidth="1"/>
-              {/* Cardinal labels */}
-              {[["Ākau",250,40],["Hikina",460,258],["Hema",250,468],["Komohana",40,258]].map(([n,x,y])=>(
-                <text key={n} x={x} y={y} textAnchor="middle" dominantBaseline="middle" fill="#5A92BC" fontSize="15" fontFamily="Cinzel,serif" fontWeight="600">{n}</text>
-              ))}
-              {/* Quadrant labels */}
-              {[["KOʻOLAU","#B07825",45],["MALANAI","#9A9A20",135],["KONA","#2090C0",225],["HOʻOLUA","#8040C8",315]].map(([n,c,a])=>{
-                const rad=(a-90)*Math.PI/180;
-                return <text key={n} x={(250+260*Math.cos(rad)).toFixed(1)} y={(250+260*Math.sin(rad)).toFixed(1)} textAnchor="middle" dominantBaseline="middle" fill={c} fontSize="11" fontFamily="Cinzel,serif" fontWeight="700" letterSpacing="0.15em">{n}</text>;
-              })}
-              {/* Key stars */}
-              {[
-                {a:67.5,  r:6,  c:"#FFD060", n:"Hōkūleʻa"},
-                {a:101.25,r:7,  c:"#A0C8FF", n:"Takurua"},
-                {a:146.25,r:5,  c:"#FFFCE0", n:"Atutahi"},
-              ].map(s=>{
-                const rad=(s.a-90)*Math.PI/180;
-                const sx=250+185*Math.cos(rad), sy=250+185*Math.sin(rad);
-                return (
-                  <g key={s.n}>
-                    <circle cx={sx.toFixed(1)} cy={sy.toFixed(1)} r={s.r} fill={s.c} opacity="0.9"/>
-                    <text x={(sx+18*Math.cos(rad)).toFixed(1)} y={(sy+18*Math.sin(rad)).toFixed(1)} textAnchor="middle" fill={s.c} fontSize="10" fontFamily="Cinzel,serif" opacity="0.8">{s.n}</text>
-                  </g>
-                );
-              })}
-              <circle cx="250" cy="250" r="5" fill="#5A92BC"/>
-            </svg>
-            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A4060", textAlign:"center", letterSpacing:"0.1em" }}>
-              32 HOUSES · 11.25° EACH · KEY STARS AT THEIR RISING AZIMUTHS
-            </div>
-          </div>
-        </ModuleLearnScreen>
+          unlocked={unlocked}
+        />
       )}
       {screen === "compass" && compassPhase === "activity" && (
         <div style={{ width:"100%",height:"100%",background:"#04070E",display:"flex",flexDirection:"column",overflow:"hidden" }}>
           <div style={{ height:"44px",borderBottom:"1px solid #0E1826",background:"rgba(4,8,18,0.95)",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 22px",flexShrink:0 }}>
             <span style={{ fontFamily:"Cinzel,serif",fontSize:"12px",fontWeight:"700",color:"#C8941A",letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
-            <span style={{ fontFamily:"Cinzel,serif",fontSize:"10.5px",color:"#3A6070",letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
+            <div style={{ display:"flex",gap:"10px",alignItems:"center" }}>
+              <span style={{ fontFamily:"Cinzel,serif",fontSize:"10.5px",color:"#3A6070",letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
+              <button onClick={() => setBagOpen(true)} style={{ background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":"#1A2840"}`, borderRadius:"5px", padding:"5px 12px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", color:unlocked.length>0?"#C8941A":"#2A4050", letterSpacing:"0.08em" }}>✦ BAG ({unlocked.length})</button>
+            </div>
           </div>
           <div style={{ padding:"7px 22px",borderBottom:"1px solid #0E1826",background:"rgba(4,8,18,0.6)",flexShrink:0 }}>
             <span style={{ fontFamily:"Cinzel,serif",fontSize:"9.5px",color:"#C8941A",letterSpacing:"0.16em" }}>MODULE 01 · TONGA → SĀMOA</span>
-            <span style={{ fontFamily:"Cinzel,serif",fontSize:"9.5px",color:"#2A4858",marginLeft:"14px",letterSpacing:"0.1em" }}>THE STAR COMPASS · NĀLEO-KOʻOLAU</span>
+            <span style={{ fontFamily:"Cinzel,serif",fontSize:"9.5px",color:"#2A4858",marginLeft:"14px",letterSpacing:"0.1em" }}>THE STAR COMPASS</span>
           </div>
           <div style={{ flex:1,display:"flex",overflow:"hidden",minHeight:0 }}>
+
+            {/* Left — Palu */}
             <div style={{ width:"320px",flexShrink:0,borderRight:"1px solid #0E1826",overflowY:"auto" }}>
-              <PaluPanel step={step} selHouse={selHouse} selStar={selStar} hovHouse={hovHouse} hovStar={hovStar} name={name} onBack={() => setScreen("map")} onOpenBag={() => setBagOpen(true)} unlocked={unlocked} />
+              <div style={{ display:"flex",flexDirection:"column",gap:"12px",padding:"18px",height:"100%",boxSizing:"border-box" }}>
+                <div style={{ display:"flex",gap:"8px" }}>
+                  <button onClick={() => setScreen("map")} style={{ flex:1,background:"none",border:"1px solid #0E1826",borderRadius:"4px",color:"#2A4050",fontSize:"9px",fontFamily:"Cinzel,serif",letterSpacing:"0.1em",padding:"7px",cursor:"pointer" }}>← MAP</button>
+                </div>
+                <div style={{ background:"rgba(12,20,40,0.85)",border:"1px solid #1E3050",borderRadius:"7px",padding:"12px 14px" }}>
+                  <div style={{ fontSize:"9px",letterSpacing:"0.18em",color:"#3A6070",fontFamily:"Cinzel,serif",marginBottom:"5px" }}>TONGA → SĀMOA</div>
+                  <div style={{ fontSize:"14px",color:"#C0DCF0",fontFamily:"Cinzel,serif",fontWeight:"700",marginBottom:"2px" }}>Night 1 · Departure</div>
+                  <div style={{ fontSize:"10.5px",color:"#507080",fontFamily:"Cinzel,serif" }}>Midnight · Tongatapu · 21°S</div>
+                </div>
+                <div style={{ flex:1,background:"rgba(6,11,22,0.7)",border:"1px solid #161F34",borderRadius:"7px",padding:"16px",display:"flex",flexDirection:"column",gap:"10px",minHeight:0,overflowY:"auto" }}>
+                  <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between" }}>
+                    <div style={{ fontSize:"11px",color:"#365060",fontFamily:"Cinzel,serif",letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
+                    <span style={{ fontSize:"16px",opacity:0.75 }}>🦜</span>
+                  </div>
+                  {step === 1 && !selStar && !hovStar && (
+                    <>
+                      <div style={{ fontSize:"17px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>OK {name}. Your turn to guide us.</div>
+                      <div style={{ fontSize:"14px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>You stand on the pola at midnight. The sky is full of stars — but the canoe is drifting, not yet oriented. You know from my story that Sāmoa lies in the Nāleo-Koʻolau house. To set our heading, you need to find the star that rises there.</div>
+                      <div style={{ padding:"9px 12px",background:"rgba(18,55,80,0.4)",borderLeft:"2px solid #1A7A6E",borderRadius:"0 4px 4px 0",fontSize:"11px",color:"#5AABB8",fontFamily:"Georgia,serif" }}>Hover each star to learn its name and house. Then choose the one that rises in Nāleo-Koʻolau.</div>
+                    </>
+                  )}
+                  {step === 1 && hovStar && !selStar && (
+                    <>
+                      <div style={{ fontSize:"17px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>{hovStar.name}</div>
+                      <div style={{ fontSize:"14px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>{hovStar.desc}</div>
+                    </>
+                  )}
+                  {step === 1 && selStar && !selStar.correct && (
+                    <>
+                      <div style={{ fontSize:"17px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>{selStar.name}.</div>
+                      <div style={{ fontSize:"14px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>{selStar.desc} We need the one that rises in Nāleo-Koʻolau.</div>
+                    </>
+                  )}
+                  {step === 1 && selStar?.correct && (
+                    <>
+                      <div style={{ fontSize:"17px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>Mānaiakalani!</div>
+                      <div style={{ fontSize:"14px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>That is the one. The compass is finding its orientation now...</div>
+                    </>
+                  )}
+                  {step === 2 && (
+                    <>
+                      <div style={{ fontSize:"17px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>Mānaiakalani. You found it.</div>
+                      <div style={{ fontSize:"14px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>See how it sits in the Nāleo-Koʻolau house — north-northeast. Keep it on your starboard bow all night and we hold our heading for Sāmoa.</div>
+                      <div style={{ marginTop:"auto",padding:"11px",background:"rgba(200,148,26,0.10)",border:"1px solid rgba(200,148,26,0.28)",borderRadius:"6px",textAlign:"center",fontFamily:"Cinzel,serif",fontSize:"10px",color:"#C8941A",letterSpacing:"0.09em" }}>✦ STAR COMPASS ADDED TO YOUR BAG ✦</div>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
-            <div style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",padding:"16px" }}>
+
+            {/* Right — night sky (step 1) or oriented compass (step 2) */}
+            <div style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",padding:"16px",background:"#04070E" }}>
+              {/* Ambient background stars */}
               <svg style={{ position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none" }}>
                 {bgStars.map((s,i) => <circle key={i} cx={`${s.x}%`} cy={`${s.y}%`} r={s.r} fill="#6A9AB8" opacity={s.op} />)}
               </svg>
-              <div style={{ width:"min(100%, calc(100vh - 160px))",aspectRatio:"600/618",position:"relative",zIndex:1 }}>
-                <CompassDial step={step} selHouse={selHouse} selStar={selStar} hovHouse={hovHouse} hovStar={hovStar} onHouseClick={handleHouseClick} onHouseHover={setHovHouse} onStarClick={handleStarClick} onStarHover={setHovStar} />
-              </div>
+
+              {step === 1 ? (
+                /* Night sky — stars scattered, not oriented */
+                <svg viewBox="0 0 600 600" style={{ width:"min(100%,520px)",height:"min(100%,520px)",position:"relative",zIndex:1 }}>
+                  <defs>
+                    <filter id="nightGlow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  </defs>
+                  {SCATTERED_STARS.map(pos => {
+                    const star = STARS.find(s => s.id === pos.id);
+                    const sx = pos.x, sy = pos.y;
+                    const isHov = hovStar?.id === star.id;
+                    const isSel = selStar?.id === star.id;
+                    const isCorrect = isSel && star.correct;
+                    const isWrong = isSel && !star.correct;
+                    // Label: place radially outward from centre (300,300)
+                    const dx = sx - 300, dy = sy - 300;
+                    const len = Math.sqrt(dx*dx+dy*dy)||1;
+                    const lx = sx + (dx/len)*(star.r+14), ly = sy + (dy/len)*(star.r+14);
+                    const anchor = dx > 30 ? "start" : dx < -30 ? "end" : "middle";
+                    return (
+                      <g key={star.id}
+                        style={{ cursor:"pointer" }}
+                        onClick={() => handleStarClick(star)}
+                        onMouseEnter={() => setHovStar(star)}
+                        onMouseLeave={() => setHovStar(null)}>
+                        {(isHov || isSel) && <circle cx={sx} cy={sy} r={star.r+16} fill="none" stroke={isCorrect?"#C0E8FF":isWrong?"#FF5533":star.color} strokeWidth="1.5" opacity="0.4"/>}
+                        <circle cx={sx} cy={sy} r={isHov||isSel ? star.r+3 : star.r}
+                          fill={isCorrect?"#C0E8FF":isWrong?"#FF6644":star.color}
+                          filter="url(#nightGlow)" opacity={isWrong ? 0.4 : 1}/>
+                        {isHov && !isSel && (
+                          <text x={lx} y={ly+4} textAnchor={anchor} fill="#EEE5C8" fontSize="13" fontFamily="Cinzel,serif" fontWeight="600"
+                            style={{ pointerEvents:"none" }}>{star.name}</text>
+                        )}
+                        {isWrong && <text x={lx} y={ly+4} textAnchor={anchor} fill="#FF6644" fontSize="11" fontFamily="Cinzel,serif"
+                          style={{ pointerEvents:"none" }}>Not Nāleo-Koʻolau</text>}
+                      </g>
+                    );
+                  })}
+                </svg>
+              ) : (
+                /* Oriented compass — success state — simple SVG, no complex component */
+                <svg viewBox="-60 -60 720 720" style={{ width:"min(100%,520px)",height:"min(100%,520px)",position:"relative",zIndex:1, filter:"drop-shadow(0 0 40px rgba(15,90,150,0.4))" }}>
+                  <defs>
+                    <radialGradient id="successBg"><stop offset="0%" stopColor="#0D1B30"/><stop offset="100%" stopColor="#060D1C"/></radialGradient>
+                    <filter id="successGlow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  </defs>
+                  {/* Background */}
+                  <circle cx={300} cy={300} r={268} fill="url(#successBg)"/>
+                  {/* House lines */}
+                  {Array.from({length:32},(_,i)=>{
+                    const rad=(i*11.25-90)*Math.PI/180;
+                    const isCard=i%8===0, isManu=i%4===0&&!isCard;
+                    const r1=isCard?52:isManu?72:95, r2=258;
+                    return <line key={i} x1={(300+r1*Math.cos(rad)).toFixed(1)} y1={(300+r1*Math.sin(rad)).toFixed(1)} x2={(300+r2*Math.cos(rad)).toFixed(1)} y2={(300+r2*Math.sin(rad)).toFixed(1)} stroke={isCard?"#3A5A80":isManu?"#253860":"#162840"} strokeWidth={isCard?1.8:isManu?1.1:0.5}/>;
+                  })}
+                  <circle cx={300} cy={300} r={258} fill="none" stroke="#253850" strokeWidth="1.5"/>
+                  {/* Quadrant fills */}
+                  {[["rgba(200,120,20,0.13)",0],["rgba(155,145,15,0.10)",90],["rgba(15,95,155,0.13)",180],["rgba(90,35,170,0.10)",270]].map(([c,a],i)=>{
+                    const r1=(a-90)*Math.PI/180, r2=(a+90-90)*Math.PI/180;
+                    return <path key={i} d={`M300,300 L${(300+258*Math.cos(r1)).toFixed(1)},${(300+258*Math.sin(r1)).toFixed(1)} A258,258 0 0,1 ${(300+258*Math.cos(r2)).toFixed(1)},${(300+258*Math.sin(r2)).toFixed(1)} Z`} fill={c}/>;
+                  })}
+                  {/* Hub */}
+                  <circle cx={300} cy={300} r={52} fill="#060D1C" stroke="#1A2840" strokeWidth="1"/>
+                  {/* Cardinal labels */}
+                  {[["Ākau",0],["Hikina",90],["Hema",180],["Komohana",270]].map(([n,a])=>{
+                    const rad=(a-90)*Math.PI/180;
+                    return <text key={n} x={(300+162*Math.cos(rad)).toFixed(1)} y={(300+162*Math.sin(rad)+5).toFixed(1)} textAnchor="middle" fill="#5A92BC" fontSize="14" fontFamily="Cinzel,serif" fontWeight="600">{n}</text>;
+                  })}
+                  {/* Quadrant labels */}
+                  {[["KOʻOLAU","#B07825",45],["MALANAI","#9A9A20",135],["KONA","#2090C0",225],["HOʻOLUA","#8040C8",315]].map(([n,c,a])=>{
+                    const rad=(a-90)*Math.PI/180;
+                    return <text key={n} x={(300+295*Math.cos(rad)).toFixed(1)} y={(300+295*Math.sin(rad)+4).toFixed(1)} textAnchor="middle" fill={c} fontSize="11" fontFamily="Cinzel,serif" fontWeight="700" letterSpacing="0.15em">{n}</text>;
+                  })}
+                  {/* Nāleo-Koʻolau wedge highlighted */}
+                  <path d={`M300,300 L${(300+257*Math.cos((22.5-5.625-90)*Math.PI/180)).toFixed(1)},${(300+257*Math.sin((22.5-5.625-90)*Math.PI/180)).toFixed(1)} A257,257 0 0,1 ${(300+257*Math.cos((22.5+5.625-90)*Math.PI/180)).toFixed(1)},${(300+257*Math.sin((22.5+5.625-90)*Math.PI/180)).toFixed(1)} Z`}
+                    fill="rgba(200,148,26,0.2)" stroke="#C8941A" strokeWidth="1.8"/>
+                  {/* Bearing line */}
+                  <line x1={300} y1={300} x2={(300+250*Math.cos((22.5-90)*Math.PI/180)).toFixed(1)} y2={(300+250*Math.sin((22.5-90)*Math.PI/180)).toFixed(1)} stroke="#C8941A" strokeWidth="2" strokeDasharray="6,4" opacity="0.8"/>
+                  {/* Nāleo-Koʻolau label */}
+                  {(()=>{ const rad=(22.5-90)*Math.PI/180; return <text x={(300+290*Math.cos(rad)).toFixed(1)} y={(300+290*Math.sin(rad)).toFixed(1)} textAnchor="middle" fill="#C8941A" fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">Nāleo-Koʻolau</text>; })()}
+                  {/* Mānaiakalani star */}
+                  {(()=>{ const rad=(22.5-90)*Math.PI/180; const sx=300+205*Math.cos(rad), sy=300+205*Math.sin(rad); return (
+                    <g filter="url(#successGlow)">
+                      <circle cx={sx.toFixed(1)} cy={sy.toFixed(1)} r={20} fill="none" stroke="#C0E8FF" strokeWidth="1" opacity="0.3"/>
+                      <circle cx={sx.toFixed(1)} cy={sy.toFixed(1)} r={12} fill="none" stroke="#C0E8FF" strokeWidth="1" opacity="0.5"/>
+                      <circle cx={sx.toFixed(1)} cy={sy.toFixed(1)} r={9} fill="#C0E8FF"/>
+                      <text x={(sx+18).toFixed(1)} y={(sy-10).toFixed(1)} fill="#EEE5C8" fontSize="13" fontFamily="Cinzel,serif" fontWeight="700">Mānaiakalani</text>
+                      <text x={(sx+18).toFixed(1)} y={(sy+5).toFixed(1)} fill="#C0E8FF" fontSize="10" fontFamily="Cinzel,serif" opacity="0.7">your guide star</text>
+                    </g>
+                  ); })()}
+                  <circle cx={300} cy={300} r={5} fill="#5A92BC"/>
+                </svg>
+              )}
             </div>
+
           </div>
         </div>
       )}
