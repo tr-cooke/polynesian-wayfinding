@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { HOUSES, STARS, JOURNEY_ORDER, getJourneyStep, ISLANDS, VOYAGE_ROADS, SEA_ROADS, TRIANGLE, BAG_ITEMS, SUN_SCENARIOS, SWELL_SCENARIOS, WIND_MAP_W, WIND_MAP_H, latLonToXY, WIND_BELTS, WIND_SCENARIO, BIRD_TYPE_META, BIRDS, BIRD_SIGHTINGS, VOYAGE_NODES, VOYAGE_WAYPOINTS, BRIDGE_CONTENT, MODULE_CONTENT, CLOUD_SIGNS, STORY_PAGES } from './data.jsx';
+import { analyticsEvents } from './firebase.js';
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -20,8 +21,163 @@ const dirName = a =>
   ["north","northeast","east","southeast","south","southwest","west","northwest"][Math.round(a / 45) % 8];
 
 /* ══════════════════════════════════════════════════════════════
-   BRIDGE SCREEN — arrival narrative shown after each module
+   FEEDBACK BUTTON — floating, always visible during gameplay
 ══════════════════════════════════════════════════════════════ */
+
+const FEEDBACK_URL = "https://docs.google.com/forms/d/e/1FAIpQLSekiUZKnikxFXrkO6I8txr-KKscaG3xDEST_Xj5C7tgkOrrUQ/viewform?usp=header";
+
+function FeedbackButton() {
+  const [hovered, setHovered] = useState(false);
+
+  const handleClick = () => {
+    analyticsEvents.feedbackOpened();
+    window.open(FEEDBACK_URL, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      title="Share feedback or report a bug"
+      style={{
+        position: "fixed",
+        bottom: "18px",
+        right: "18px",
+        zIndex: 200,
+        display: "flex",
+        alignItems: "center",
+        gap: "7px",
+        padding: hovered ? "9px 16px" : "9px 12px",
+        borderRadius: "24px",
+        border: "1px solid rgba(200,148,26,0.35)",
+        background: hovered ? "rgba(200,148,26,0.18)" : "rgba(4,8,18,0.82)",
+        backdropFilter: "blur(8px)",
+        cursor: "pointer",
+        transition: "all 0.2s ease",
+        boxShadow: hovered ? "0 0 20px rgba(200,148,26,0.2)" : "0 2px 12px rgba(0,0,0,0.4)",
+      }}
+    >
+      <span style={{ fontSize: "14px", lineHeight: 1 }}>✦</span>
+      <span style={{
+        fontFamily: "Cinzel,serif",
+        fontSize: "10px",
+        fontWeight: "700",
+        letterSpacing: "0.1em",
+        color: "#C8941A",
+        whiteSpace: "nowrap",
+        maxWidth: hovered ? "80px" : "0px",
+        overflow: "hidden",
+        transition: "max-width 0.2s ease",
+        opacity: hovered ? 1 : 0,
+      }}>
+        FEEDBACK
+      </span>
+    </button>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ERROR BOUNDARY
+   Catches any render crash and shows a readable screen instead
+   of a blank page. Must be a class component — hooks can't do this.
+══════════════════════════════════════════════════════════════ */
+
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null, info: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+
+  componentDidCatch(error, info) {
+    console.error("[Ocean Adventure crash]", error, info?.componentStack);
+    this.setState({ info });
+    try { analyticsEvents.appCrashed(error?.message); } catch(e) {}
+  }
+
+  handleReset() {
+    // Clear saved state and reload — gives the user a way out
+    try {
+      localStorage.removeItem("pvs_haumana");
+      localStorage.removeItem("pvs_bag");
+      localStorage.removeItem("pvs_bag_intro");
+    } catch(e) {}
+    window.location.reload();
+  }
+
+  render() {
+    if (!this.state.error) return this.props.children;
+
+    const msg = this.state.error?.message || "Unknown error";
+    const stack = this.state.info?.componentStack || "";
+    const firstLine = stack.split("\n").filter(Boolean)[0] || "";
+
+    return (
+      <div style={{
+        width:"100%", height:"100%", background:"#04080E",
+        display:"flex", alignItems:"center", justifyContent:"center",
+        fontFamily:"Georgia,serif", padding:"40px", boxSizing:"border-box",
+      }}>
+        <div style={{ maxWidth:"540px", width:"100%", display:"flex", flexDirection:"column", gap:"24px" }}>
+          <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:"#C8941A", letterSpacing:"0.2em" }}>
+            OCEAN ADVENTURE · SYSTEM
+          </div>
+          <div style={{ fontFamily:"Cinzel,serif", fontSize:"28px", fontWeight:"700", color:"#E8D8A8", lineHeight:"1.2" }}>
+            Something went wrong.
+          </div>
+          <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", lineHeight:"1.75", fontStyle:"italic" }}>
+            "Even the best navigator runs into unexpected weather. Your progress is saved — let us get you back on course."
+          </div>
+          <div style={{ background:"rgba(255,60,30,0.06)", border:"1px solid rgba(255,60,30,0.2)", borderRadius:"6px", padding:"14px 16px" }}>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#FF6644", letterSpacing:"0.12em", marginBottom:"6px" }}>
+              ERROR DETAIL
+            </div>
+            <div style={{ fontFamily:"monospace", fontSize:"12px", color:"#FF9977", lineHeight:"1.5", wordBreak:"break-word" }}>
+              {msg}
+            </div>
+            {firstLine && (
+              <div style={{ fontFamily:"monospace", fontSize:"11px", color:"#884433", marginTop:"6px", lineHeight:"1.4" }}>
+                {firstLine.trim()}
+              </div>
+            )}
+          </div>
+          <div style={{ display:"flex", gap:"12px" }}>
+            <button
+              onClick={() => this.handleReset()}
+              style={{
+                flex:1, padding:"14px", borderRadius:"6px", cursor:"pointer",
+                fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700",
+                letterSpacing:"0.12em", border:"1px solid #C8941A",
+                background:"rgba(200,148,26,0.14)", color:"#C8941A",
+              }}>
+              RESTART VOYAGE →
+            </button>
+            <button
+              onClick={() => this.setState({ error: null, info: null })}
+              style={{
+                flex:1, padding:"14px", borderRadius:"6px", cursor:"pointer",
+                fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700",
+                letterSpacing:"0.12em", border:"1px solid #1A3050",
+                background:"none", color:"#3A6070",
+              }}>
+              TRY AGAIN
+            </button>
+          </div>
+          <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#1A2A40", letterSpacing:"0.1em", textAlign:"center" }}>
+            If this keeps happening, please share the error detail above with the development team.
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+
 
 function BridgeScreen({ moduleNum, name, unlocked, onReturn }) {
   const b     = BRIDGE_CONTENT[moduleNum];
@@ -4319,8 +4475,16 @@ function StoryCard({ name, onComplete }) {
 
 
 
-export default function App() {
-  const [screen,   setScreen]   = useState("loading");
+export default function AppWithBoundary() {
+  return (
+    <ErrorBoundary>
+      <App />
+      <FeedbackButton />
+    </ErrorBoundary>
+  );
+}
+
+function App() {
   const [name,     setName]     = useState("");
   const [step,     setStep]     = useState(1);
   const [selHouse, setSelHouse] = useState(null);
@@ -4346,6 +4510,14 @@ export default function App() {
       if (prev.includes(itemId)) return prev;
       const next = [...prev, itemId];
       localStorage.setItem("pvs_bag", JSON.stringify(next));
+      // Fire module_completed when the primary tool for each module is unlocked
+      const moduleCompletionMap = {
+        star_compass: 1, sun_arc: 2, wave_reader: 3,
+        wind_reader: 4, bird_guide: 5, cloud_reader: 6,
+      };
+      if (moduleCompletionMap[itemId]) {
+        analyticsEvents.moduleCompleted(moduleCompletionMap[itemId]);
+      }
       return next;
     });
   };
@@ -4355,7 +4527,7 @@ export default function App() {
   const handleSubmit = n => {
     localStorage.setItem("pvs_haumana", n);
     setName(n);
-    // Only unlock sweet potato seeds if not already in bag (new game)
+    analyticsEvents.voyageStarted(n);
     const savedBag = JSON.parse(localStorage.getItem("pvs_bag") || "[]");
     if (!savedBag.includes("sweet_potato_seeds")) unlock("sweet_potato_seeds");
     setScreen("story");
