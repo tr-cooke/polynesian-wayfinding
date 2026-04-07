@@ -7,19 +7,27 @@
 // 3. Paste the values into the config below, replacing each placeholder
 // 4. In Firebase console → Analytics → enable Google Analytics if not already on
 // ---------------------------------------------------------------------------
-
+// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics, logEvent as firebaseLogEvent, isSupported } from "firebase/analytics";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey:            "PASTE_YOUR_API_KEY_HERE",
-  authDomain:        "PASTE_YOUR_AUTH_DOMAIN_HERE",
-  projectId:         "PASTE_YOUR_PROJECT_ID_HERE",
-  storageBucket:     "PASTE_YOUR_STORAGE_BUCKET_HERE",
-  messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID_HERE",
-  appId:             "PASTE_YOUR_APP_ID_HERE",
-  measurementId:     "PASTE_YOUR_MEASUREMENT_ID_HERE",
+  apiKey: "AIzaSyCSK6mzWkMskEzmoOlMQmCKMRfnOrfcgFM",
+  authDomain: "polynesian-wayfinding-97d64.firebaseapp.com",
+  projectId: "polynesian-wayfinding-97d64",
+  storageBucket: "polynesian-wayfinding-97d64.firebasestorage.app",
+  messagingSenderId: "1033974689241",
+  appId: "1:1033974689241:web:ffaea5c6d04d0028453dc8",
+  measurementId: "G-BRPV6XV197"
 };
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 // Initialise — analytics may not be supported in all environments (e.g. localhost
 // with ad blockers), so we degrade gracefully rather than crashing.
