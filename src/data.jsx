@@ -499,9 +499,8 @@ export const BRIDGE_CONTENT = {
     destination: "Sāmoa",
     arrivalScene: "🏝",
     paluLines: [
-      "We've arrived. Pull the bow up — there, into that cove. The sand is soft and the palms give shade.",
-      "I'll head inland with Matala to share our first set of sweet potato seeds. The local wayfinders here will look after us tonight.",
-      "Rest. You navigated well for your first crossing. Mānaiakalani held true all three nights.",
+      "We have made it to Sāmoa! Congratulations, young Wayfinder. You carry the star compass in your mind now.",
+      "Let's rest here, and see if we can find anyone to talk with.",
     ],
     storyTitle: "The Star Compass",
     story: "The thirty-two houses of the horizon are not lines on a chart — they are held in the mind. Nainoa Thompson, who revived this knowledge in the twentieth century, described the compass as something you build inside yourself during training, until you can feel where every house sits even with your eyes closed. The star does not move. You move around it. That is the secret.",
