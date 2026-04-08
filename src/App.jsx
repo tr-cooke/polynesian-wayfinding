@@ -368,7 +368,7 @@ function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
   const handleShare = () => {
     setShared(true);
     setPhase("exchange");
-    onUnlock("samoan_star_map");
+    onUnlock("samoan_star_map"); onUnlock("wayfarers_notebook");
     setTimeout(() => setStoryVis(true), 800);
   };
 
@@ -568,14 +568,16 @@ function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
           {/* Exchange speech bubble over greeter */}
           {shared && (
             <g>
-              <rect x={greeterX-130} y={greeterY-150} width="260" height="88" rx="8"
+              <rect x={greeterX-140} y={greeterY-176} width="280" height="116" rx="8"
                 fill="#05100A" stroke="#C8941A77" strokeWidth="1.5"/>
               <path d={`M${greeterX-10},${greeterY-62} L${greeterX},${greeterY-50} L${greeterX+10},${greeterY-62}`}
                 fill="#05100A" stroke="#C8941A77" strokeWidth="1.5"/>
               <text x={greeterX} y={greeterY-128} textAnchor="middle" fill="#C8941A" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.1em">TAUTAI FALEOLO</text>
-              <text x={greeterX} y={greeterY-110} textAnchor="middle" fill="#A8C8A0" fontSize="11" fontFamily="Georgia,serif" fontStyle="italic">"These seeds will feed many families.</text>
-              <text x={greeterX} y={greeterY-94} textAnchor="middle" fill="#A8C8A0" fontSize="11" fontFamily="Georgia,serif" fontStyle="italic">Take our star map in return."</text>
-              <text x={greeterX} y={greeterY-72} textAnchor="middle" fill="#2AB870" fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">✦ Samoan Star Map received</text>
+              <text x={greeterX} y={greeterY-138} textAnchor="middle" fill="#A8C8A0" fontSize="11" fontFamily="Georgia,serif" fontStyle="italic">"These seeds will feed many families.</text>
+              <text x={greeterX} y={greeterY-122} textAnchor="middle" fill="#A8C8A0" fontSize="11" fontFamily="Georgia,serif" fontStyle="italic">Take our star map." She leans closer.</text>
+              <text x={greeterX} y={greeterY-106} textAnchor="middle" fill="#C8941A" fontSize="11" fontFamily="Georgia,serif" fontStyle="italic">"And write this down: Tahiti —</text>
+              <text x={greeterX} y={greeterY-90} textAnchor="middle" fill="#C8941A" fontSize="11" fontFamily="Georgia,serif" fontStyle="italic">three hand-widths below the zenith."</text>
+              <text x={greeterX} y={greeterY-68} textAnchor="middle" fill="#2AB870" fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">✦ Star Map + Notebook received</text>
             </g>
           )}
 
@@ -626,6 +628,9 @@ function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
             <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#A8C8A0", lineHeight:"1.7", fontStyle:"italic" }}>
               "Visitors from Tonga! We heard the stories of your crossing — three nights on the open ocean. You carry the star compass in your mind now. What have you brought us from the islands?"
             </div>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#8AA898", lineHeight:"1.65", fontStyle:"italic", borderLeft:`2px solid ${accent}33`, paddingLeft:"12px" }}>
+              Palu leans toward you quietly: "If they offer anything — a star map, a word of advice — write it down. The spoken knowledge is worth more than the map itself."
+            </div>
             <div style={{ display:"flex", gap:"14px" }}>
               <button onClick={handleShare} style={{ flex:1, padding:"14px 18px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}`, background:`rgba(200,148,26,0.14)`, color:accent }}>
                 Share the sweet potato cuttings →
@@ -662,6 +667,16 @@ function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
                     </div>
                   </div>
                 )}
+                {(() => { const nb = BAG_ITEMS.find(i => i.id === "wayfarers_notebook"); return nb ? (
+                  <div style={{ display:"flex", alignItems:"center", gap:"12px", padding:"12px 14px", background:`${nb.color}10`, border:`1px solid ${nb.color}33`, borderRadius:"8px" }}>
+                    <span style={{ fontSize:"24px" }}>{nb.icon}</span>
+                    <div>
+                      <div style={{ fontFamily:"Cinzel,serif", fontSize:"13px", fontWeight:"700", color:"#D0C8A8" }}>{nb.name}</div>
+                      <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:`${nb.color}99`, letterSpacing:"0.06em", marginTop:"2px" }}>{nb.hawaiian}</div>
+                      <div style={{ fontFamily:"Georgia,serif", fontSize:"11px", color:"#7A8070", marginTop:"4px", fontStyle:"italic" }}>Spoken knowledge from every island</div>
+                    </div>
+                  </div>
+                ) : null; })()}
                 <button onClick={handleOkAfterStory} style={{ padding:"12px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`rgba(200,148,26,0.14)`, color:accent }}>
                   OK →
                 </button>
@@ -1174,7 +1189,221 @@ function NavigatorsBag({ open, onClose, unlocked }) {
    VOYAGE MAP
 ══════════════════════════════════════════════════════════════ */
 
-function VoyageMap({ name, onNavigate, unlocked, onOpenBag, onReset }) {
+/* ══════════════════════════════════════════════════════════════
+   CREDITS SCREEN — cinematic scrolling, accessible from map + end
+══════════════════════════════════════════════════════════════ */
+
+function CreditsScreen({ onBack }) {
+  const [scrollY, setScrollY] = useState(0);
+  const [scrolling, setScrolling] = useState(false);
+  const containerRef = React.useRef(null);
+
+  // Auto-scroll
+  useEffect(() => {
+    if (!scrolling) return;
+    const id = setInterval(() => {
+      if (containerRef.current) {
+        containerRef.current.scrollTop += 0.8;
+      }
+    }, 16);
+    return () => clearInterval(id);
+  }, [scrolling]);
+
+  const accent = "#C8941A";
+
+  const Section = ({ title, color, children }) => (
+    <div style={{ display:"flex", flexDirection:"column", gap:"18px" }}>
+      <div style={{ display:"flex", alignItems:"center", gap:"16px" }}>
+        <div style={{ flex:1, height:"1px", background:`linear-gradient(to right, transparent, ${color}55)` }}/>
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:color, letterSpacing:"0.28em", opacity:0.9 }}>{title}</div>
+        <div style={{ flex:1, height:"1px", background:`linear-gradient(to left, transparent, ${color}55)` }}/>
+      </div>
+      {children}
+    </div>
+  );
+
+  const Entry = ({ title, sub, detail, url, color="#C8C0A0" }) => (
+    <div style={{ display:"flex", flexDirection:"column", gap:"5px", textAlign:"center" }}>
+      {title && (
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"14px", fontWeight:"700", color }}>
+          {url
+            ? <a href={url} target="_blank" rel="noopener noreferrer"
+                style={{ color, textDecoration:"none", borderBottom:`1px solid ${accent}44` }}>{title} ↗</a>
+            : title}
+        </div>
+      )}
+      {sub && <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:`${color}88`, letterSpacing:"0.1em" }}>{sub}</div>}
+      {detail && <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#4A7080", lineHeight:"1.75", fontStyle:"italic", maxWidth:"520px", margin:"0 auto" }}>{detail}</div>}
+    </div>
+  );
+
+  const Divider = () => (
+    <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"16px", padding:"8px 0" }}>
+      <div style={{ width:"40px", height:"1px", background:`${accent}33` }}/>
+      <span style={{ color:`${accent}44`, fontSize:"10px" }}>✦</span>
+      <div style={{ width:"40px", height:"1px", background:`${accent}33` }}/>
+    </div>
+  );
+
+  return (
+    <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+
+      {/* Header */}
+      <div style={{ height:"44px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0, zIndex:2 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:accent, letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+        <div style={{ display:"flex", gap:"10px", alignItems:"center" }}>
+          <button onClick={() => setScrolling(s => !s)} style={{ background:"none", border:`1px solid ${accent}33`, borderRadius:"5px", padding:"5px 14px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:`${accent}99`, letterSpacing:"0.1em" }}>
+            {scrolling ? "⏸ PAUSE" : "▶ SCROLL"}
+          </button>
+          <button onClick={onBack} style={{ background:"none", border:`1px solid ${accent}33`, borderRadius:"5px", padding:"5px 14px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:`${accent}99`, letterSpacing:"0.1em" }}>← BACK</button>
+        </div>
+      </div>
+
+      {/* Star field */}
+      <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none", zIndex:0 }}>
+        {Array.from({length:80},(_,i)=>({
+          x:((i*137+41)%97)/97*100, y:((i*79+23)%89)/89*100,
+          r:i%11===0?1.4:i%5===0?0.9:0.5, op:0.05+(i%7)*0.04
+        })).map((s,i)=>(
+          <circle key={i} cx={`${s.x}%`} cy={`${s.y}%`} r={s.r} fill={accent} opacity={s.op}/>
+        ))}
+      </svg>
+
+      {/* Scrolling content */}
+      <div ref={containerRef} style={{ flex:1, overflowY:"auto", zIndex:1, scrollBehavior:"smooth" }}>
+        <div style={{ maxWidth:"620px", margin:"0 auto", padding:"60px 32px 120px", display:"flex", flexDirection:"column", gap:"48px", textAlign:"center" }}>
+
+          {/* Title card */}
+          <div style={{ display:"flex", flexDirection:"column", gap:"16px", paddingTop:"20px" }}>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.4em", opacity:0.6 }}>A POLYNESIAN VOYAGING EXPERIENCE</div>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"36px", fontWeight:"900", color:"#E8D8A8", lineHeight:"1.1" }}>OCEAN ADVENTURE</div>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"16px" }}>
+              <div style={{ flex:1, height:"1px", background:`linear-gradient(to right, transparent, ${accent}66)` }}/>
+              <span style={{ color:accent, fontSize:"16px" }}>✦</span>
+              <div style={{ flex:1, height:"1px", background:`linear-gradient(to left, transparent, ${accent}66)` }}/>
+            </div>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#4A7080", fontStyle:"italic", lineHeight:"1.8" }}>
+              This experience is a work in progress. Navigation techniques, cultural details,
+              and language are grounded in documented research — but wayfinding knowledge
+              is deep, living, and belongs to the communities that hold it. We welcome
+              corrections and feedback.
+            </div>
+          </div>
+
+          <Divider/>
+
+          {/* Inspiration */}
+          <Section title="INSPIRATION" color="#E8C060">
+            <Entry
+              title="The Wayfinder"
+              sub="Adam Johnson · MCD · 2025"
+              detail="An epic novel set in the Polynesian islands during the height of the Tuʻi Tonga Empire. Johnson's decade of immersion in Tongan oral tradition and his portrayal of celestial navigation, outrigger voyaging, and island life was the seed for this experience."
+            />
+          </Section>
+
+          <Divider/>
+
+          {/* Cultural Foundation */}
+          <Section title="CULTURAL FOUNDATION" color="#2A9A70">
+            <Entry
+              title="Mau Piailug (1932–2010)"
+              sub="Satawal, Micronesia · Grandmaster Navigator"
+              detail="Sailed Hōkūleʻa from Hawaiʻi to Tahiti in 1976 using non-instrument navigation alone, reviving a tradition that had nearly been lost. He taught Nainoa Thompson and, through him, a generation of Pacific navigators. Everything in this experience traces back to him."
+            />
+            <Entry
+              title="Nainoa Thompson"
+              sub="Polynesian Voyaging Society · Master Navigator"
+              detail="Developed the modern Hawaiian star compass. First Hawaiian in centuries to navigate open ocean without instruments. His published accounts of zenith stars, latitude sailing, and hand measurement are the backbone of the navigation content here."
+              url="https://hokulea.com/the-star-compass-by-nainoa-thompson/"
+            />
+            <Entry
+              title="The Polynesian Voyaging Society"
+              sub="Hōkūleʻa · hokulea.com"
+              detail="The organisation that built Hōkūleʻa, revived the living practice of Pacific wayfinding, and published the navigation research this experience draws on most heavily. Their educational materials are freely available at hokulea.com."
+              url="https://hokulea.com"
+            />
+          </Section>
+
+          <Divider/>
+
+          {/* Academic Sources */}
+          <Section title="RESEARCH & SCHOLARSHIP" color="#7AACBE">
+            <Entry
+              title="University of Hawaiʻi · Mānoa"
+              sub="Polynesian Voyaging Society Education at Sea"
+              detail="The UH-affiliated research into non-instrument wayfinding, estimating position, meridian pairs, and zenith star mechanics provided technical grounding for the Module 2 sun-latitude content."
+              url="https://worldwidevoyage.hokulea.com/education-at-sea/polynesian-navigation/polynesian-non-instrument-wayfinding/estimating-position/"
+            />
+            <Entry
+              title="Ben Finney"
+              sub="Voyage of Rediscovery · 1994"
+              detail="Source of the account of Mau Piailug reading two swell trains simultaneously while lying in the hull of Hōkūleʻa — the foundation of the Module 3 swell content."
+            />
+            <Entry
+              title="David Lewis"
+              sub="We the Navigators · 1972"
+              detail="The first modern scholarly documentation of living Pacific non-instrument navigation, based on voyages with surviving navigators across Polynesia, Micronesia, and Melanesia."
+            />
+            <Entry
+              title="Harold Gatty"
+              sub="The Raft Book · 1943"
+              detail="Bird navigation distances, debris drift patterns, and traditional Pacific sea-reading techniques, written as a survival guide for US military aviators."
+            />
+            <Entry
+              title="Jack Thatcher · Te Aurere"
+              sub="Kāpehu Whetū · Aotearoa star compass"
+              detail="Adapted the Hawaiian star compass into te reo Māori for Aotearoa navigators. Source of Māori compass terminology used in this experience."
+              url="https://www.sciencelearn.org.nz/resources/622-the-star-compass-kapehu-whetu"
+            />
+          </Section>
+
+          <Divider/>
+
+          {/* Language note */}
+          <Section title="A NOTE ON LANGUAGE" color={accent}>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#4A7080", lineHeight:"1.85", fontStyle:"italic" }}>
+              The star compass house names and star names in this experience come directly from
+              Nainoa Thompson's published Hawaiian star compass. Other terms draw on Hawaiian,
+              Māori, and Samoan language sources of varying reliability. Some were generated
+              rather than sourced, and we know they need review by native speakers.
+              If you have expertise in Pacific languages and would like to help, please use
+              the feedback button — we would be genuinely grateful.
+            </div>
+          </Section>
+
+          <Divider/>
+
+          {/* Oral traditions */}
+          <Section title="ORAL TRADITIONS CITED" color="#2A9A70">
+            <Entry title="Māui cycle" detail="Māui lassoing the sun — Polynesian oral tradition, cited in the Module 2 Tama-nui-te-rā bridge screen."/>
+            <Entry title="Kupe's sailing instructions" detail="Māori oral tradition. Kupe's account of navigating to Aotearoa — cited in the Module 6 bridge screen."/>
+            <Entry title="Makanikeoe" detail="A Marquesan wind-spirit narrative, from oral tradition references, cited in the Module 4 wind introduction."/>
+          </Section>
+
+          <Divider/>
+
+          {/* Closing */}
+          <div style={{ display:"flex", flexDirection:"column", gap:"14px", paddingTop:"8px" }}>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8A0", lineHeight:"1.8", fontStyle:"italic" }}>
+              "You cannot look up at the stars and tell where you are.
+              It all has to be done in your head."
+            </div>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:`${accent}77`, letterSpacing:"0.12em" }}>
+              — Nainoa Thompson · Polynesian Voyaging Society
+            </div>
+          </div>
+
+          <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#1A2A38", letterSpacing:"0.2em", paddingBottom:"40px" }}>
+            He ao! He ao tea! — A cloud! A white cloud!
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VoyageMap({ name, onNavigate, unlocked, onOpenBag, onReset, onCredits }) {
   const [hovIsland, setHovIsland] = useState(null);
   const [waveOffset, setWaveOffset] = useState(0);
   const W = 760, H = 500;
@@ -1237,6 +1466,17 @@ function VoyageMap({ name, onNavigate, unlocked, onOpenBag, onReset }) {
           </button>
           <button onClick={onReset} style={{ background: "none", border: "1px solid #0A2030", borderRadius: "5px", padding: "5px 10px", cursor: "pointer", fontFamily: "Cinzel,serif", fontSize: "9.5px", color: "#0E3040", letterSpacing: "0.08em" }}>↺ RESET</button>
         </div>
+      </div>
+
+      {/* Credits / source banner */}
+      <div style={{ padding:"7px 22px", borderBottom:"1px solid #0A1E2A", background:"rgba(3,10,18,0.9)", display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0 }}>
+        <div style={{ fontFamily:"Georgia,serif", fontSize:"11px", color:"#1A4A5A", fontStyle:"italic", lineHeight:"1.4" }}>
+          Navigation research: Polynesian Voyaging Society · University of Hawaiʻi · Adam Johnson, <em>The Wayfinder</em> (2025)
+          <span style={{ marginLeft:"10px", color:"#1A3A4A" }}>· Work in progress — feedback welcome</span>
+        </div>
+        <button onClick={onCredits} style={{ flexShrink:0, background:"none", border:"1px solid #0A3040", borderRadius:"4px", padding:"4px 12px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"8.5px", color:"#1A5060", letterSpacing:"0.1em", marginLeft:"16px" }}>
+          CREDITS ↗
+        </button>
       </div>
 
       {/* Map */}
@@ -2211,13 +2451,22 @@ function FinalVoyageModule({ name, onBack, onOpenBag, unlocked }) {
               Palu Hemi · Tongatapu · Master Navigator
             </div>
 
+            <button onClick={() => setPhase("credits")} style={{ background:"none", border:"1px solid #C8941A33", borderRadius:"5px", padding:"8px 20px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", color:"#C8941A88", letterSpacing:"0.12em", marginTop:"4px" }}>
+              VIEW SOURCES & CREDITS →
+            </button>
+
           </div>
         </div>
       </div>
     );
   }
 
-  // Main voyage screen — map + question
+  // ── CREDITS SCREEN — uses shared component ──────────────────
+  if (phase === "credits") {
+    return <CreditsScreen onBack={() => setPhase("certificate")} />;
+  }
+
+    // Main voyage screen — map + question
   const accent = "#48CAE4";
 
   return (
@@ -3115,16 +3364,16 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
     showNoonContinue = true;
   } else if (actStep === 2) {
     if (confirmed) {
-      paluTitle = "That is ʻAʻā's path.";
-      paluBody = "When Tama-nui-te-rā stands at that height, ʻAʻā would pass directly overhead tonight. We are on Tahiti's latitude. Turn east — she will find us.";
+      paluTitle = "Three hand-widths. There it is.";
+      paluBody = "The Samoan wayfinders were right. The sun has just told us the same thing ʻAʻā would have told us tonight. We are at 17° south — Tahiti's latitude. Turn east, and she will find us.";
     } else if (handY !== null && Math.abs(handY - TAHITI_HAND) > TOLERANCE) {
       paluTitle = handY > TAHITI_HAND ? "A little lower." : "A little higher.";
       paluBody = handY > TAHITI_HAND
-        ? "That height belongs to an island north of Tahiti. We have not sailed far enough south yet. Lower your hand a fraction."
-        : "That height belongs to an island south of Tahiti. We have sailed too far. Raise your hand slightly.";
+        ? "That is north of Tahiti. Lower your hand — find three hand-widths below the zenith point."
+        : "That is south of Tahiti. Raise your hand slightly — three hand-widths below overhead.";
     } else {
       paluTitle = "Raise your hand to the sun.";
-      paluBody = "I have memorised the height of Tama-nui-te-rā that belongs to Tahiti's path. Drag your hand up from the horizon until it matches where I would hold it. When the sun sits there — we are on ʻAʻā's path.";
+      paluBody = "The Samoan wayfinders told us: Tahiti is three hand-widths below the zenith at noon. Drag your hand upward. When the sun sits three hand-widths below directly overhead — that is Tahiti's latitude.";
     }
   }
 
@@ -3194,13 +3443,13 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
                 <div style={{ position:"absolute", inset:0, background:"rgba(4,8,18,0.96)", borderRadius:"7px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"18px", padding:"24px" }}>
                   <div style={{ fontSize:"32px" }}>☀</div>
                   <div style={{ fontFamily:"Cinzel,serif", fontSize:"16px", fontWeight:"700", color:accent, textAlign:"center" }}>
-                    ʻAʻā's path found.
+                    Three hand-widths. Tahiti's latitude found.
                   </div>
                   <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", fontStyle:"italic", textAlign:"center", lineHeight:"1.7" }}>
-                    When Tama-nui-te-rā stands at that height, ʻAʻā would pass directly overhead tonight. We are on Tahiti's latitude.
+                    Three hand-widths below the zenith. The Samoan wayfinders knew it. Now the sun has confirmed it. We are at 17° south — Tahiti's latitude.
                   </div>
                   <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#A8C8A0", fontStyle:"italic", textAlign:"center", lineHeight:"1.7" }}>
-                    Turn east — and Tahiti will find us.
+                    The stars and the sun are two clocks telling the same time. Turn east. Tahiti will find us.
                   </div>
                   <button onClick={() => setPhase("bridge")} style={{ padding:"13px 28px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`rgba(208,96,48,0.14)`, color:accent, marginTop:"6px" }}>
                     CONTINUE →
@@ -5472,6 +5721,9 @@ function WelcomeScreen({ onSubmit }) {
         <div style={{ fontSize: "14px", color: "#7AABBB", fontFamily: "Georgia,serif", fontStyle: "italic", lineHeight: "1.72", maxWidth: "400px" }}>
           Do you have what it takes to become an expert navigator?
         </div>
+        <div style={{ fontFamily:"Georgia,serif", fontSize:"12px", color:"#2A4050", lineHeight:"1.65", fontStyle:"italic", maxWidth:"380px", textAlign:"center" }}>
+          This experience is inspired by the voyaging traditions of the Pacific — and by the work of Mau Piailug, Nainoa Thompson, and the navigators of the Polynesian Voyaging Society who revived them.
+        </div>
         <div style={{ width: "100%", background: "rgba(8,14,28,0.88)", border: "1px solid #1E3050", borderRadius: "10px", padding: "24px 26px", display: "flex", flexDirection: "column", gap: "14px" }}>
           <div>
             <div style={{ fontSize: "13px", color: "#D0A840", fontFamily: "Cinzel,serif", fontWeight: "700", marginBottom: "4px" }}>Ko wai tō ingoa, haumāna?</div>
@@ -5840,6 +6092,11 @@ function App() {
 
   if (screen === "welcome") return <><style>{css}</style><WelcomeScreen onSubmit={handleSubmit} /></>;
 
+  if (screen === "credits") return (
+    <><style>{css}</style>
+    <CreditsScreen onBack={() => setScreen("map")} />
+    </>
+  );
   if (screen === "story") return <><style>{css}</style><StoryCard name={name} onComplete={() => setScreen("map")} /></>;
 
   const bgStars = Array.from({ length: 55 }, (_, i) => ({ x:((i*113+37)%97)/97*100, y:((i*79+23)%89)/89*100, r:i%5===0?1.1:0.55, op:0.10+(i%5)*0.06 }));
@@ -5858,7 +6115,7 @@ function App() {
           if (m===5) setScreen("birds");
           if (m===6) setScreen("clouds");
           if (m===7) setScreen("voyage");
-        }} unlocked={unlocked} onOpenBag={() => setBagOpen(true)} onReset={handleReset} />
+        }} unlocked={unlocked} onOpenBag={() => setBagOpen(true)} onReset={handleReset} onCredits={() => setScreen("credits")} />
       )}
       {screen === "map" && !bagIntroSeen && (
         <BagIntroPopup onDismiss={() => {
