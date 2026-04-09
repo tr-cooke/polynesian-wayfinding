@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { HOUSES, STARS, JOURNEY_ORDER, getJourneyStep, ISLANDS, VOYAGE_ROADS, SEA_ROADS, TRIANGLE, BAG_ITEMS, SUN_SCENARIOS, SWELL_SCENARIOS, WIND_MAP_W, WIND_MAP_H, latLonToXY, WIND_BELTS, WIND_SCENARIO, BIRD_TYPE_META, BIRDS, BIRD_SIGHTINGS, VOYAGE_NODES, VOYAGE_WAYPOINTS, BRIDGE_CONTENT, MODULE_CONTENT, CLOUD_SIGNS, STORY_PAGES } from './data.jsx';
+import React, { useState, useEffect } from "react";
+import { HOUSES, STARS, JOURNEY_ORDER, ISLANDS, VOYAGE_ROADS, SEA_ROADS, TRIANGLE, BAG_ITEMS, SUN_SCENARIOS, SWELL_SCENARIOS, WIND_MAP_W, WIND_MAP_H, latLonToXY, WIND_BELTS, WIND_SCENARIO, BIRD_TYPE_META, BIRDS, BIRD_SIGHTINGS, VOYAGE_NODES, VOYAGE_WAYPOINTS, BRIDGE_CONTENT, MODULE_CONTENT, CLOUD_SIGNS, STORY_PAGES } from './data.jsx';
 import { analyticsEvents } from './firebase.js';
 
 
@@ -91,9 +91,11 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, info) {
-    console.error("[Ocean Adventure crash]", error, info?.componentStack);
+    if (import.meta?.env?.DEV) {
+      console.error("[Ocean Adventure crash]", error, info?.componentStack);
+    }
     this.setState({ info });
-    try { analyticsEvents.appCrashed(error?.message); } catch(e) {}
+    try { analyticsEvents.appCrashed(error?.message); } catch { /* ignore */ }
   }
 
   handleReset() {
@@ -102,7 +104,7 @@ class ErrorBoundary extends React.Component {
       localStorage.removeItem("pvs_haumana");
       localStorage.removeItem("pvs_bag");
       localStorage.removeItem("pvs_bag_intro");
-    } catch(e) {}
+    } catch { /* ignore */ }
     window.location.reload();
   }
 
@@ -327,7 +329,7 @@ function SamoaCrossing({ name, onArrive }) {
 
 
 
-function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
+function SamoaArrivalScreen({ onReturn, onUnlock }) {
   // Phase flow: palu → (click each line) → palm → greeter → dialogue → exchange → story → farewell
   const [phase,       setPhase]      = useState("palu");
   const [lineIdx,     setLineIdx]    = useState(0);   // which Palu line is visible
@@ -723,7 +725,7 @@ function SamoaArrivalScreen({ name, unlocked, onReturn, onUnlock }) {
 const TAHITI_CANOE_IMG = "/images/tahiti-canoe.jpg";
 const TAHITI_BEACH_IMG = "/images/tahiti-beach.jpg";
 
-function TahitiArrivalScreen({ name, unlocked, onReturn }) {
+function TahitiArrivalScreen({ onReturn }) {
   const [phase,     setPhase]     = useState("canoe");
   const [lineIdx,   setLineIdx]   = useState(0);
   const [storyVis,  setStoryVis]  = useState(false);
@@ -880,7 +882,7 @@ function TahitiArrivalScreen({ name, unlocked, onReturn }) {
 }
 
 
-function BridgeScreen({ moduleNum, name, unlocked, onReturn }) {
+function BridgeScreen({ moduleNum, name, onReturn }) {
   const b      = BRIDGE_CONTENT[moduleNum];
   const m      = MODULE_CONTENT[moduleNum];
   const accent = m.accent;
@@ -904,7 +906,6 @@ function BridgeScreen({ moduleNum, name, unlocked, onReturn }) {
     }
   };
 
-  const accent2 = accent;
   const particles = Array.from({length:40},(_,i)=>({ x:((i*137+41)%97)/97*100, y:((i*79+23)%89)/89*100, r:i%7===0?1.2:0.6, op:0.06+(i%5)*0.05 }));
 
   const currentLine = b.paluLines[lineIdx]?.replace("{{name}}", name) ?? "";
@@ -1046,7 +1047,21 @@ function BridgeScreen({ moduleNum, name, unlocked, onReturn }) {
 function BagIntroPopup({ onDismiss, onOpenBag }) {
   return (
     <div style={{ position:"fixed", inset:0, zIndex:90, pointerEvents:"none" }}>
-      <div style={{ position:"absolute", inset:0, background:"rgba(2,5,12,0.55)", backdropFilter:"blur(1px)", pointerEvents:"auto" }} onClick={onDismiss}/>
+      <button
+        type="button"
+        aria-label="Dismiss"
+        onClick={onDismiss}
+        style={{
+          position:"absolute", inset:0,
+          background:"rgba(2,5,12,0.55)",
+          backdropFilter:"blur(1px)",
+          pointerEvents:"auto",
+          border:"none",
+          padding:0,
+          margin:0,
+          cursor:"pointer",
+        }}
+      />
       <div style={{
         position:"absolute", top:"56px", right:"16px",
         width:"280px", background:"rgba(6,12,24,0.98)", border:"1px solid #C8941A55",
@@ -1074,7 +1089,21 @@ function BagIntroPopup({ onDismiss, onOpenBag }) {
 function MapNavPopup({ onDismiss }) {
   return (
     <div style={{ position:"fixed", inset:0, zIndex:90, pointerEvents:"none" }}>
-      <div style={{ position:"absolute", inset:0, background:"rgba(2,5,12,0.45)", backdropFilter:"blur(1px)", pointerEvents:"auto" }} onClick={onDismiss}/>
+      <button
+        type="button"
+        aria-label="Dismiss"
+        onClick={onDismiss}
+        style={{
+          position:"absolute", inset:0,
+          background:"rgba(2,5,12,0.45)",
+          backdropFilter:"blur(1px)",
+          pointerEvents:"auto",
+          border:"none",
+          padding:0,
+          margin:0,
+          cursor:"pointer",
+        }}
+      />
       <div style={{
         position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)",
         width:"320px", background:"rgba(6,12,24,0.98)", border:"1px solid #C8941A55",
@@ -1103,8 +1132,27 @@ function NavigatorsBag({ open, onClose, unlocked }) {
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", justifyContent: "flex-end" }}>
-      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(2,5,12,0.72)", backdropFilter: "blur(3px)" }} />
-      <div style={{ position: "relative", width: "340px", height: "100%", background: "#06101E", borderLeft: "1px solid #1A2E48", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <button
+        type="button"
+        aria-label="Close Navigator's Bag"
+        onClick={onClose}
+        style={{
+          position:"absolute",
+          inset:0,
+          background:"rgba(2,5,12,0.72)",
+          backdropFilter:"blur(3px)",
+          border:"none",
+          padding:0,
+          margin:0,
+          cursor:"pointer",
+        }}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigator's Bag"
+        style={{ position: "relative", width: "340px", height: "100%", background: "#06101E", borderLeft: "1px solid #1A2E48", display: "flex", flexDirection: "column", overflow: "hidden" }}
+      >
 
         <div style={{ padding: "18px 20px 14px", borderBottom: "1px solid #0E1E30", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
@@ -1131,12 +1179,14 @@ function NavigatorsBag({ open, onClose, unlocked }) {
                   {unlockedItems.length} ITEM{unlockedItems.length !== 1 ? "S" : ""} COLLECTED
                 </div>
                 {unlockedItems.map(it => (
-                  <div key={it.id} onClick={() => setActiveItem(it.id)} style={{
+                  <button key={it.id} type="button" aria-label={`Open ${it.name}`} onClick={() => setActiveItem(it.id)} style={{
                     padding: "13px 15px", borderRadius: "7px",
                     border: `1px solid ${it.color}44`,
                     background: `${it.color}0C`,
                     cursor: "pointer",
                     display: "flex", alignItems: "center", gap: "13px",
+                    width: "100%",
+                    textAlign: "left",
                   }}>
                     <div style={{ fontSize: "22px", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: `${it.color}18`, borderRadius: "6px", flexShrink: 0, filter: `drop-shadow(0 0 8px ${it.color}66)` }}>
                       {it.icon}
@@ -1146,7 +1196,7 @@ function NavigatorsBag({ open, onClose, unlocked }) {
                       <div style={{ fontFamily: "Cinzel,serif", fontSize: "9px", color: it.color, letterSpacing: "0.06em", marginTop: "2px" }}>{it.hawaiian}</div>
                     </div>
                     <div style={{ color: "#2A4860", fontSize: "14px" }}>›</div>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
@@ -1193,8 +1243,47 @@ function NavigatorsBag({ open, onClose, unlocked }) {
    CREDITS SCREEN — cinematic scrolling, accessible from map + end
 ══════════════════════════════════════════════════════════════ */
 
+function CreditsSection({ title, color, children }) {
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:"18px" }}>
+      <div style={{ display:"flex", alignItems:"center", gap:"16px" }}>
+        <div style={{ flex:1, height:"1px", background:`linear-gradient(to right, transparent, ${color}55)` }}/>
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:color, letterSpacing:"0.28em", opacity:0.9 }}>{title}</div>
+        <div style={{ flex:1, height:"1px", background:`linear-gradient(to left, transparent, ${color}55)` }}/>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function CreditsEntry({ title, sub, detail, url, color = "#C8C0A0", accent }) {
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:"5px", textAlign:"center" }}>
+      {title && (
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"14px", fontWeight:"700", color }}>
+          {url
+            ? <a href={url} target="_blank" rel="noopener noreferrer"
+                style={{ color, textDecoration:"none", borderBottom:`1px solid ${accent}44` }}>{title} ↗</a>
+            : title}
+        </div>
+      )}
+      {sub && <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:`${color}88`, letterSpacing:"0.1em" }}>{sub}</div>}
+      {detail && <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#4A7080", lineHeight:"1.75", fontStyle:"italic", maxWidth:"520px", margin:"0 auto" }}>{detail}</div>}
+    </div>
+  );
+}
+
+function CreditsDivider({ accent }) {
+  return (
+    <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"16px", padding:"8px 0" }}>
+      <div style={{ width:"40px", height:"1px", background:`${accent}33` }}/>
+      <span style={{ color:`${accent}44`, fontSize:"10px" }}>✦</span>
+      <div style={{ width:"40px", height:"1px", background:`${accent}33` }}/>
+    </div>
+  );
+}
+
 function CreditsScreen({ onBack }) {
-  const [scrollY, setScrollY] = useState(0);
   const [scrolling, setScrolling] = useState(false);
   const containerRef = React.useRef(null);
 
@@ -1210,40 +1299,6 @@ function CreditsScreen({ onBack }) {
   }, [scrolling]);
 
   const accent = "#C8941A";
-
-  const Section = ({ title, color, children }) => (
-    <div style={{ display:"flex", flexDirection:"column", gap:"18px" }}>
-      <div style={{ display:"flex", alignItems:"center", gap:"16px" }}>
-        <div style={{ flex:1, height:"1px", background:`linear-gradient(to right, transparent, ${color}55)` }}/>
-        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:color, letterSpacing:"0.28em", opacity:0.9 }}>{title}</div>
-        <div style={{ flex:1, height:"1px", background:`linear-gradient(to left, transparent, ${color}55)` }}/>
-      </div>
-      {children}
-    </div>
-  );
-
-  const Entry = ({ title, sub, detail, url, color="#C8C0A0" }) => (
-    <div style={{ display:"flex", flexDirection:"column", gap:"5px", textAlign:"center" }}>
-      {title && (
-        <div style={{ fontFamily:"Cinzel,serif", fontSize:"14px", fontWeight:"700", color }}>
-          {url
-            ? <a href={url} target="_blank" rel="noopener noreferrer"
-                style={{ color, textDecoration:"none", borderBottom:`1px solid ${accent}44` }}>{title} ↗</a>
-            : title}
-        </div>
-      )}
-      {sub && <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:`${color}88`, letterSpacing:"0.1em" }}>{sub}</div>}
-      {detail && <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#4A7080", lineHeight:"1.75", fontStyle:"italic", maxWidth:"520px", margin:"0 auto" }}>{detail}</div>}
-    </div>
-  );
-
-  const Divider = () => (
-    <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"16px", padding:"8px 0" }}>
-      <div style={{ width:"40px", height:"1px", background:`${accent}33` }}/>
-      <span style={{ color:`${accent}44`, fontSize:"10px" }}>✦</span>
-      <div style={{ width:"40px", height:"1px", background:`${accent}33` }}/>
-    </div>
-  );
 
   return (
     <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", flexDirection:"column", overflow:"hidden" }}>
@@ -1290,77 +1345,86 @@ function CreditsScreen({ onBack }) {
             </div>
           </div>
 
-          <Divider/>
+          <CreditsDivider accent={accent} />
 
           {/* Inspiration */}
-          <Section title="INSPIRATION" color="#E8C060">
-            <Entry
+          <CreditsSection title="INSPIRATION" color="#E8C060">
+            <CreditsEntry
               title="The Wayfinder"
               sub="Adam Johnson · MCD · 2025"
               detail="An epic novel set in the Polynesian islands during the height of the Tuʻi Tonga Empire. Johnson's decade of immersion in Tongan oral tradition and his portrayal of celestial navigation, outrigger voyaging, and island life was the seed for this experience."
+              accent={accent}
             />
-          </Section>
+          </CreditsSection>
 
-          <Divider/>
+          <CreditsDivider accent={accent} />
 
           {/* Cultural Foundation */}
-          <Section title="CULTURAL FOUNDATION" color="#2A9A70">
-            <Entry
+          <CreditsSection title="CULTURAL FOUNDATION" color="#2A9A70">
+            <CreditsEntry
               title="Mau Piailug (1932–2010)"
               sub="Satawal, Micronesia · Grandmaster Navigator"
               detail="Sailed Hōkūleʻa from Hawaiʻi to Tahiti in 1976 using non-instrument navigation alone, reviving a tradition that had nearly been lost. He taught Nainoa Thompson and, through him, a generation of Pacific navigators. Everything in this experience traces back to him."
+              accent={accent}
             />
-            <Entry
+            <CreditsEntry
               title="Nainoa Thompson"
               sub="Polynesian Voyaging Society · Master Navigator"
               detail="Developed the modern Hawaiian star compass. First Hawaiian in centuries to navigate open ocean without instruments. His published accounts of zenith stars, latitude sailing, and hand measurement are the backbone of the navigation content here."
               url="https://hokulea.com/the-star-compass-by-nainoa-thompson/"
+              accent={accent}
             />
-            <Entry
+            <CreditsEntry
               title="The Polynesian Voyaging Society"
               sub="Hōkūleʻa · hokulea.com"
               detail="The organisation that built Hōkūleʻa, revived the living practice of Pacific wayfinding, and published the navigation research this experience draws on most heavily. Their educational materials are freely available at hokulea.com."
               url="https://hokulea.com"
+              accent={accent}
             />
-          </Section>
+          </CreditsSection>
 
-          <Divider/>
+          <CreditsDivider accent={accent} />
 
           {/* Academic Sources */}
-          <Section title="RESEARCH & SCHOLARSHIP" color="#7AACBE">
-            <Entry
+          <CreditsSection title="RESEARCH & SCHOLARSHIP" color="#7AACBE">
+            <CreditsEntry
               title="University of Hawaiʻi · Mānoa"
               sub="Polynesian Voyaging Society Education at Sea"
               detail="The UH-affiliated research into non-instrument wayfinding, estimating position, meridian pairs, and zenith star mechanics provided technical grounding for the Module 2 sun-latitude content."
               url="https://worldwidevoyage.hokulea.com/education-at-sea/polynesian-navigation/polynesian-non-instrument-wayfinding/estimating-position/"
+              accent={accent}
             />
-            <Entry
+            <CreditsEntry
               title="Ben Finney"
               sub="Voyage of Rediscovery · 1994"
               detail="Source of the account of Mau Piailug reading two swell trains simultaneously while lying in the hull of Hōkūleʻa — the foundation of the Module 3 swell content."
+              accent={accent}
             />
-            <Entry
+            <CreditsEntry
               title="David Lewis"
               sub="We the Navigators · 1972"
               detail="The first modern scholarly documentation of living Pacific non-instrument navigation, based on voyages with surviving navigators across Polynesia, Micronesia, and Melanesia."
+              accent={accent}
             />
-            <Entry
+            <CreditsEntry
               title="Harold Gatty"
               sub="The Raft Book · 1943"
               detail="Bird navigation distances, debris drift patterns, and traditional Pacific sea-reading techniques, written as a survival guide for US military aviators."
+              accent={accent}
             />
-            <Entry
+            <CreditsEntry
               title="Jack Thatcher · Te Aurere"
               sub="Kāpehu Whetū · Aotearoa star compass"
               detail="Adapted the Hawaiian star compass into te reo Māori for Aotearoa navigators. Source of Māori compass terminology used in this experience."
               url="https://www.sciencelearn.org.nz/resources/622-the-star-compass-kapehu-whetu"
+              accent={accent}
             />
-          </Section>
+          </CreditsSection>
 
-          <Divider/>
+          <CreditsDivider accent={accent} />
 
           {/* Language note */}
-          <Section title="A NOTE ON LANGUAGE" color={accent}>
+          <CreditsSection title="A NOTE ON LANGUAGE" color={accent}>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#4A7080", lineHeight:"1.85", fontStyle:"italic" }}>
               The star compass house names and star names in this experience come directly from
               Nainoa Thompson's published Hawaiian star compass. Other terms draw on Hawaiian,
@@ -1369,18 +1433,18 @@ function CreditsScreen({ onBack }) {
               If you have expertise in Pacific languages and would like to help, please use
               the feedback button — we would be genuinely grateful.
             </div>
-          </Section>
+          </CreditsSection>
 
-          <Divider/>
+          <CreditsDivider accent={accent} />
 
           {/* Oral traditions */}
-          <Section title="ORAL TRADITIONS CITED" color="#2A9A70">
-            <Entry title="Māui cycle" detail="Māui lassoing the sun — Polynesian oral tradition, cited in the Module 2 Tama-nui-te-rā bridge screen."/>
-            <Entry title="Kupe's sailing instructions" detail="Māori oral tradition. Kupe's account of navigating to Aotearoa — cited in the Module 6 bridge screen."/>
-            <Entry title="Makanikeoe" detail="A Marquesan wind-spirit narrative, from oral tradition references, cited in the Module 4 wind introduction."/>
-          </Section>
+          <CreditsSection title="ORAL TRADITIONS CITED" color="#2A9A70">
+            <CreditsEntry title="Māui cycle" detail="Māui lassoing the sun — Polynesian oral tradition, cited in the Module 2 Tama-nui-te-rā bridge screen." accent={accent}/>
+            <CreditsEntry title="Kupe's sailing instructions" detail="Māori oral tradition. Kupe's account of navigating to Aotearoa — cited in the Module 6 bridge screen." accent={accent}/>
+            <CreditsEntry title="Makanikeoe" detail="A Marquesan wind-spirit narrative, from oral tradition references, cited in the Module 4 wind introduction." accent={accent}/>
+          </CreditsSection>
 
-          <Divider/>
+          <CreditsDivider accent={accent} />
 
           {/* Closing */}
           <div style={{ display:"flex", flexDirection:"column", gap:"14px", paddingTop:"8px" }}>
@@ -2017,7 +2081,21 @@ const COMPASS_LEARN_STEPS = MODULE_CONTENT[1].learn.concepts;
 function ShoreIntroPopup({ onDismiss }) {
   return (
     <div style={{ position:"fixed", inset:0, zIndex:95, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px" }}>
-      <div style={{ position:"absolute", inset:0, background:"rgba(2,6,4,0.75)", backdropFilter:"blur(3px)" }} onClick={onDismiss}/>
+      <button
+        type="button"
+        aria-label="Dismiss"
+        onClick={onDismiss}
+        style={{
+          position:"absolute",
+          inset:0,
+          background:"rgba(2,6,4,0.75)",
+          backdropFilter:"blur(3px)",
+          border:"none",
+          padding:0,
+          margin:0,
+          cursor:"pointer",
+        }}
+      />
       <div style={{
         position:"relative", zIndex:1, background:"rgba(4,10,6,0.98)",
         border:"1px solid rgba(200,148,26,0.35)", borderRadius:"14px",
@@ -2098,11 +2176,21 @@ function CompassLearnScreen({ name, onReady, onBack, onOpenBag, unlocked }) {
             {/* Step dots */}
             <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
               {Array.from({length:total},(_,i)=>(
-                <div key={i} onClick={() => setConceptIdx(i)} style={{
+                <button
+                  key={i}
+                  type="button"
+                  aria-label={`Go to step ${i + 1}`}
+                  aria-current={i === conceptIdx ? "step" : undefined}
+                  onClick={() => setConceptIdx(i)}
+                  style={{
                   width: i===conceptIdx ? "18px" : "7px", height:"7px", borderRadius:"4px",
                   background: i===conceptIdx ? accent : i<conceptIdx ? "#2A8860" : "#1A2820",
                   cursor:"pointer", transition:"all 0.25s",
-                }}/>
+                  border:"none",
+                  padding:0,
+                  margin:0,
+                }}
+                />
               ))}
               <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A3A28", marginLeft:"4px" }}>{conceptIdx+1}/{total}</span>
             </div>
@@ -3280,7 +3368,24 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
               {/* Step dots */}
               <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
                 {concepts.map((_,i)=>(
-                  <div key={i} onClick={() => setLearnStep(i)} style={{ width:i===learnStep?"18px":"7px", height:"7px", borderRadius:"4px", background:i===learnStep?accent:i<learnStep?"#2A8860":"#1A2820", cursor:"pointer", transition:"all 0.25s" }}/>
+                  <button
+                    key={i}
+                    type="button"
+                    aria-label={`Go to step ${i + 1}`}
+                    aria-current={i === learnStep ? "step" : undefined}
+                    onClick={() => setLearnStep(i)}
+                    style={{
+                      width:i===learnStep?"18px":"7px",
+                      height:"7px",
+                      borderRadius:"4px",
+                      background:i===learnStep?accent:i<learnStep?"#2A8860":"#1A2820",
+                      cursor:"pointer",
+                      transition:"all 0.25s",
+                      border:"none",
+                      padding:0,
+                      margin:0,
+                    }}
+                  />
                 ))}
                 <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A3A28", marginLeft:"4px" }}>{learnStep+1}/{concepts.length}</span>
               </div>
@@ -4067,7 +4172,24 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
               {/* Step dots */}
               <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
                 {concepts.map((_,i)=>(
-                  <div key={i} style={{ width:i===learnStep?"18px":"7px", height:"7px", borderRadius:4, background:i===learnStep?accent:i<learnStep?"#2A8860":"#1A2820", cursor:"pointer", transition:"all 0.25s" }} onClick={()=>setLearnStep(i)}/>
+                  <button
+                    key={i}
+                    type="button"
+                    aria-label={`Go to step ${i + 1}`}
+                    aria-current={i === learnStep ? "step" : undefined}
+                    onClick={() => setLearnStep(i)}
+                    style={{
+                      width:i===learnStep?"18px":"7px",
+                      height:"7px",
+                      borderRadius:4,
+                      background:i===learnStep?accent:i<learnStep?"#2A8860":"#1A2820",
+                      cursor:"pointer",
+                      transition:"all 0.25s",
+                      border:"none",
+                      padding:0,
+                      margin:0,
+                    }}
+                  />
                 ))}
                 <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A3A28", marginLeft:"4px" }}>{learnStep+1}/{concepts.length}</span>
               </div>
@@ -4795,7 +4917,7 @@ function BirdSilhouette({ birdId, color, size = 48 }) {
   const d = shapes[birdId] || shapes.noddy;
   return (
     <svg width={size} height={h} viewBox="0 0 60 36" style={{ color, filter:`drop-shadow(0 0 6px ${color}66)` }}>
-      <g stroke="currentColor">{/* eslint-disable-next-line react/no-danger */}
+      <g stroke="currentColor">
         <g dangerouslySetInnerHTML={{ __html: d }} />
       </g>
     </svg>
@@ -5066,10 +5188,18 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
                 {BIRDS.map((bird, i) => {
                   const pal = BIRD_TYPE_META[bird.type] || BIRD_TYPE_META.land;
                   return (
-                    <div key={bird.id} onClick={() => setActiveCard(i)}
+                    <button
+                      key={bird.id}
+                      type="button"
+                      aria-label={`Open ${bird.label}`}
+                      aria-current={activeCard === i ? "true" : undefined}
+                      onClick={() => setActiveCard(i)}
                       style={{ padding:"10px 12px", marginBottom:"4px", borderRadius:"6px", cursor:"pointer",
                         border:`1px solid ${activeCard===i ? pal.fill+"66" : "#0A1818"}`,
-                        background:activeCard===i ? `${pal.fill}10` : "rgba(255,255,255,0.02)" }}>
+                        background:activeCard===i ? `${pal.fill}10` : "rgba(255,255,255,0.02)",
+                        width:"100%",
+                        textAlign:"left",
+                      }}>
                       <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
                         <BirdSilhouette birdId={bird.id} color={activeCard===i ? pal.fill : "#2A5040"} size={28} />
                         <div>
@@ -5079,7 +5209,7 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -5855,11 +5985,22 @@ function StoryCard({ name, onComplete }) {
         {/* Progress dots */}
         <div style={{ display:"flex", justifyContent:"center", gap:"10px", padding:"16px 0 0" }}>
           {pages.map((_,i) => (
-            <div key={i} onClick={() => handleDotClick(i)} style={{
+            <button
+              key={i}
+              type="button"
+              aria-label={`Go to page ${i + 1}`}
+              aria-current={i === pageIdx ? "page" : undefined}
+              disabled={i > pageIdx}
+              onClick={() => handleDotClick(i)}
+              style={{
               width: i === pageIdx ? "20px" : "8px", height:"8px", borderRadius:"4px",
               background: i === pageIdx ? "#C8941A" : i < pageIdx ? "#2A8860" : "#1A2840",
               transition:"all 0.3s", cursor: i <= pageIdx ? "pointer" : "default",
-            }}/>
+              border:"none",
+              padding:0,
+              margin:0,
+            }}
+            />
           ))}
         </div>
 
