@@ -929,7 +929,7 @@ function BridgeScreen({ moduleNum, name, onReturn }) {
       <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0, zIndex:1 }}>
 
         {/* Left — always visible */}
-        <div style={{ width:"340px", flexShrink:0, borderRight:`1px solid ${accent}18`, display:"flex", flexDirection:"column" }}>
+      <div style={{ width:"320px", flexShrink:0, borderRight:`1px solid ${accent}18`, display:"flex", flexDirection:"column" }}>
           <div style={{ padding:"28px 24px", display:"flex", flexDirection:"column", gap:"22px", flex:1 }}>
 
             {/* Arrival tag */}
@@ -2155,7 +2155,7 @@ function CompassLearnScreen({ name, onReady, onBack, onOpenBag, unlocked }) {
       {/* Location bar */}
       <div style={{ padding:"7px 22px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,10,6,0.7)", flexShrink:0, display:"flex", alignItems:"center", gap:"14px" }}>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em", opacity:0.9 }}>ON SHORE · {dep.location.toUpperCase()}</span>
-        <span style={{ fontFamily:"Georgia,serif", fontSize:"9px", color:`${accent}66`, fontStyle:"italic" }}>{dep.note}</span>
+          <span style={{ fontFamily:"Georgia,serif", fontSize:"11px", color:`${accent}88`, fontStyle:"italic" }}>{dep.note}</span>
       </div>
 
       {/* Body */}
@@ -2167,8 +2167,8 @@ function CompassLearnScreen({ name, onReady, onBack, onOpenBag, unlocked }) {
 
             {/* Nav */}
             <div style={{ display:"flex", gap:"8px" }}>
-              <button onClick={onBack} style={{ flex:1, background:"none", border:`1px solid ${accent}22`, borderRadius:"4px", color:"#2A3A28", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
-              <button onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":accent+"22"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#2A3A28", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>
+              <button onClick={onBack} style={{ flex:1, background:"none", border:`1px solid ${accent}33`, borderRadius:"4px", color:"#7AACBE", fontSize:"10px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
+              <button onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A66":accent+"33"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#7AACBE", fontSize:"10px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>
                 {unlocked.length>0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
               </button>
             </div>
@@ -2192,7 +2192,7 @@ function CompassLearnScreen({ name, onReady, onBack, onOpenBag, unlocked }) {
                 }}
                 />
               ))}
-              <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A3A28", marginLeft:"4px" }}>{conceptIdx+1}/{total}</span>
+              <span style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#7AACBE", marginLeft:"6px" }}>{conceptIdx+1}/{total}</span>
             </div>
 
             {/* Concept heading */}
@@ -2332,7 +2332,7 @@ function VoyageMap7({ nodeIdx, wakaPos }) {
               opacity={done ? 1 : current ? 1 : 0.5}/>
             {done && (
               <text x={path[i].x} y={path[i].y + 4} textAnchor="middle"
-                fill="#FFFFFF" fontSize="7" fontFamily="Cinzel,serif">✓</text>
+                fill="#FFFFFF" fontSize="10" fontFamily="Cinzel,serif">✓</text>
             )}
             {!done && (
               <text x={path[i].x + 10} y={path[i].y + 4}
@@ -2785,7 +2785,7 @@ function ModuleLearnScreen({ moduleNum, name, onReady, onBack, onOpenBag, unlock
       {/* Location bar — on shore */}
       <div style={{ padding:"7px 22px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,10,6,0.7)", flexShrink:0, display:"flex", alignItems:"center", gap:"14px" }}>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em", opacity:0.9 }}>ON SHORE · {dep.location.toUpperCase()}</span>
-        <span style={{ fontFamily:"Georgia,serif", fontSize:"9px", color:`${accent}66`, fontStyle:"italic" }}>{dep.note}</span>
+          <span style={{ fontFamily:"Georgia,serif", fontSize:"11px", color:`${accent}88`, fontStyle:"italic" }}>{dep.note}</span>
       </div>
 
       {/* Body */}
@@ -3156,7 +3156,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
                 <PaluPortrait />
               </div>
               <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", color:accent }}>Palu Hemi</div>
-              <div style={{ fontFamily:"Cinzel,serif", fontSize:"8px", color:"#3A4050", letterSpacing:"0.06em" }}>Master Navigator</div>
+                    <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:"#7AACBE", letterSpacing:"0.08em" }}>Master Navigator</div>
             </div>
             {/* Quote + CTA */}
             <div style={{ flex:1, display:"flex", flexDirection:"column", gap:"28px" }}>
@@ -3227,7 +3227,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
             {/* Another dim star above equator */}
             <circle cx="80" cy="55" r="6" fill="#8AB0D0" opacity="0.5"/>
             <text x="105" y="50" fill="#8AB0D0" fontSize="9" fontFamily="Cinzel,serif" opacity="0.5">Atutahi</text>
-            <text x="105" y="62" fill="#8AB0D0" fontSize="8" fontFamily="Cinzel,serif" opacity="0.4">(equator)</text>
+            <text x="105" y="62" fill="#8AB0D0" fontSize="10" fontFamily="Cinzel,serif" opacity="0.6">(equator)</text>
           </svg>
         );
       }
@@ -3242,7 +3242,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
             ))}
             {/* Overhead zenith marker */}
             <line x1="240" y1="0" x2="240" y2="260" stroke="#C8941A" strokeWidth="1" strokeDasharray="3,7" opacity="0.25"/>
-            <text x="240" y="14" textAnchor="middle" fill="#C8941A" fontSize="9" fontFamily="Cinzel,serif" opacity="0.5">DIRECTLY OVERHEAD</text>
+            <text x="240" y="14" textAnchor="middle" fill="#C8941A" fontSize="11" fontFamily="Cinzel,serif" opacity="0.6">DIRECTLY OVERHEAD</text>
             {/* ʻAʻā - glowing bright */}
             <circle cx="240" cy="60" r="14" fill="#C0E8FF" opacity="0.15"/>
             <circle cx="240" cy="60" r="9" fill="#C0E8FF" opacity="0.95"/>
@@ -3261,52 +3261,109 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
         );
       }
       if (learnStep === 2) {
-        // Screen 3: cloudy night, sun during the day — the "same dome" connection
+        // Screen 3: cloudy night, sun during the day — split into two SVGs so narrow viewports can stack (no squashed label overlap).
         return (
-          <svg viewBox="0 0 480 280" style={{ width:"100%", borderRadius:"8px", background:"#050A14" }}>
-            {/* Left: night/cloudy */}
-            <rect width="235" height="280" fill="#050A10"/>
-            <rect x="0" y="220" width="235" height="60" fill="#030810"/>
-            <line x1="0" y1="220" x2="235" y2="220" stroke="#1A3040" strokeWidth="1"/>
-            {/* Cloud covering ʻAʻā */}
-            <ellipse cx="120" cy="60" rx="75" ry="28" fill="#1A2030" opacity="0.9"/>
-            <ellipse cx="90" cy="70" rx="55" ry="22" fill="#182030" opacity="0.85"/>
-            <ellipse cx="150" cy="68" rx="60" ry="24" fill="#182030" opacity="0.85"/>
-            <text x="118" y="67" textAnchor="middle" fill="#3A5060" fontSize="10" fontFamily="Cinzel,serif">cloud</text>
-            {/* Hidden star hint */}
-            <circle cx="118" cy="38" r="7" fill="#C0E8FF" opacity="0.15"/>
-            <text x="118" y="36" textAnchor="middle" fill="#3A5060" fontSize="8" fontFamily="Cinzel,serif">ʻAʻā?</text>
-            <text x="118" y="160" textAnchor="middle" fill="#3A5060" fontSize="10" fontFamily="Cinzel,serif">Stars hidden</text>
-            <text x="118" y="175" textAnchor="middle" fill="#3A5060" fontSize="9" fontFamily="Cinzel,serif">two nights</text>
-            {/* Divider */}
-            <line x1="237" y1="0" x2="237" y2="280" stroke="#1A3040" strokeWidth="1"/>
-            {/* Right: day, sun visible */}
-            <rect x="238" y="0" width="242" height="280" fill="#08141E"/>
-            <rect x="238" y="220" width="242" height="60" fill="#030C08"/>
-            <line x1="238" y1="220" x2="480" y2="220" stroke="#1A4020" strokeWidth="1"/>
-            {/* Sun at noon */}
-            <circle cx="359" cy="65" r="18" fill="#FFD060" opacity="0.15"/>
-            <circle cx="359" cy="65" r="11" fill="#FFD060" opacity="0.95"/>
-            {/* Dotted arc path */}
-            <path d="M248,220 Q359,40 470,220" fill="none" stroke="#D06030" strokeWidth="1.2" strokeDasharray="6,5" opacity="0.5"/>
-            <text x="359" y="46" textAnchor="middle" fill="#FFD060" fontSize="10" fontFamily="Cinzel,serif">Tama-nui-te-rā</text>
-            {/* Connection arrow */}
-            <text x="359" y="150" textAnchor="middle" fill="#D06030" fontSize="10" fontFamily="Cinzel,serif">Sun still crosses</text>
-            <text x="359" y="165" textAnchor="middle" fill="#D06030" fontSize="10" fontFamily="Cinzel,serif">the same dome</text>
-            {/* Labels */}
-            <text x="118" y="200" textAnchor="middle" fill="#2A4050" fontSize="9" fontFamily="Cinzel,serif">NIGHT</text>
-            <text x="359" y="200" textAnchor="middle" fill="#D06030" fontSize="9" fontFamily="Cinzel,serif">DAY</text>
-          </svg>
+          <div className="m2-learn-dual-sky">
+            <svg viewBox="0 0 235 280" aria-hidden>
+              <rect width="235" height="280" fill="#050A10"/>
+              <rect x="0" y="220" width="235" height="60" fill="#030810"/>
+              <line x1="0" y1="220" x2="235" y2="220" stroke="#1A3040" strokeWidth="1"/>
+              <ellipse cx="120" cy="60" rx="75" ry="28" fill="#1A2030" opacity="0.9"/>
+              <ellipse cx="90" cy="70" rx="55" ry="22" fill="#182030" opacity="0.85"/>
+              <ellipse cx="150" cy="68" rx="60" ry="24" fill="#182030" opacity="0.85"/>
+              <text x="118" y="67" textAnchor="middle" fill="#3A5060" fontSize="10" fontFamily="Cinzel,serif">cloud</text>
+              <circle cx="118" cy="38" r="7" fill="#C0E8FF" opacity="0.15"/>
+              <text x="118" y="36" textAnchor="middle" fill="#6A9AB8" fontSize="10" fontFamily="Cinzel,serif">ʻAʻā?</text>
+              <text x="118" y="160" textAnchor="middle" fill="#3A5060" fontSize="10" fontFamily="Cinzel,serif">Stars hidden</text>
+              <text x="118" y="175" textAnchor="middle" fill="#3A5060" fontSize="9" fontFamily="Cinzel,serif">two nights</text>
+              <text x="118" y="200" textAnchor="middle" fill="#2A4050" fontSize="9" fontFamily="Cinzel,serif">NIGHT</text>
+            </svg>
+            <svg viewBox="0 0 242 280" aria-hidden>
+              <rect width="242" height="280" fill="#08141E"/>
+              <rect x="0" y="220" width="242" height="60" fill="#030C08"/>
+              <line x1="0" y1="220" x2="242" y2="220" stroke="#1A4020" strokeWidth="1"/>
+              <circle cx="121" cy="65" r="18" fill="#FFD060" opacity="0.15"/>
+              <circle cx="121" cy="65" r="11" fill="#FFD060" opacity="0.95"/>
+              <path d="M10,220 Q121,40 232,220" fill="none" stroke="#D06030" strokeWidth="1.2" strokeDasharray="6,5" opacity="0.5"/>
+              <text x="121" y="46" textAnchor="middle" fill="#FFD060" fontSize="10" fontFamily="Cinzel,serif">Tama-nui-te-rā</text>
+              <text x="121" y="150" textAnchor="middle" fill="#D06030" fontSize="10" fontFamily="Cinzel,serif">Sun still crosses</text>
+              <text x="121" y="165" textAnchor="middle" fill="#D06030" fontSize="10" fontFamily="Cinzel,serif">the same dome</text>
+              <text x="121" y="200" textAnchor="middle" fill="#D06030" fontSize="9" fontFamily="Cinzel,serif">DAY</text>
+            </svg>
+          </div>
         );
       }
       // Screen 4: AI-generated illustration with SVG label overlay
-      const IMG_B64 = "/images/navigator-hand-measurement.jpg";
       return (
         <svg viewBox="0 0 560 840" style={{ width:"100%", maxHeight:"100%", borderRadius:"8px", display:"block" }}>
-          {/* Background illustration */}
-          <image href={IMG_B64}
-                 x="0" y="0" width="560" height="840"
-                 preserveAspectRatio="xMidYMid meet"/>
+          <defs>
+            <linearGradient id="handSky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#070F1E"/>
+              <stop offset="55%" stopColor="#061220"/>
+              <stop offset="100%" stopColor="#030A14"/>
+            </linearGradient>
+            <linearGradient id="handSea" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#030A14"/>
+              <stop offset="100%" stopColor="#02060E"/>
+            </linearGradient>
+            <filter id="softGlow">
+              <feGaussianBlur stdDeviation="6" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          {/* Background (pure SVG — avoids missing asset) */}
+          <rect x="0" y="0" width="560" height="840" fill="url(#handSky)"/>
+
+          {/* Stars */}
+          {Array.from({length:48},(_,i)=>({
+            x: ((i*137+41)%97)/97*560,
+            y: ((i*79+23)%89)/89*320,
+            r: i%11===0?1.6:i%5===0?1.0:0.6,
+            op: 0.10 + (i%7)*0.05,
+          })).map((s,i)=>(
+            <circle key={i} cx={s.x} cy={s.y} r={s.r} fill="#7AACCC" opacity={s.op}/>
+          ))}
+
+          {/* Horizon / sea */}
+          <rect x="0" y="560" width="560" height="280" fill="url(#handSea)"/>
+          <line x1="0" y1="560" x2="560" y2="560" stroke="#1A5030" strokeWidth="2" opacity="0.55"/>
+          <text x="280" y="590" textAnchor="middle" fill="#2A7050" fontSize="11" fontFamily="Cinzel,serif" letterSpacing="0.12em" opacity="0.85">
+            HORIZON
+          </text>
+
+          {/* Zenith marker */}
+          <line x1="280" y1="0" x2="280" y2="560" stroke="#C8941A" strokeWidth="1.2" strokeDasharray="4,8" opacity="0.25"/>
+          <text x="280" y="34" textAnchor="middle" fill="#C8941A" fontSize="11" fontFamily="Cinzel,serif" opacity="0.55">
+            DIRECTLY OVERHEAD
+          </text>
+
+          {/* ʻAʻā (zenith star) */}
+          <circle cx="280" cy="120" r="18" fill="#C0E8FF" opacity="0.12"/>
+          <circle cx="280" cy="120" r="10" fill="#C0E8FF" opacity="0.95" filter="url(#softGlow)"/>
+          <text x="304" y="114" fill="#C0E8FF" fontSize="18" fontFamily="Cinzel,serif" fontWeight="700">ʻAʻā</text>
+          <text x="304" y="134" fill="#C0E8FF" fontSize="12" fontFamily="Cinzel,serif" opacity="0.7">(Sirius)</text>
+
+          {/* Noon sun shown 17° short of zenith (schematic) */}
+          <circle cx="280" cy="250" r="22" fill="#FFD060" opacity="0.12"/>
+          <circle cx="280" cy="250" r="12" fill="#FFD060" opacity="0.95" filter="url(#softGlow)"/>
+          <text x="304" y="255" fill="#FFD060" fontSize="12" fontFamily="Cinzel,serif" opacity="0.85">noon sun</text>
+
+          {/* 17° gap brace */}
+          <line x1="262" y1="132" x2="262" y2="238" stroke="#D06030" strokeWidth="2" opacity="0.85"/>
+          <path d="M255,132 L270,132" stroke="#D06030" strokeWidth="2" opacity="0.85"/>
+          <path d="M255,238 L270,238" stroke="#D06030" strokeWidth="2" opacity="0.85"/>
+          <text x="246" y="192" textAnchor="end" fill="#D06030" fontSize="26" fontFamily="Cinzel,serif" fontWeight="800">17°</text>
+          <text x="246" y="214" textAnchor="end" fill="#D06030" fontSize="12" fontFamily="Cinzel,serif" opacity="0.85">≈ 3 hand-widths</text>
+
+          {/* Hand silhouette (schematic) */}
+          <g transform="translate(90,620)" opacity="0.85">
+            <path d="M55,150 Q40,95 44,58 Q46,30 62,26 Q78,22 82,44 Q86,70 86,90 Q90,58 108,54 Q126,52 130,76 Q134,98 132,124 Q140,92 158,90 Q176,90 178,110 Q180,128 174,150 Q184,120 200,124 Q216,128 212,152 Q208,178 196,198 Q160,258 102,258 Q66,258 58,220 Z"
+              fill="#0A1822" stroke="#1A3040" strokeWidth="2"/>
+            <text x="130" y="286" textAnchor="middle" fill="#2A4860" fontSize="11" fontFamily="Cinzel,serif" letterSpacing="0.08em" opacity="0.9">
+              hand-widths (schematic)
+            </text>
+          </g>
           {/* Dark panel — right side labels */}
           <rect x="340" y="18" width="212" height="248" rx="6"
                 fill="#040C16" opacity="0.68"/>
@@ -3351,7 +3408,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
         {/* Location bar */}
         <div style={{ padding:"7px 22px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,10,6,0.7)", flexShrink:0, display:"flex", alignItems:"center", gap:"14px" }}>
           <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em", opacity:0.9 }}>ON SHORE · {MODULE_CONTENT[2].departure.location.toUpperCase()}</span>
-          <span style={{ fontFamily:"Georgia,serif", fontSize:"9px", color:`${accent}66`, fontStyle:"italic" }}>{MODULE_CONTENT[2].departure.note}</span>
+          <span style={{ fontFamily:"Georgia,serif", fontSize:"11px", color:`${accent}88`, fontStyle:"italic" }}>{MODULE_CONTENT[2].departure.note}</span>
         </div>
         {/* Body */}
         <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
@@ -3510,7 +3567,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
               {["1 · Noon", "2 · Hand", "✦ Done"].map((label, i) => {
                 const done = i + 1 < actStep || (i === 2 && confirmed);
                 const curr = i + 1 === actStep && !(i === 2 && confirmed);
-                return <div key={i} style={{ flex:1, textAlign:"center", padding:"5px 1px", fontSize:"7px", fontFamily:"Cinzel,serif", letterSpacing:"0.04em", background:curr?"rgba(208,96,48,0.18)":done?"rgba(26,120,110,0.18)":"rgba(255,255,255,0.03)", border:`1px solid ${curr?accent:done?"#1A8870":"#1E3050"}`, borderRadius:"4px", color:curr?"#E07040":done?"#2BB5A0":"#3A5060" }}>{label}</div>;
+                return <div key={i} style={{ flex:1, textAlign:"center", padding:"6px 2px", fontSize:"10px", fontFamily:"Cinzel,serif", letterSpacing:"0.06em", background:curr?"rgba(208,96,48,0.18)":done?"rgba(26,120,110,0.18)":"rgba(255,255,255,0.03)", border:`1px solid ${curr?accent:done?"#1A8870":"#1E3050"}`, borderRadius:"5px", color:curr?"#E07040":done?"#2BB5A0":"#7AACBE" }}>{label}</div>;
               })}
             </div>
             {/* Scenario card */}
@@ -3594,10 +3651,10 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
                   <line x1="0" y1="220" x2="520" y2="220" stroke="#1A5030" strokeWidth="1.5"/>
                   <path d="M60,220 Q260,48 460,220" fill="none" stroke="#D06030" strokeWidth="1" strokeDasharray="5,7" opacity="0.3"/>
                   <line x1="260" y1="0" x2="260" y2="220" stroke="#C8941A" strokeWidth="1" strokeDasharray="2,8" opacity="0.2"/>
-                  <text x="260" y="12" textAnchor="middle" fill="#C8941A" fontSize="8" fontFamily="Cinzel,serif" opacity="0.4">OVERHEAD</text>
-                  <text x="60"  y="238" textAnchor="middle" fill="#1A5030" fontSize="8" fontFamily="Cinzel,serif">EAST</text>
-                  <text x="260" y="238" textAnchor="middle" fill="#1A5030" fontSize="8" fontFamily="Cinzel,serif">SOUTH</text>
-                  <text x="460" y="238" textAnchor="middle" fill="#1A5030" fontSize="8" fontFamily="Cinzel,serif">WEST</text>
+                  <text x="260" y="12" textAnchor="middle" fill="#C8941A" fontSize="10" fontFamily="Cinzel,serif" opacity="0.55">OVERHEAD</text>
+                  <text x="60"  y="238" textAnchor="middle" fill="#2A7050" fontSize="10" fontFamily="Cinzel,serif">EAST</text>
+                  <text x="260" y="238" textAnchor="middle" fill="#2A7050" fontSize="10" fontFamily="Cinzel,serif">SOUTH</text>
+                  <text x="460" y="238" textAnchor="middle" fill="#2A7050" fontSize="10" fontFamily="Cinzel,serif">WEST</text>
                   {atNoon && <circle cx={sunX} cy={sunY} r="26" fill="#FFD060" opacity="0.12"/>}
                   <circle cx={sunX} cy={sunY} r={atNoon ? 13 : 9} fill="#FFD060" opacity={atNoon ? 1 : 0.85}/>
                   {atNoon && (
@@ -3629,7 +3686,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
                 <line x1="0" y1={HORIZ} x2="520" y2={HORIZ} stroke="#1A5030" strokeWidth="1.5"/>
                 {/* Zenith line */}
                 <line x1={SUN_X} y1="0" x2={SUN_X} y2={HORIZ} stroke="#C8941A" strokeWidth="1" strokeDasharray="2,8" opacity="0.2"/>
-                <text x={SUN_X} y="14" textAnchor="middle" fill="#C8941A" fontSize="8" fontFamily="Cinzel,serif" opacity="0.35">OVERHEAD</text>
+                <text x={SUN_X} y="14" textAnchor="middle" fill="#C8941A" fontSize="10" fontFamily="Cinzel,serif" opacity="0.5">OVERHEAD</text>
                 {/* Angle reference lines every 15° */}
                 {[15,30,45,60,75].map(deg => {
                   const y = HORIZ - (deg/90) * (HORIZ - ZENITH);
@@ -3643,9 +3700,9 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
                 {/* Target zone (subtle) */}
                 <rect x="0" y={targetY - 12} width="520" height="24" fill="#D06030" opacity="0.06" rx="2"/>
                 {/* Cardinal labels */}
-                <text x="70" y={HORIZ - 6} fill="#1A5030" fontSize="8" fontFamily="Cinzel,serif">EAST</text>
-                <text x={SUN_X} y={HORIZ - 6} textAnchor="middle" fill="#1A5030" fontSize="8" fontFamily="Cinzel,serif">SOUTH</text>
-                <text x="450" y={HORIZ - 6} fill="#1A5030" fontSize="8" fontFamily="Cinzel,serif">WEST</text>
+                <text x="70" y={HORIZ - 6} fill="#2A7050" fontSize="10" fontFamily="Cinzel,serif">EAST</text>
+                <text x={SUN_X} y={HORIZ - 6} textAnchor="middle" fill="#2A7050" fontSize="10" fontFamily="Cinzel,serif">SOUTH</text>
+                <text x="450" y={HORIZ - 6} fill="#2A7050" fontSize="10" fontFamily="Cinzel,serif">WEST</text>
                 {/* Sun at noon (static) */}
                 <circle cx={SUN_X} cy={targetY} r="16" fill="#FFD060" opacity="0.15"/>
                 <circle cx={SUN_X} cy={targetY} r="10" fill="#FFD060" opacity="0.9"/>
@@ -4155,7 +4212,7 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
         {/* Location bar */}
         <div style={{ padding:"7px 22px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,10,6,0.7)", flexShrink:0, display:"flex", alignItems:"center", gap:"14px" }}>
           <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em", opacity:0.9 }}>ON SHORE · PAPEETE, TAHITI</span>
-          <span style={{ fontFamily:"Georgia,serif", fontSize:"9px", color:`${accent}66`, fontStyle:"italic" }}>Before dawn. The harbour. Palu sketches in the wet sand.</span>
+          <span style={{ fontFamily:"Georgia,serif", fontSize:"11px", color:`${accent}88`, fontStyle:"italic" }}>Before dawn. The harbour. Palu sketches in the wet sand.</span>
         </div>
         {/* Body */}
         <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
@@ -4301,13 +4358,22 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
       {/* Header */}
       <div style={{ height:"44px", borderBottom:"1px solid #0A1E2C", background:"rgba(3,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#2A9090", letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
+        <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#2A9090", letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
+          <button
+            type="button"
+            onClick={onOpenBag}
+            style={{ background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":"#0A1E2C"}`, borderRadius:"5px", padding:"5px 10px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", color:unlocked.length>0?"#C8941A":"#7AACBE", letterSpacing:"0.08em" }}
+          >
+            {unlocked.length>0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
+          </button>
+        </div>
       </div>
 
       {/* Module bar */}
       <div style={{ padding:"7px 22px", borderBottom:"1px solid #0A1E2C", background:"rgba(3,8,18,0.6)", flexShrink:0 }}>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#2A90A8", letterSpacing:"0.16em" }}>MODULE 3 · TE MOANA</span>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#1A3848", marginLeft:"14px", letterSpacing:"0.1em" }}>OCEAN SWELLS · NAVIGATION BY FEEL</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#2A90A8", letterSpacing:"0.16em" }}>MODULE 3 · TE MOANA</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#7AACBE", marginLeft:"14px", letterSpacing:"0.1em" }}>OCEAN SWELLS · NAVIGATION BY FEEL</span>
       </div>
 
       {/* Body */}
@@ -4317,12 +4383,7 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
         <div style={{ width:"320px", flexShrink:0, borderRight:"1px solid #0A1E2C", overflowY:"auto" }}>
           <div style={{ display:"flex", flexDirection:"column", gap:"12px", padding:"18px", boxSizing:"border-box" }}>
 
-            <div style={{ display:"flex", gap:"8px" }}>
-              <button onClick={onBack} style={{ flex:1, background:"none", border:"1px solid #0A1826", borderRadius:"4px", color:"#1A3848", fontSize:"9px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"7px", cursor:"pointer" }}>← MAP</button>
-              <button onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":"#0A1826"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#1A3848", fontSize:"9px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"7px", cursor:"pointer" }}>
-                {unlocked.length > 0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
-              </button>
-            </div>
+            <button type="button" onClick={onBack} style={{ width:"100%", background:"none", border:"1px solid #0A1826", borderRadius:"4px", color:"#7AACBE", fontSize:"10px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
 
             {/* Scenario card */}
             <div style={{ background:"rgba(8,18,32,0.85)", border:"1px solid #0E2A3A", borderRadius:"7px", padding:"12px 14px" }}>
@@ -4335,7 +4396,7 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
             <div style={{ display:"flex", gap:"4px" }}>
               {stepLabels.map((label, i) => {
                 const done = i+1 < step, curr = i+1 === step;
-                return <div key={i} style={{ flex:1, textAlign:"center", padding:"5px 1px", fontSize:"7px", fontFamily:"Cinzel,serif", letterSpacing:"0.04em", background:curr?"rgba(42,144,168,0.18)":done?"rgba(26,120,110,0.18)":"rgba(255,255,255,0.03)", border:`1px solid ${curr?"#2A90A8":done?"#1A8870":"#0E2030"}`, borderRadius:"4px", color:curr?"#2AB8C8":done?"#2BB5A0":"#1A3848" }}>{label}</div>;
+                return <div key={i} style={{ flex:1, textAlign:"center", padding:"6px 2px", fontSize:"10px", fontFamily:"Cinzel,serif", letterSpacing:"0.06em", background:curr?"rgba(42,144,168,0.18)":done?"rgba(26,120,110,0.18)":"rgba(255,255,255,0.03)", border:`1px solid ${curr?"#2A90A8":done?"#1A8870":"#0E2030"}`, borderRadius:"5px", color:curr?"#2AB8C8":done?"#2BB5A0":"#7AACBE" }}>{label}</div>;
               })}
             </div>
 
@@ -4550,7 +4611,7 @@ function WindMapSVG({ mode, step, selBearing, selElNino, confirming, onBearingSe
 
         {/* Equator line */}
         {(() => { const y = (35/70)*H; return <line x1={0} y1={y} x2={W} y2={y} stroke="#1A3A30" strokeWidth="1" strokeDasharray="8,6" />; })()}
-        <text x={W-8} y={(35/70)*H - 4} textAnchor="end" fill="#1A3A30" fontSize="8" fontFamily="Cinzel,serif">EQUATOR</text>
+        <text x={W-8} y={(35/70)*H - 4} textAnchor="end" fill="#6A9AB8" fontSize="10" fontFamily="Cinzel,serif">EQUATOR</text>
 
         {/* Lat reference lines */}
         {[-20, -10, 0, 10, 20].map(lat => {
@@ -4759,13 +4820,22 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
       {/* Header */}
       <div style={{ height:"44px", borderBottom:"1px solid #0A1828", background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#4A70A8", letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
+        <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#4A70A8", letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
+          <button
+            type="button"
+            onClick={onOpenBag}
+            style={{ background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":"#0A1828"}`, borderRadius:"5px", padding:"5px 10px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", color:unlocked.length>0?"#C8941A":"#7AACBE", letterSpacing:"0.08em" }}
+          >
+            {unlocked.length>0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
+          </button>
+        </div>
       </div>
 
       {/* Module bar */}
       <div style={{ padding:"7px 22px", borderBottom:"1px solid #0A1828", background:"rgba(4,8,18,0.6)", flexShrink:0 }}>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#4A70C0", letterSpacing:"0.16em" }}>MODULE 4 · HAU ME MATAGI</span>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#1A3048", marginLeft:"14px", letterSpacing:"0.1em" }}>WIND PATTERNS · VOYAGE STRATEGY</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#4A70C0", letterSpacing:"0.16em" }}>MODULE 4 · HAU ME MATAGI</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#7AACBE", marginLeft:"14px", letterSpacing:"0.1em" }}>WIND PATTERNS · VOYAGE STRATEGY</span>
       </div>
 
       {/* Body */}
@@ -4775,12 +4845,7 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
         <div style={{ width:"320px", flexShrink:0, borderRight:"1px solid #0A1828", overflowY:"auto" }}>
           <div style={{ display:"flex", flexDirection:"column", gap:"12px", padding:"18px", boxSizing:"border-box" }}>
 
-            <div style={{ display:"flex", gap:"8px" }}>
-              <button onClick={onBack} style={{ flex:1, background:"none", border:"1px solid #0A1828", borderRadius:"4px", color:"#1A3048", fontSize:"9px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"7px", cursor:"pointer" }}>← MAP</button>
-              <button onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":"#0A1828"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#1A3048", fontSize:"9px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"7px", cursor:"pointer" }}>
-                {unlocked.length > 0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
-              </button>
-            </div>
+            <button type="button" onClick={onBack} style={{ width:"100%", background:"none", border:"1px solid #0A1828", borderRadius:"4px", color:"#7AACBE", fontSize:"10px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
 
             {/* Scenario card */}
             <div style={{ background:"rgba(8,14,28,0.85)", border:"1px solid #0E2040", borderRadius:"7px", padding:"12px 14px" }}>
@@ -4793,7 +4858,7 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
             <div style={{ display:"flex", gap:"4px" }}>
               {stepLabels.map((label, i) => {
                 const done = i+1 < step, curr = i+1 === step;
-                return <div key={i} style={{ flex:1, textAlign:"center", padding:"5px 1px", fontSize:"7px", fontFamily:"Cinzel,serif", letterSpacing:"0.04em", background:curr?"rgba(74,112,192,0.18)":done?"rgba(26,120,110,0.18)":"rgba(255,255,255,0.03)", border:`1px solid ${curr?"#4A70C0":done?"#1A8870":"#0E2030"}`, borderRadius:"4px", color:curr?"#7AAAE0":done?"#2BB5A0":"#1A3848" }}>{label}</div>;
+                return <div key={i} style={{ flex:1, textAlign:"center", padding:"6px 2px", fontSize:"10px", fontFamily:"Cinzel,serif", letterSpacing:"0.06em", background:curr?"rgba(74,112,192,0.18)":done?"rgba(26,120,110,0.18)":"rgba(255,255,255,0.03)", border:`1px solid ${curr?"#4A70C0":done?"#1A8870":"#0E2030"}`, borderRadius:"5px", color:curr?"#7AAAE0":done?"#2BB5A0":"#7AACBE" }}>{label}</div>;
               })}
             </div>
 
@@ -5039,6 +5104,24 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
   if (phase === "bridge") return (
     <BridgeScreen moduleNum={5} name={name} unlocked={unlocked} onReturn={onBridge || onBack} />
   );
+  if (phase === "done") return (
+    <div style={{ width:"100%", height:"100%", background:"#040C0A", display:"flex", alignItems:"center", justifyContent:"center", padding:"24px" }}>
+      <div style={{ maxWidth:"520px", width:"100%", background:"rgba(4,10,8,0.9)", border:"1px solid #0A1E18", borderRadius:"12px", padding:"22px 22px 18px", textAlign:"center" }}>
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A9A70", letterSpacing:"0.18em", marginBottom:"10px" }}>MODULE 5 COMPLETE</div>
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"22px", fontWeight:"800", color:"#E8D8A8", lineHeight:"1.2", marginBottom:"10px" }}>You read what flies.</div>
+        <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", lineHeight:"1.75", fontStyle:"italic", marginBottom:"16px" }}>
+          "The ʻiwa did not return. Somewhere ahead, beyond the horizon, it is landing. That is Fiji."
+        </div>
+        <button
+          type="button"
+          onClick={() => { onComplete(); setPhase("bridge"); }}
+          style={{ padding:"12px 18px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"800", letterSpacing:"0.12em", border:"1px solid #2A9A70", background:"rgba(42,154,112,0.14)", color:"#2A9A70" }}
+        >
+          CONTINUE →
+        </button>
+      </div>
+    </div>
+  );
 
   const currentSighting = BIRD_SIGHTINGS[sightingIdx];
   const currentBird     = BIRDS.find(b => b.id === currentSighting?.birdId);
@@ -5062,8 +5145,7 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
       setTimeout(() => {
         setConfirming(false);
         if (isLast) {
-          onComplete();
-          setPhase("bridge");
+          setPhase("done");
         } else {
           setSightingIdx(i => i + 1);
         }
@@ -5110,13 +5192,22 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
       {/* Header */}
       <div style={{ height:"44px", borderBottom:"1px solid #0A1E18", background:"rgba(4,10,8,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#2A9A70", letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
+        <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#2A9A70", letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
+          <button
+            type="button"
+            onClick={onOpenBag}
+            style={{ background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":"#0A1E18"}`, borderRadius:"5px", padding:"5px 10px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", color:unlocked.length>0?"#C8941A":"#7AACBE", letterSpacing:"0.08em" }}
+          >
+            {unlocked.length>0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
+          </button>
+        </div>
       </div>
 
       {/* Module bar */}
       <div style={{ padding:"7px 22px", borderBottom:"1px solid #0A1E18", background:"rgba(4,10,8,0.6)", flexShrink:0 }}>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#2A9A70", letterSpacing:"0.16em" }}>MODULE 5 · NGĀ MANU</span>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#1A3028", marginLeft:"14px", letterSpacing:"0.1em" }}>THE BIRD GUIDE · READ WHAT FLIES</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#2A9A70", letterSpacing:"0.16em" }}>MODULE 5 · NGĀ MANU</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#7AACBE", marginLeft:"14px", letterSpacing:"0.1em" }}>THE BIRD GUIDE · READ WHAT FLIES</span>
       </div>
 
       {/* Body */}
@@ -5126,18 +5217,13 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
         <div style={{ width:"320px", flexShrink:0, borderRight:"1px solid #0A1E18", overflowY:"auto" }}>
           <div style={{ display:"flex", flexDirection:"column", gap:"12px", padding:"18px", boxSizing:"border-box" }}>
 
-            <div style={{ display:"flex", gap:"8px" }}>
-              <button onClick={onBack} style={{ flex:1, background:"none", border:"1px solid #0A1818", borderRadius:"4px", color:"#1A3028", fontSize:"9px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"7px", cursor:"pointer" }}>← MAP</button>
-              <button onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":"#0A1818"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#1A3028", fontSize:"9px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"7px", cursor:"pointer" }}>
-                {unlocked.length > 0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
-              </button>
-            </div>
+            <button type="button" onClick={onBack} style={{ width:"100%", background:"none", border:"1px solid #0A1818", borderRadius:"4px", color:"#7AACBE", fontSize:"10px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
 
             {/* Step indicators */}
             <div style={{ display:"flex", gap:"4px" }}>
               {stepLabels.map((label, i) => {
                 const done = i+1 < step, curr = i+1 === step;
-                return <div key={i} style={{ flex:1, textAlign:"center", padding:"5px 1px", fontSize:"7px", fontFamily:"Cinzel,serif", letterSpacing:"0.04em", background:curr?`rgba(42,154,112,0.18)`:done?"rgba(26,120,110,0.18)":"rgba(255,255,255,0.03)", border:`1px solid ${curr?accent:done?"#1A8870":"#0E2018"}`, borderRadius:"4px", color:curr?"#3AC890":done?"#2BB5A0":"#1A3028" }}>{label}</div>;
+                return <div key={i} style={{ flex:1, textAlign:"center", padding:"6px 2px", fontSize:"10px", fontFamily:"Cinzel,serif", letterSpacing:"0.06em", background:curr?`rgba(42,154,112,0.18)`:done?"rgba(26,120,110,0.18)":"rgba(255,255,255,0.03)", border:`1px solid ${curr?accent:done?"#1A8870":"#0E2018"}`, borderRadius:"5px", color:curr?"#3AC890":done?"#2BB5A0":"#7AACBE" }}>{label}</div>;
               })}
             </div>
 
@@ -5462,7 +5548,7 @@ function CloudScene({ sceneType, animOffset }) {
         <ellipse cx={W/2} cy={H*0.74} rx={40} ry={8} fill="#0A2020" opacity="0.8"/>
         {/* Vertical dashed line connecting cloud to island */}
         <line x1={W/2} y1={82} x2={W/2} y2={H*0.71} stroke="#4A8A9A" strokeWidth="0.8" strokeDasharray="4,5" opacity="0.4"/>
-        <text x={W - 12} y={H - 10} textAnchor="end" fill="#1A3040" fontSize="8" fontFamily="Cinzel,serif">ALL OTHER CLOUDS MOVING →</text>
+        <text x={W - 12} y={H - 10} textAnchor="end" fill="#6A9AB8" fontSize="10" fontFamily="Cinzel,serif">ALL OTHER CLOUDS MOVING →</text>
       </svg>
     );
   }
@@ -5497,7 +5583,7 @@ function CloudScene({ sceneType, animOffset }) {
         <text x={W/2} y={122} textAnchor="middle" fill="#00C896" fontSize="9" fontFamily="Cinzel,serif" opacity={glowAmt * 1.2} letterSpacing="0.1em">LAGOON GLOW</text>
         {/* Dashed line */}
         <line x1={W/2} y1={126} x2={W/2} y2={H*0.66} stroke="#00C896" strokeWidth="0.8" strokeDasharray="4,5" opacity="0.3"/>
-        <text x={W-12} y={H-10} textAnchor="end" fill="#0A2818" fontSize="8" fontFamily="Cinzel,serif">CORAL LAGOON BELOW</text>
+        <text x={W-12} y={H-10} textAnchor="end" fill="#2AB870" fontSize="10" fontFamily="Cinzel,serif">CORAL LAGOON BELOW</text>
       </svg>
     );
   }
@@ -5611,6 +5697,24 @@ function CloudsModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
   if (phase === "bridge") return (
     <BridgeScreen moduleNum={6} name={name} unlocked={unlocked} onReturn={onBridge || onBack} />
   );
+  if (phase === "done") return (
+    <div style={{ width:"100%", height:"100%", background:"#040810", display:"flex", alignItems:"center", justifyContent:"center", padding:"24px" }}>
+      <div style={{ maxWidth:"540px", width:"100%", background:"rgba(8,14,28,0.92)", border:"1px solid #0E2040", borderRadius:"12px", padding:"22px 22px 18px", textAlign:"center" }}>
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#7A9EC8", letterSpacing:"0.18em", marginBottom:"10px" }}>MODULE 6 COMPLETE</div>
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"22px", fontWeight:"800", color:"#E8D8A8", lineHeight:"1.2", marginBottom:"10px" }}>You can read the approach.</div>
+        <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", lineHeight:"1.75", fontStyle:"italic", marginBottom:"16px" }}>
+          "Standing cloud, lagoon glow, water colour, floating debris — together they form an approach map drawn by the ocean itself."
+        </div>
+        <button
+          type="button"
+          onClick={() => { onComplete(); setPhase("bridge"); }}
+          style={{ padding:"12px 18px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"800", letterSpacing:"0.12em", border:"1px solid #7A9EC8", background:"rgba(122,158,200,0.14)", color:"#7A9EC8" }}
+        >
+          CONTINUE →
+        </button>
+      </div>
+    </div>
+  );
   if (phase === "learn") return (
     <ModuleLearnScreen moduleNum={6} name={name}
       onReady={() => setPhase("activity")}
@@ -5669,7 +5773,7 @@ function CloudsModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
       const isLast = signIdx === CLOUD_SIGNS.length - 1;
       setTimeout(() => {
         setConfirming(false);
-        if (isLast) { onComplete(); setPhase("bridge"); }
+        if (isLast) { setPhase("done"); }
         else setStep(s => s + 1);
       }, 1800);
     }
@@ -5694,13 +5798,22 @@ function CloudsModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
       {/* Header */}
       <div style={{ height:"44px", borderBottom:"1px solid #0A1428", background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
+        <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
+          <button
+            type="button"
+            onClick={onOpenBag}
+            style={{ background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":"#0A1428"}`, borderRadius:"5px", padding:"5px 10px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", color:unlocked.length>0?"#C8941A":"#7AACBE", letterSpacing:"0.08em" }}
+          >
+            {unlocked.length>0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
+          </button>
+        </div>
       </div>
 
       {/* Module bar */}
       <div style={{ padding:"7px 22px", borderBottom:"1px solid #0A1428", background:"rgba(4,8,18,0.6)", flexShrink:0 }}>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em" }}>MODULE 6 · KAPUA ME TE MOANA</span>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:"#1A2A40", marginLeft:"14px", letterSpacing:"0.1em" }}>CLOUDS, SEA SIGNS & KUPE'S INSTRUCTIONS</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.16em" }}>MODULE 6 · KAPUA ME TE MOANA</span>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#7AACBE", marginLeft:"14px", letterSpacing:"0.1em" }}>CLOUDS, SEA SIGNS & KUPE'S INSTRUCTIONS</span>
       </div>
 
       {/* Body */}
@@ -5710,12 +5823,7 @@ function CloudsModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
         <div style={{ width:"320px", flexShrink:0, borderRight:"1px solid #0A1428", overflowY:"auto" }}>
           <div style={{ display:"flex", flexDirection:"column", gap:"12px", padding:"18px", boxSizing:"border-box" }}>
 
-            <div style={{ display:"flex", gap:"8px" }}>
-              <button onClick={onBack} style={{ flex:1, background:"none", border:"1px solid #0A1428", borderRadius:"4px", color:"#1A2A40", fontSize:"9px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"7px", cursor:"pointer" }}>← MAP</button>
-              <button onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":"#0A1428"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#1A2A40", fontSize:"9px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"7px", cursor:"pointer" }}>
-                {unlocked.length > 0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
-              </button>
-            </div>
+            <button type="button" onClick={onBack} style={{ width:"100%", background:"none", border:"1px solid #0A1428", borderRadius:"4px", color:"#7AACBE", fontSize:"10px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
 
             {/* Scenario card */}
             <div style={{ background:"rgba(8,14,28,0.85)", border:"1px solid #0E2040", borderRadius:"7px", padding:"12px 14px" }}>
@@ -5728,7 +5836,7 @@ function CloudsModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
             <div style={{ display:"flex", gap:"4px" }}>
               {stepLabels.map((label, i) => {
                 const done = i < step - 1, curr = i === step - 1;
-                return <div key={i} style={{ flex:1, textAlign:"center", padding:"5px 1px", fontSize:"8px", fontFamily:"Cinzel,serif", background:curr?`rgba(122,158,200,0.18)`:done?"rgba(26,120,110,0.18)":"rgba(255,255,255,0.03)", border:`1px solid ${curr?accent:done?"#1A8870":"#0E2030"}`, borderRadius:"4px", color:curr?accent:done?"#2BB5A0":"#1A2A40" }}>{label}</div>;
+                return <div key={i} style={{ flex:1, textAlign:"center", padding:"6px 2px", fontSize:"10px", fontFamily:"Cinzel,serif", background:curr?`rgba(122,158,200,0.18)`:done?"rgba(26,120,110,0.18)":"rgba(255,255,255,0.03)", border:`1px solid ${curr?accent:done?"#1A8870":"#0E2030"}`, borderRadius:"5px", color:curr?accent:done?"#2BB5A0":"#7AACBE" }}>{label}</div>;
               })}
             </div>
 
@@ -6227,6 +6335,11 @@ function App() {
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body, #root { width: 100%; height: 100%; overflow: hidden; }
     input::placeholder { color: #2A4050; }
+    .m2-learn-dual-sky { display: flex; flex-direction: row; gap: 8px; align-items: stretch; width: 100%; }
+    .m2-learn-dual-sky svg { flex: 1; min-width: 0; border-radius: 8px; display: block; background: #050A14; }
+    @media (max-width: 720px) {
+      .m2-learn-dual-sky { flex-direction: column; }
+    }
   `;
 
   if (screen === "loading") return <div style={{ width:"100%",height:"100%",background:"#04070E" }} />;
