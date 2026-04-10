@@ -43,7 +43,7 @@ function FeedbackButton() {
       style={{
         position: "fixed",
         bottom: "18px",
-        right: "18px",
+        left: "18px",
         zIndex: 200,
         display: "flex",
         alignItems: "center",
@@ -304,7 +304,7 @@ function SamoaCrossing({ name, onArrive }) {
         </svg>
 
         {/* Palu speech — HTML overlay for wrapping */}
-        <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(2,6,14,0.9)", borderTop:"1px solid #0A1828", padding:"20px 32px 16px" }}>
+        <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(2,6,14,0.9)", borderTop:"1px solid #0A1828", padding:"20px 160px 16px 32px" }}>
           <div style={{ fontFamily:"Georgia,serif", fontSize:"17px", color:"#A8C8A0", lineHeight:"1.8", fontStyle:"italic", marginBottom:"10px" }}>
             "{lines[lineIdx]}"
           </div>
