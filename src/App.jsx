@@ -3522,7 +3522,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
     paluBody = "We are five days out from Sāmoa. The stars have been hidden for two nights. But Tama-nui-te-rā still crosses the sky. We need to find local noon — the moment he stands at his highest point. Click the sky when the sun reaches its peak.";
   } else if (actStep === 1 && noonFound) {
     paluTitle = "There. Local noon.";
-    paluBody = "That is the highest point. We know two things: our east-west position from dead reckoning — we have sailed roughly ESE from Sāmoa. Now we need latitude. That is what the sun height will give us.";
+    paluBody = "That is the highest point. We know roughly where we are east to west — dead reckoning: counting days, speed, and direction since Sāmoa. But we need to know how far north or south we are. That is latitude. That is what the sun height will give us.";
     showNoonContinue = true;
   } else if (actStep === 2) {
     if (confirmed) {
@@ -3595,7 +3595,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
                 </button>
               )}
               {actStep === 2 && !confirmed && handY !== null && Math.abs(handY - TAHITI_HAND) <= TOLERANCE && (
-                <button onClick={() => { setConfirmed(true); onComplete(); setTimeout(() => setNiceWork("done"), 200); }}
+                <button onClick={() => { setConfirmed(true); onComplete(); setNiceWork("done"); }}
                   style={{ padding:"14px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`rgba(208,96,48,0.18)`, color:accent }}>
                   CONFIRM — THIS IS TAHITI'S HEIGHT →
                 </button>
