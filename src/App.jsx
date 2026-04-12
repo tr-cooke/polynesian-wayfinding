@@ -1982,6 +1982,21 @@ function CompassDial({ step, selHouse, selStar, hovHouse, hovStar, onHouseClick,
 ══════════════════════════════════════════════════════════════ */
 
 function CompassLearnDiagram({ step }) {
+  const [arcT, setArcT] = useState(0);
+  useEffect(() => {
+    if (step !== 1) {
+      setArcT(0);
+      return;
+    }
+    let frameId;
+    const tick = () => {
+      setArcT(t => (t + 0.003) % 1);
+      frameId = requestAnimationFrame(tick);
+    };
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, [step]);
+
   // CX/CY=300, R=248. viewBox gives 60px padding on each side
   const CX=300, CY=300, R=248, RI=52;
   const p = (deg, r) => {
@@ -2051,6 +2066,20 @@ function CompassLearnDiagram({ step }) {
             <text x={peakPt.x.toFixed(1)} y={(peakPt.y-16).toFixed(1)} textAnchor="middle"
               fill="#4A7090" fontSize="10" fontFamily="Cinzel,serif">overhead — useless for direction</text>
             <circle cx={peakPt.x.toFixed(1)} cy={peakPt.y.toFixed(1)} r={5} fill="#C0E8FF" opacity="0.4"/>
+
+            {/* Step 1: star moving along same parametric arc as arcPts (t = i/(arcSteps-1)) */}
+            {step === 1 && (() => {
+              const angle = (arcT * 180) * Math.PI / 180;
+              const rx = 220, ry = 160;
+              const ax = CX + rx * Math.cos(Math.PI - angle);
+              const ay = horizY - ry * Math.sin(angle);
+              return (
+                <g>
+                  <circle cx={ax.toFixed(1)} cy={ay.toFixed(1)} r={14} fill="#C0E8FF" opacity="0.22"/>
+                  <circle cx={ax.toFixed(1)} cy={ay.toFixed(1)} r={7} fill="#C0E8FF" filter="url(#clGlow)"/>
+                </g>
+              );
+            })()}
 
             {/* Polaris comparison — top left */}
             <circle cx={CX-180} cy={CY-160} r={7} fill="#FFD060" opacity="0.9"/>
