@@ -722,9 +722,6 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
    TAHITI ARRIVAL SCREEN
 ══════════════════════════════════════════════════════════════ */
 
-const TAHITI_CANOE_IMG = "/images/tahiti-canoe.jpg";
-const TAHITI_BEACH_IMG = "/images/tahiti-beach.jpg";
-
 function TahitiArrivalScreen({ onReturn }) {
   const [phase,     setPhase]     = useState("canoe");
   const [lineIdx,   setLineIdx]   = useState(0);
@@ -768,7 +765,6 @@ function TahitiArrivalScreen({ onReturn }) {
   };
 
   const isCanoe  = phase === "canoe";
-  const imgB64   = isCanoe ? TAHITI_CANOE_IMG : TAHITI_BEACH_IMG;
   const lines    = isCanoe ? canoeLines : beachLines;
   const curLine  = lines[lineIdx];
   const isLast   = lineIdx === lines.length - 1;
@@ -784,12 +780,133 @@ function TahitiArrivalScreen({ onReturn }) {
 
       {/* Scene */}
       <div style={{ flex:1, position:"relative", overflow:"hidden" }}>
-        {/* Background image */}
-        <img
-          src={imgB64}
-          alt=""
-          style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"cover", objectPosition:"center" }}
-        />
+        {isCanoe ? (
+          <svg
+            viewBox="0 0 760 400"
+            style={{ position:"absolute", inset:0, width:"100%", height:"100%", display:"block" }}
+            preserveAspectRatio="xMidYMid slice"
+          >
+            <defs>
+              <linearGradient id="tahitiCanoeSky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#01060C"/>
+                <stop offset="45%" stopColor="#061018"/>
+                <stop offset="72%" stopColor="#040C18"/>
+                <stop offset="100%" stopColor="#02060A"/>
+              </linearGradient>
+              <linearGradient id="tahitiCanoeDawn" x1="1" y1="0" x2="0.25" y2="0">
+                <stop offset="0%" stopColor="#D06030" stopOpacity="0.35"/>
+                <stop offset="35%" stopColor="#E09060" stopOpacity="0.12"/>
+                <stop offset="100%" stopColor="#040C18" stopOpacity="0"/>
+              </linearGradient>
+            </defs>
+            <rect width="760" height="400" fill="url(#tahitiCanoeSky)"/>
+            <rect width="760" height="260" fill="url(#tahitiCanoeDawn)"/>
+            {/* Stars (drawn before land so ridgeline occludes them near horizon) */}
+            {[[52,28,1],[118,16,0.7],[198,36,1.2],[268,22,0.85],[338,14,0.65],[412,40,1.1],[488,20,0.9],[562,32,0.75],[628,18,1],[702,26,0.8],[320,52,0.6],[450,58,0.7]].map(([x,y,r],i)=>(
+              <circle key={i} cx={x} cy={y} r={r} fill="#C8DCE8" opacity="0.45"/>
+            ))}
+            {/* Distant ridgeline — multiple peaks */}
+            <path
+              d="M-20,228 Q60,210 120,218 Q160,175 210,200 Q250,145 300,185 Q350,120 400,165 Q455,105 510,155 Q560,125 620,148 Q680,130 780,168 L780,400 L-20,400Z"
+              fill="#042010"
+            />
+            <path
+              d="M-20,218 Q80,198 140,208 Q185,168 235,192 Q275,138 330,178 Q385,118 445,162 Q500,128 565,152 Q630,132 700,158 Q740,148 780,162 L780,400 L-20,400Z"
+              fill="#063018"
+              opacity="0.92"
+            />
+            <path
+              d="M-20,208 Q100,188 160,198 Q200,158 255,182 Q305,132 365,172 Q420,118 485,158 Q545,128 610,148 Q670,135 780,158 L780,400 L-20,400Z"
+              fill="#0A4028"
+              opacity="0.55"
+            />
+            {/* Calm sea plane */}
+            <path d="M0,248 Q190,238 380,244 Q570,250 760,242 L760,400 L0,400Z" fill="#040C18"/>
+            <path d="M0,268 Q200,256 400,262 Q560,268 760,258 L760,400 L0,400Z" fill="#030810" opacity="0.85"/>
+            {[0,1,2,3,4].map(i=>(
+              <path key={i} d={`M${-40+i*160},${285+i*6} Q${80+i*160},${278+i*6} ${200+i*160},${285+i*6}`} fill="none" stroke="#0A2030" strokeWidth="0.8" opacity="0.35"/>
+            ))}
+            {/* Waka — foreground center */}
+            <g transform="translate(380, 318)">
+              <ellipse cx="0" cy="18" rx="112" ry="10" fill="#020408" opacity="0.35"/>
+              <path d="M-95,8 Q-100,-2 -88,-8 Q0,-18 88,-8 Q100,-2 95,8 Q70,14 0,16 Q-70,14 -95,8Z" fill="#1A1208"/>
+              <path d="M-88,2 Q0,-10 88,2" fill="none" stroke="#D06030" strokeWidth="2.2" opacity="0.9"/>
+              <path d="M-72,-6 L-95,-28 L-98,-24 L-78,-4Z" fill="#2A1810"/>
+              <path d="M72,-6 L95,-28 L98,-24 L78,-4Z" fill="#2A1810"/>
+              <rect x="-8" y="-42" width="16" height="38" rx="2" fill="#2A2014"/>
+              <path d="M-6,-42 L-6,-62 Q0,-68 6,-62 L6,-42" fill="none" stroke="#D06030" strokeWidth="1.8" opacity="0.85"/>
+              <ellipse cx="-108" cy="4" rx="14" ry="5" fill="#1A140C"/>
+              <path d="M-95,4 L-108,4" stroke="#D06030" strokeWidth="1.5" opacity="0.8"/>
+              <path d="M-95,0 L-108,2" stroke="#3A3020" strokeWidth="3" strokeLinecap="round"/>
+            </g>
+          </svg>
+        ) : (
+          <svg
+            viewBox="0 0 760 400"
+            style={{ position:"absolute", inset:0, width:"100%", height:"100%", display:"block" }}
+            preserveAspectRatio="xMidYMid slice"
+          >
+            <defs>
+              <linearGradient id="tahitiBeachSky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#0A1814"/>
+                <stop offset="55%" stopColor="#0D1E18"/>
+                <stop offset="100%" stopColor="#142820"/>
+              </linearGradient>
+              <linearGradient id="tahitiBeachMtn" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#143020"/>
+                <stop offset="100%" stopColor="#081410"/>
+              </linearGradient>
+              <linearGradient id="tahitiBeachSand" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#6A5538"/>
+                <stop offset="100%" stopColor="#3E2E18"/>
+              </linearGradient>
+            </defs>
+            <rect width="760" height="400" fill="url(#tahitiBeachSky)"/>
+            {[[44,22,1],[130,14,0.75],[220,30,1.05],[310,18,0.65],[400,26,0.95],[490,12,0.7],[580,34,1.1],[670,20,0.85],[720,44,0.6],[250,48,0.55],[360,54,0.68],[540,52,0.62]].map(([x,y,r],i)=>(
+              <circle key={i} cx={x} cy={y} r={r} fill="#B8C8D0" opacity="0.5"/>
+            ))}
+            {/* Lush layered treeline */}
+            <path
+              d="M0,158 Q45,118 95,142 Q140,98 195,128 Q250,88 310,118 Q370,78 430,108 Q495,72 555,100 Q615,78 675,95 Q725,82 760,98 L760,228 L0,228Z"
+              fill="#0A1C12"
+              opacity="0.95"
+            />
+            <path
+              d="M0,178 Q55,148 115,165 Q175,132 240,152 Q300,125 365,148 Q430,118 500,138 Q565,112 630,130 Q690,108 760,125 L760,238 L0,238Z"
+              fill="#0E2418"
+              opacity="0.92"
+            />
+            <path
+              d="M0,192 Q70,168 140,182 Q200,155 275,172 Q340,148 410,168 Q480,142 555,162 Q620,138 690,155 Q735,145 760,150 L760,248 L0,248Z"
+              fill="#123220"
+              opacity="0.88"
+            />
+            {/* Volcanic-style ridgeline — distinct from Samoa */}
+            <path
+              d="M-15,268 Q90,175 165,210 Q210,130 275,185 Q330,95 395,165 Q455,110 520,175 Q585,125 645,195 Q705,150 775,205 L775,400 L-15,400Z"
+              fill="url(#tahitiBeachMtn)"
+              opacity="0.9"
+            />
+            <path d="M0,328 Q200,302 400,312 Q580,318 760,298 L760,400 L0,400Z" fill="url(#tahitiBeachSand)"/>
+            {[0,1,2,3].map(i=>(
+              <path
+                key={i}
+                d={`M${i*190},${348+i*5} Q${i*190+95},${342+i*5} ${i*190+190},${348+i*5}`}
+                fill="none"
+                stroke="#5A4828"
+                strokeWidth="0.65"
+                opacity="0.32"
+              />
+            ))}
+            {/* Torch glow — warm */}
+            <ellipse cx="520" cy="268" rx="120" ry="90" fill="#D06030" opacity="0.06"/>
+            <circle cx="520" cy="278" r="70" fill="#E8A060" opacity="0.07"/>
+            <circle cx="520" cy="288" r="36" fill="#D06030" opacity="0.09"/>
+            <line x1="520" y1="288" x2="520" y2="338" stroke="#2A1810" strokeWidth="5" strokeLinecap="round"/>
+            <path d="M512,288 Q520,268 528,288" fill="#D06030" opacity="0.95"/>
+            <path d="M505,288 Q520,275 535,288 Q520,300 505,288" fill="#F0A060" opacity="0.35"/>
+          </svg>
+        )}
         {/* Vignette */}
         <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"50%", background:"linear-gradient(to top, rgba(8,4,2,0.92) 0%, transparent 100%)", pointerEvents:"none" }}/>
 
