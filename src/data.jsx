@@ -656,6 +656,7 @@ export const MODULE_CONTENT = {
         "Marquesan voyagers are believed to have launched the great expansion to Hawaiʻi, Easter Island, and possibly the Americas — making this archipelago one of the most important waypoints in Pacific navigation history.",
       ],
     },
+    // TODO: Add stick chart visual/exchange mechanic at Marquesas arrival (future island arrival screen)
     learn: {
       title: "Ocean Swells",
       concepts: [
@@ -663,6 +664,7 @@ export const MODULE_CONTENT = {
         { heading: "Period is the key", body: "A 14-second swell means one crest every 14 seconds passing under the hull. Wind-waves are 3–6 seconds. Long period = ocean swell = reliable compass. Short period = local wind = ignore it." },
         { heading: "Island interference", body: "Islands disturb swells in three ways: Block (calm shadow behind), Refract (swells bend around the sides), Reflect (cross-chop bounces back ahead). You can detect an island 30–40 km away by how the hull moves." },
         { heading: "Mau's method", body: "Master navigator Mau Piailug would lie flat in the hull, feet touching the sides, to feel swell direction through his whole body. He could separate two different swell trains simultaneously — and navigate by both." },
+        { heading: "The Marshallese Stick Chart", body: "Not all navigators kept their knowledge only in their minds. The navigators of the Marshall Islands created rebbelib — stick charts made from curved sticks and shells, recording the pattern of swells around islands. These were teaching tools built on shore, not carried to sea — the knowledge was memorised, then the chart left behind. On our next stop, a Marquesan navigator will show us one." },
       ],
     },
   },
