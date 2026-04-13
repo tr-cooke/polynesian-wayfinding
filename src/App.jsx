@@ -20,58 +20,7 @@ const wedge = (deg, r, cx = 300, cy = 300, half = 5.625) => {
 const dirName = a =>
   ["north","northeast","east","southeast","south","southwest","west","northwest"][Math.round(a / 45) % 8];
 
-/* ══════════════════════════════════════════════════════════════
-   FEEDBACK BUTTON — floating, always visible during gameplay
-══════════════════════════════════════════════════════════════ */
-
 const FEEDBACK_URL = "https://docs.google.com/forms/d/e/1FAIpQLSekiUZKnikxFXrkO6I8txr-KKscaG3xDEST_Xj5C7tgkOrrUQ/viewform?usp=header";
-
-function FeedbackButton() {
-  const [hovered, setHovered] = useState(false);
-
-  const handleClick = () => {
-    analyticsEvents.feedbackOpened();
-    window.open(FEEDBACK_URL, "_blank", "noopener,noreferrer");
-  };
-
-  return (
-    <button
-      onClick={handleClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      title="Share feedback or report a bug"
-      style={{
-        position: "fixed",
-        bottom: "18px",
-        left: "18px",
-        zIndex: 200,
-        display: "flex",
-        alignItems: "center",
-        gap: "7px",
-        padding: "9px 16px",
-        borderRadius: "24px",
-        border: "1px solid rgba(200,148,26,0.45)",
-        background: hovered ? "rgba(200,148,26,0.22)" : "rgba(4,8,18,0.88)",
-        backdropFilter: "blur(8px)",
-        cursor: "pointer",
-        transition: "background 0.2s ease",
-        boxShadow: hovered ? "0 0 20px rgba(200,148,26,0.25)" : "0 2px 12px rgba(0,0,0,0.4)",
-      }}
-    >
-      <span style={{ fontSize: "14px", lineHeight: 1 }}>✦</span>
-      <span style={{
-        fontFamily: "Cinzel,serif",
-        fontSize: "10px",
-        fontWeight: "700",
-        letterSpacing: "0.1em",
-        color: "#C8941A",
-        whiteSpace: "nowrap",
-      }}>
-        FEEDBACK
-      </span>
-    </button>
-  );
-}
 
 /* ══════════════════════════════════════════════════════════════
    ERROR BOUNDARY
@@ -224,7 +173,16 @@ function SamoaCrossing({ name, onArrive }) {
       {/* Header */}
       <div style={{ height:"44px", borderBottom:"1px solid #0A1828", background:"rgba(3,8,16,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0 }}>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#1A3050", letterSpacing:"0.18em" }}>TONGA → SĀMOA · NIGHT {lineIdx + 1}</span>
+        <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#1A3050", letterSpacing:"0.18em" }}>TONGA → SĀMOA · NIGHT {lineIdx + 1}</span>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); analyticsEvents.feedbackOpened(); window.open(FEEDBACK_URL, "_blank", "noopener,noreferrer"); }}
+            style={{ background:"none", border:"1px solid #0A2A3A", borderRadius:"5px", padding:"5px 10px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:"#1A6070", letterSpacing:"0.08em" }}
+          >
+            ✦ FEEDBACK
+          </button>
+        </div>
       </div>
 
       {/* Ocean scene */}
@@ -402,7 +360,15 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
       {/* Header */}
       <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:"rgba(8,16,10,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0 }}>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
-        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:`${accent}88`, letterSpacing:"0.18em" }}>ARRIVED · SĀMOA</div>
+        <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+          <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:`${accent}88`, letterSpacing:"0.18em" }}>ARRIVED · SĀMOA</div>
+          <button
+            onClick={() => { analyticsEvents.feedbackOpened(); window.open(FEEDBACK_URL, "_blank", "noopener,noreferrer"); }}
+            style={{ background:"none", border:"1px solid #0A2A3A", borderRadius:"5px", padding:"5px 10px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:"#1A6070", letterSpacing:"0.08em" }}
+          >
+            ✦ FEEDBACK
+          </button>
+        </div>
       </div>
 
       {/* Scene */}
@@ -1645,6 +1611,12 @@ function VoyageMap({ name, onNavigate, unlocked, onOpenBag, onReset, onCredits }
           <button onClick={onOpenBag} style={{ background: unlocked.length > 0 ? "rgba(200,148,26,0.14)" : "rgba(255,255,255,0.03)", border: `1px solid ${unlocked.length > 0 ? "#C8941A66" : "#0A2A3A"}`, borderRadius: "5px", padding: "5px 12px", cursor: "pointer", fontFamily: "Cinzel,serif", fontSize: "10px", color: unlocked.length > 0 ? "#C8941A" : "#1A6070", letterSpacing: "0.08em" }}>
             {unlocked.length > 0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
           </button>
+          <button
+            onClick={() => { analyticsEvents.feedbackOpened(); window.open(FEEDBACK_URL, "_blank", "noopener,noreferrer"); }}
+            style={{ background:"none", border:"1px solid #0A2A3A", borderRadius:"5px", padding:"5px 10px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:"#1A6070", letterSpacing:"0.08em" }}
+          >
+            ✦ FEEDBACK
+          </button>
           <button onClick={onReset} style={{ background: "none", border: "1px solid #0A2030", borderRadius: "5px", padding: "5px 10px", cursor: "pointer", fontFamily: "Cinzel,serif", fontSize: "9.5px", color: "#0E3040", letterSpacing: "0.08em" }}>↺ RESET</button>
         </div>
       </div>
@@ -2295,7 +2267,15 @@ function CompassLearnScreen({ name, onReady, onBack, onOpenBag, unlocked }) {
       {/* Header */}
       <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:shoreMid, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
-        <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em", opacity:0.8 }}>HAUMĀNA · {name.toUpperCase()}</span>
+        <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em", opacity:0.8 }}>HAUMĀNA · {name.toUpperCase()}</span>
+          <button
+            onClick={() => { analyticsEvents.feedbackOpened(); window.open(FEEDBACK_URL, "_blank", "noopener,noreferrer"); }}
+            style={{ background:"none", border:"1px solid #0A2A3A", borderRadius:"5px", padding:"5px 10px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:"#1A6070", letterSpacing:"0.08em" }}
+          >
+            ✦ FEEDBACK
+          </button>
+        </div>
       </div>
 
       {/* Location bar */}
@@ -3536,7 +3516,15 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
         {/* Header */}
         <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:"rgba(6,14,8,0.96)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
           <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
-          <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em", opacity:0.8 }}>HAUMĀNA · {name.toUpperCase()}</span>
+          <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+            <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em", opacity:0.8 }}>HAUMĀNA · {name.toUpperCase()}</span>
+            <button
+              onClick={() => { analyticsEvents.feedbackOpened(); window.open(FEEDBACK_URL, "_blank", "noopener,noreferrer"); }}
+              style={{ background:"none", border:"1px solid #0A2A3A", borderRadius:"5px", padding:"5px 10px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:"#1A6070", letterSpacing:"0.08em" }}
+            >
+              ✦ FEEDBACK
+            </button>
+          </div>
         </div>
         {/* Location bar */}
         <div style={{ padding:"7px 22px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,10,6,0.7)", flexShrink:0, display:"flex", alignItems:"center", gap:"14px" }}>
@@ -3678,6 +3666,12 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
         <div style={{ display:"flex", gap:"10px", alignItems:"center" }}>
           <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:"#3A6070", letterSpacing:"0.09em" }}>HAUMĀNA · {name.toUpperCase()}</span>
           <button onClick={onOpenBag} style={{ background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":"#1A2840"}`, borderRadius:"5px", padding:"5px 12px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", color:unlocked.length>0?"#C8941A":"#2A4050", letterSpacing:"0.08em" }}>✦ BAG ({unlocked.length})</button>
+          <button
+            onClick={() => { analyticsEvents.feedbackOpened(); window.open(FEEDBACK_URL, "_blank", "noopener,noreferrer"); }}
+            style={{ background:"none", border:"1px solid #0A2A3A", borderRadius:"5px", padding:"5px 10px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:"#1A6070", letterSpacing:"0.08em" }}
+          >
+            ✦ FEEDBACK
+          </button>
         </div>
       </div>
       {/* Module bar */}
@@ -6364,7 +6358,6 @@ export default function AppWithBoundary() {
   return (
     <ErrorBoundary>
       <App />
-      <FeedbackButton />
     </ErrorBoundary>
   );
 }
