@@ -6451,6 +6451,8 @@ function App() {
   ];
 
   const [keepGoing, setKeepGoing] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  const [animT, setAnimT] = useState(0);
 
   const handleStarClick = s => {
     if (step !== 1 || keepGoing) return;
@@ -6460,6 +6462,25 @@ function App() {
       setKeepGoing(true);
     }
   };
+
+  useEffect(() => {
+    if (!animating) return;
+    let frame;
+    const start = performance.now();
+    const DURATION = 2500; // ms
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / DURATION);
+      setAnimT(t);
+      if (t < 1) {
+        frame = requestAnimationFrame(tick);
+      } else {
+        setAnimating(false);
+        setStep(2);
+      }
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [animating]);
 
   const css = `
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&display=swap');
@@ -6654,11 +6675,19 @@ function App() {
                       <div style={{ fontSize:"15px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>That is the one. The compass is finding its orientation now...</div>
                     </>
                   )}
-                  {keepGoing && step === 1 && (
+                  {animating && (
+                    <>
+                      <div style={{ fontSize:"20px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>Mānaiakalani.</div>
+                      <div style={{ fontSize:"15px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.7" }}>
+                        The compass is finding its orientation. Watch the sky.
+                      </div>
+                    </>
+                  )}
+                  {keepGoing && step === 1 && !animating && (
                     <>
                       <div style={{ fontSize:"20px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>Mānaiakalani!</div>
                       <div style={{ fontSize:"15px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>That is the one. Keep it on your starboard bow all night and we hold our heading for Sāmoa.</div>
-                      <button onClick={() => setStep(2)} style={{ marginTop:"8px", padding:"12px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A" }}>
+                      <button onClick={() => { setAnimT(0); setAnimating(true); }} style={{ marginTop:"8px", padding:"12px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A" }}>
                         KEEP GOING →
                       </button>
                     </>
@@ -6684,7 +6713,7 @@ function App() {
                 {bgStars.map((s,i) => <circle key={i} cx={`${s.x}%`} cy={`${s.y}%`} r={s.r} fill="#6A9AB8" opacity={s.op} />)}
               </svg>
 
-              {step === 1 ? (
+              {step === 1 && !animating && (
                 /* Night sky — stars scattered, not oriented */
                 <svg viewBox="0 0 600 600" style={{ width:"min(100%,520px)",height:"min(100%,520px)",position:"relative",zIndex:1 }}>
                   <defs>
@@ -6722,7 +6751,85 @@ function App() {
                     );
                   })}
                 </svg>
-              ) : (
+              )}
+
+              {animating && (() => {
+                const ease = t => t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+                const compassOp = Math.max(0, Math.min(1, (animT - 0.3) / 0.5));
+                const moveT = ease(Math.max(0, Math.min(1, (animT - 0.4) / 0.6)));
+
+                const starData = [
+                  { id:"manaiakalani", angle:22.5,   dist:205, color:"#C0E8FF", r:9,  name:"Mānaiakalani" },
+                  { id:"hokule_a",     angle:67.5,   dist:185, color:"#E8C060", r:7  },
+                  { id:"tawera",       angle:78.75,  dist:165, color:"#A0B8F0", r:5  },
+                  { id:"takurua",      angle:101.25, dist:190, color:"#F0D070", r:8  },
+                  { id:"atutahi",      angle:146.25, dist:175, color:"#FFFFFF",  r:6  },
+                ];
+
+                return (
+                  <svg viewBox="0 0 600 600" style={{ width:"min(100%,520px)", height:"min(100%,520px)", position:"relative", zIndex:1 }}>
+                    <defs>
+                      <filter id="animGlow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+
+                    <rect width="600" height="600" fill="#04070E"/>
+
+                    {Array.from({length:32},(_,i)=>{
+                      const rad=(i*11.25-90)*Math.PI/180;
+                      const isCard=i%8===0, isManu=i%4===0&&!isCard;
+                      const r1=isCard?52:isManu?72:95, r2=258;
+                      return <line key={i}
+                        x1={(300+r1*Math.cos(rad)).toFixed(1)} y1={(300+r1*Math.sin(rad)).toFixed(1)}
+                        x2={(300+r2*Math.cos(rad)).toFixed(1)} y2={(300+r2*Math.sin(rad)).toFixed(1)}
+                        stroke={isCard?"#3A5A80":isManu?"#253860":"#162840"}
+                        strokeWidth={isCard?1.8:isManu?1.1:0.5}
+                        opacity={compassOp}/>;
+                    })}
+                    <circle cx="300" cy="300" r="258" fill="none" stroke="#253850" strokeWidth="1.5" opacity={compassOp}/>
+
+                    {[["rgba(200,120,20,0.13)",0],["rgba(155,145,15,0.10)",90],["rgba(15,95,155,0.13)",180],["rgba(90,35,170,0.10)",270]].map(([c,a],i)=>{
+                      const r1=(a-90)*Math.PI/180, r2=(a+90-90)*Math.PI/180;
+                      return <path key={i} d={`M300,300 L${(300+258*Math.cos(r1)).toFixed(1)},${(300+258*Math.sin(r1)).toFixed(1)} A258,258 0 0,1 ${(300+258*Math.cos(r2)).toFixed(1)},${(300+258*Math.sin(r2)).toFixed(1)} Z`} fill={c} opacity={compassOp}/>;
+                    })}
+
+                    <circle cx="300" cy="300" r="52" fill="#060D1C" stroke="#1A2840" strokeWidth="1" opacity={compassOp}/>
+
+                    <path d={`M300,300 L${(300+257*Math.cos((22.5-5.625-90)*Math.PI/180)).toFixed(1)},${(300+257*Math.sin((22.5-5.625-90)*Math.PI/180)).toFixed(1)} A257,257 0 0,1 ${(300+257*Math.cos((22.5+5.625-90)*Math.PI/180)).toFixed(1)},${(300+257*Math.sin((22.5+5.625-90)*Math.PI/180)).toFixed(1)} Z`}
+                      fill="rgba(200,148,26,0.2)" stroke="#C8941A" strokeWidth="1.8" opacity={compassOp}/>
+
+                    {starData.map(star => {
+                      const scattered = SCATTERED_STARS.find(s => s.id === star.id);
+                      const compass = toXY(star.angle, star.dist, 0);
+                      const cx = scattered.x + (compass.x - scattered.x) * moveT;
+                      const cy = scattered.y + (compass.y - scattered.y) * moveT;
+                      const isMana = star.id === "manaiakalani";
+                      return (
+                        <g key={star.id} filter={isMana ? "url(#animGlow)" : undefined}>
+                          {isMana && moveT > 0 && (
+                            <line
+                              x1={scattered.x.toFixed(1)} y1={scattered.y.toFixed(1)}
+                              x2={cx.toFixed(1)} y2={cy.toFixed(1)}
+                              stroke="#C0E8FF" strokeWidth="1" strokeDasharray="4,6"
+                              opacity={moveT * 0.4}/>
+                          )}
+                          {isMana && <circle cx={cx.toFixed(1)} cy={cy.toFixed(1)} r={star.r+10} fill="#C0E8FF" opacity={0.1 + animT*0.1}/>}
+                          <circle cx={cx.toFixed(1)} cy={cy.toFixed(1)} r={isMana ? star.r + 2 : star.r} fill={star.color}/>
+                          {isMana && moveT > 0.6 && (
+                            <text x={(cx+16).toFixed(1)} y={(cy-8).toFixed(1)} fill="#EEE5C8" fontSize="12"
+                              fontFamily="Cinzel,serif" fontWeight="700" opacity={(moveT-0.6)/0.4}>
+                              {star.name}
+                            </text>
+                          )}
+                        </g>
+                      );
+                    })}
+
+                    <circle cx="300" cy="300" r="4" fill="#5A92BC" opacity={compassOp}/>
+                  </svg>
+                );
+              })()}
+
+              {step === 2 && (
                 /* Oriented compass — success state — simple SVG, no complex component */
                 <svg viewBox="-60 -60 720 720" style={{ width:"min(100%,520px)",height:"min(100%,520px)",position:"relative",zIndex:1, filter:"drop-shadow(0 0 40px rgba(15,90,150,0.4))" }}>
                   <defs>
