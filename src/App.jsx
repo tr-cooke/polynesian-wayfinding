@@ -3419,96 +3419,32 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
           </div>
         );
       }
-      // Screen 4: inline schematic (replaces missing /images/navigator-hand-measurement.jpg)
-      const Z = 48;
-      const H = 312;
-      const cx = 298;
-      const yFromAlt = (deg) => H - (deg / 90) * (H - Z);
-      // ~73% of zenith–horizon arc ≈ 73° altitude: noon sun 17° below zenith (Tahiti latitude lesson)
-      const sunY = yFromAlt(73);
-      const handY = sunY;
-      return (
-        <svg viewBox="0 0 520 380" style={{ width:"100%", borderRadius:"8px", display:"block" }} aria-hidden>
-          <defs>
-            <linearGradient id="learn4Sea" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#030A12"/>
-              <stop offset="100%" stopColor="#02060C"/>
-            </linearGradient>
-            <filter id="learn4SunGlow">
-              <feGaussianBlur stdDeviation="4" result="b"/>
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <rect width="520" height="380" fill="#050B14"/>
-          {/* Sky tint */}
-          <rect width="520" height={H} fill="#050B14"/>
-          {[[32,28],[88,18],[168,36],[380,22],[452,40],[220,52]].map(([x,y],i) => (
-            <circle key={i} cx={x} cy={y} r={0.9} fill="#4A6888" opacity="0.28"/>
-          ))}
-          {/* 15° altitude reference lines (match hand-drag activity) */}
-          {[15, 30, 45, 60, 75].map((deg) => {
-            const y = yFromAlt(deg);
-            return (
-              <g key={deg}>
-                <line x1="40" y1={y} x2="488" y2={y} stroke="#122840" strokeWidth="0.8" strokeDasharray="3,8"/>
-                <text x="34" y={y + 3} textAnchor="end" fill="#1A3A58" fontSize="10" fontFamily="Cinzel,serif">{deg}°</text>
-              </g>
-            );
-          })}
-          {/* Zenith → horizon meridian */}
-          <line x1={cx} y1={Z} x2={cx} y2={H} stroke="#C8941A" strokeWidth="1" strokeDasharray="2,6" opacity="0.45"/>
-          <circle cx={cx} cy={Z} r="3" fill="#C8941A" opacity="0.85"/>
-          <text x={cx} y="28" textAnchor="middle" fill="#C8941A" fontSize="12" fontFamily="Cinzel,serif" fontWeight="700">ZENITH (directly overhead)</text>
-          {/* Noon sun on meridian */}
-          <circle cx={cx} cy={sunY} r="18" fill="#FFD060" opacity="0.14"/>
-          <circle cx={cx} cy={sunY} r="11" fill="#FFD060" opacity="0.98" filter="url(#learn4SunGlow)"/>
-          <text x={cx + 22} y={sunY + 4} fill="#FFD060" fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">noon sun</text>
-          {/* Curved bracket + ticks: zenith to noon sun (17° along meridian) */}
-          <path
-            d={`M ${cx} ${Z + 8} Q ${cx + 56} ${(Z + sunY) / 2} ${cx} ${sunY - 6}`}
-            fill="none"
-            stroke="#D06030"
-            strokeWidth="1.4"
-            strokeDasharray="4,4"
-            opacity="0.92"
-          />
-          <line x1={cx - 3} y1={Z + 8} x2={cx + 3} y2={Z + 8} stroke="#D06030" strokeWidth="1.4"/>
-          <line x1={cx - 3} y1={sunY - 6} x2={cx + 3} y2={sunY - 6} stroke="#D06030" strokeWidth="1.4"/>
-          <text x={cx + 62} y={(Z + sunY) / 2 - 2} fill="#D06030" fontSize="12" fontFamily="Cinzel,serif" fontWeight="700">17° — Tahiti's path</text>
-          <text x={cx + 62} y={(Z + sunY) / 2 + 14} fill="#D06030" fontSize="11" fontFamily="Cinzel,serif" opacity="0.92">3 hand-widths</text>
-          {/* Deck + horizon */}
-          <rect x="0" y={H} width="520" height={380 - H} fill="url(#learn4Sea)"/>
-          <line x1="0" y1={H} x2="520" y2={H} stroke="#1A5030" strokeWidth="1.5"/>
-          <text x="260" y="368" textAnchor="middle" fill="#2A7050" fontSize="12" fontFamily="Cinzel,serif" letterSpacing="0.1em">HORIZON</text>
-          {/* Waka deck plane */}
-          <path d={`M40,${H} Q200,${H - 4} 360,${H} L400,${H + 6} L60,${H + 6} Z`} fill="#0A140C" stroke="#1A3020" strokeWidth="1"/>
-          {/* Navigator silhouette (side view, arm up) */}
-          <g opacity="0.92">
-            {/* Legs / torso */}
-            <path
-              d={`M228,${H} L232,${H - 52} Q234,${H - 78} 248,${H - 82} L262,${H - 80} L268,${H - 52} L272,${H} Z`}
-              fill="#0A1218"
-              stroke="#1A2834"
-              strokeWidth="1.2"
-            />
-            {/* Head */}
-            <ellipse cx="255" cy={H - 92} rx="10" ry="11" fill="#0A1218" stroke="#1A2834" strokeWidth="1"/>
-            {/* Arm raised toward hand height (~73° / ~73% of arc) */}
-            <path
-              d={`M248,${H - 74} Q252,${handY + 36} 238,${handY + 4} L232,${handY - 2} L226,${handY + 10} L236,${handY + 14} Q248,${H - 58} 242,${H - 68} Z`}
-              fill="#0A1218"
-              stroke="#1A2834"
-              strokeWidth="1.2"
-            />
-            {/* Flat hand to left of meridian, same altitude as noon sun */}
-            <line x1="178" y1={handY} x2="248" y2={handY} stroke="#D06030" strokeWidth="2.2" opacity="0.88"/>
-            <rect x="198" y={handY - 6} width="40" height="12" rx="2" fill="#0A1218" stroke="#D06030" strokeWidth="1" opacity="0.95"/>
-            {[0, 1, 2, 3].map((i) => (
-              <rect key={i} x={202 + i * 9} y={handY - 16} width="3" height="12" rx="1" fill="#D06030" opacity="0.85"/>
-            ))}
-          </g>
-        </svg>
-      );
+      // Screen 4: Reading the noon sun — photo + overlay labels
+      if (learnStep === 3) {
+        return (
+          <svg viewBox="0 0 560 840" style={{ width:"100%", maxHeight:"100%", borderRadius:"8px", display:"block" }}>
+            <image href="/images/navigator-hand-measurement.jpg"
+              x="0" y="0" width="560" height="840"
+              preserveAspectRatio="xMidYMid meet"/>
+            {/* Dark panel — right side labels */}
+            <rect x="340" y="18" width="212" height="248" rx="6" fill="#040C16" opacity="0.68"/>
+            <text x="348" y="50" fontFamily="Cinzel,serif" fontSize="16" fontWeight="700" fill="#C8941A" opacity="0.97">ʻAʻā (Sirius)</text>
+            <text x="348" y="70" fontFamily="Cinzel,serif" fontSize="13" fill="#C8941A" opacity="0.80">Tahiti's zenith star</text>
+            <text x="348" y="88" fontFamily="Georgia,serif" fontSize="13" fill="#C8941A" fontStyle="italic" opacity="0.68">passes directly overhead</text>
+            <text x="348" y="104" fontFamily="Georgia,serif" fontSize="13" fill="#C8941A" fontStyle="italic" opacity="0.68">at Tahiti's latitude</text>
+            <text x="348" y="148" fontFamily="Cinzel,serif" fontSize="26" fontWeight="700" fill="#D06030" opacity="0.97">17°</text>
+            <text x="348" y="172" fontFamily="Cinzel,serif" fontSize="14" fill="#D06030" opacity="0.90">gap from overhead</text>
+            <text x="348" y="190" fontFamily="Cinzel,serif" fontSize="13" fill="#D06030" opacity="0.70">≈ 3 hand-widths</text>
+            <text x="348" y="218" fontFamily="Cinzel,serif" fontSize="16" fill="#FFD060" opacity="0.96">noon sun</text>
+            <text x="348" y="238" fontFamily="Georgia,serif" fontSize="13" fill="#FFD060" fontStyle="italic" opacity="0.72">17° short of zenith</text>
+            <rect x="0" y="800" width="560" height="40" fill="#020810" opacity="0.85"/>
+            <text x="280" y="825" textAnchor="middle" fontFamily="Georgia,serif" fontSize="15" fill="#7AACBE" fontStyle="italic">
+              Measure the gap from ʻAʻā's path down to the noon sun
+            </text>
+          </svg>
+        );
+      }
+      return null;
     };
 
     return (
