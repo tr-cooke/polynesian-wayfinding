@@ -534,7 +534,7 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
           {/* Palu lines moved to HTML overlay below for proper text wrapping */}
 
           {/* Exchange speech bubble over greeter */}
-          {shared && (
+          {shared && !storyVis && (
             <g>
               <rect x={greeterX-140} y={greeterY-176} width="280" height="116" rx="8"
                 fill="#05100A" stroke="#C8941A77" strokeWidth="1.5"/>
