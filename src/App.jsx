@@ -268,13 +268,13 @@ function SamoaCrossing({ name, onArrive }) {
           </div>
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
             <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#C8941A", letterSpacing:"0.08em" }}>— PALU HEMI</span>
-            <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:"10px", paddingRight:"20px" }}>
               <div style={{ display:"flex", gap:"6px" }}>
                 {lines.map((_,i) => (
                   <div key={i} style={{ width:i===lineIdx?14:7, height:7, borderRadius:4, background:i<=lineIdx?"#C8941A":"#0A1828", transition:"all 0.25s" }}/>
                 ))}
               </div>
-              <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#C8941A", opacity:0.55, letterSpacing:"0.06em" }}>
+              <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#FFD060", opacity:0.9, letterSpacing:"0.06em" }}>
                 {isLast ? "click to arrive →" : "click to continue →"}
               </span>
             </div>
@@ -1962,7 +1962,7 @@ function CompassLearnDiagram({ step }) {
     }
     let frameId;
     const tick = () => {
-      setArcT(t => (t + 0.003) % 1);
+      setArcT(t => (t + 0.0015) % 1);
       frameId = requestAnimationFrame(tick);
     };
     frameId = requestAnimationFrame(tick);
