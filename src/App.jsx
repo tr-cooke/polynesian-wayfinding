@@ -4208,7 +4208,7 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
       onBack={onBack} />
   );
   if (phase === "bridge") return (
-    <MarquesasArrivalScreen onReturn={onBridge || onBack} />
+    <MarquesasArrivalScreen name={name} unlocked={unlocked} onReturn={onBridge || onBack} />
   );
   if (phase === "learn") {
     const concepts = MODULE_CONTENT[3].learn.concepts;
@@ -5394,7 +5394,7 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
     );
   }
   if (phase === "bridge") return (
-    <BridgeScreen moduleNum={5} name={name} unlocked={unlocked} onReturn={onBridge || onBack} />
+    <FijiBirdMateScreen name={name} unlocked={unlocked} onReturn={onBridge || onBack} />
   );
   if (phase === "done") return (
     <div style={{ width:"100%", height:"100%", background:"#040C0A", display:"flex", alignItems:"center", justifyContent:"center", padding:"24px" }}>

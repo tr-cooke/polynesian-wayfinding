@@ -566,7 +566,7 @@ export const BRIDGE_CONTENT = {
     story: "Ancient navigators did not simply watch birds — they maintained mental maps of bird territories, migration routes, and daily patterns across the whole ocean. Some voyages were deliberately timed to follow bird migrations: a voyage from Tahiti to Aotearoa might follow the long-tailed cuckoo south, just as a voyage to Hawaiʻi followed the Pacific golden plover north. The birds were not just signs of land — they were guides, calendars, and companions.",
     storyCitation: "Harold Gatty, The Raft Book, 1943; Polynesian voyaging oral tradition",
     bagItems: ["bird_guide"],
-    bagNote: "The bird guide joins your bag — and Matala has made a new friend. She has not said so, but she has been unusually quiet since we landed, which for Matala means something.",
+    bagNote: "The bird guide joins your bag — and Matala has found her companion on the island of Fiji. She has been unusually quiet ever since, which for Matala means something.",
     bridgeLine: "One last crossing to get home. Fiji to Tonga — southeast, familiar water. The clouds and the sea itself will tell us when we are close. I will show you the last of what I know.",
   },
   6: {
