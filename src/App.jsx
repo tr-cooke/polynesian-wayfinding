@@ -869,6 +869,157 @@ function TahitiArrivalScreen({ onReturn }) {
 }
 
 
+/* ══════════════════════════════════════════════════════════════
+   MARQUESAS ARRIVAL SCREEN
+══════════════════════════════════════════════════════════════ */
+
+function MarquesasArrivalScreen({ onReturn }) {
+  const [phase,     setPhase]     = useState("canoe");
+  const [lineIdx,   setLineIdx]   = useState(0);
+  const [storyVis,  setStoryVis]  = useState(false);
+  const [returnVis, setReturnVis] = useState(false);
+
+  const b = BRIDGE_CONTENT[3];
+  const accent = MODULE_CONTENT[3].accent;
+
+  const canoeLines = b.paluLines.slice(0, 2);
+  const beachLines = b.paluLines.slice(2);
+
+  const handleCanoeClick = () => {
+    if (lineIdx < canoeLines.length - 1) {
+      setLineIdx(i => i + 1);
+    } else {
+      setPhase("beach");
+      setLineIdx(0);
+    }
+  };
+
+  const handleBeachClick = () => {
+    if (lineIdx < beachLines.length - 1) {
+      setLineIdx(i => i + 1);
+    } else {
+      setPhase("story");
+      setTimeout(() => setStoryVis(true), 200);
+      setTimeout(() => setReturnVis(true), 700);
+    }
+  };
+
+  const isCanoe  = phase === "canoe";
+  const lines    = isCanoe ? canoeLines : beachLines;
+  const curLine  = lines[lineIdx];
+  const isLast   = lineIdx === lines.length - 1;
+  const isPaluPhase = phase === "canoe" || phase === "beach";
+
+  const MARQUESAS_CANOE_IMG = "/images/marquesas-canoe.png";
+  const MARQUESAS_SHORE_IMG = "/images/marquesas-shore.png";
+  const currentImg = isCanoe ? MARQUESAS_CANOE_IMG : MARQUESAS_SHORE_IMG;
+
+  return (
+    <div style={{ width:"100%", height:"100%", background:"#060A0C", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+      <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:"rgba(6,10,12,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:`${accent}88`, letterSpacing:"0.18em" }}>ARRIVED · MARQUESAS</div>
+      </div>
+
+      <div style={{ flex:1, position:"relative", overflow:"hidden" }}>
+        <img
+          src={currentImg}
+          alt=""
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center",
+          }}
+        />
+        <div style={{
+          position: "absolute",
+          bottom: 0, left: 0, right: 0,
+          height: "55%",
+          background: "linear-gradient(to top, rgba(4,10,14,0.95) 0%, rgba(4,10,14,0.45) 60%, transparent 100%)",
+          pointerEvents: "none",
+        }}/>
+        <div style={{
+          position: "absolute",
+          top: 0, left: 0, right: 0,
+          height: "20%",
+          background: "linear-gradient(to bottom, rgba(4,10,14,0.55) 0%, transparent 100%)",
+          pointerEvents: "none",
+        }}/>
+
+        {isPaluPhase && (
+          <div
+            onClick={isCanoe ? handleCanoeClick : handleBeachClick}
+            style={{ position:"absolute", bottom:0, left:0, right:0, padding:"20px 28px 16px", cursor:"pointer", userSelect:"none" }}
+          >
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"17px", color:"#D8E4E8", lineHeight:"1.8", fontStyle:"italic", marginBottom:"10px", textShadow:"0 2px 12px rgba(0,0,0,0.9)" }}>
+              "{curLine}"
+            </div>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+              <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.08em" }}>— PALU HEMI</span>
+              <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+                <div style={{ display:"flex", gap:"6px" }}>
+                  {lines.map((_,i) => (
+                    <div key={i} style={{ width:i===lineIdx?14:7, height:7, borderRadius:4, background:i<=lineIdx?accent:"#102428", transition:"all 0.25s" }}/>
+                  ))}
+                </div>
+                <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, opacity:0.6, letterSpacing:"0.06em" }}>
+                  {isLast && isCanoe ? "go ashore →" : isLast ? "navigator's knowledge →" : "click to continue →"}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {storyVis && (
+          <div style={{ position:"absolute", inset:0, background:"rgba(4,10,14,0.93)", backdropFilter:"blur(2px)", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+            <div style={{ flex:1, overflowY:"auto", padding:"28px 32px 20px", display:"flex", flexDirection:"column", gap:"20px" }}>
+              <div>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"10px", opacity:0.7 }}>NAVIGATOR'S KNOWLEDGE</div>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"17px", fontWeight:"700", color:"#E8D8A8", marginBottom:"14px" }}>{b.storyTitle}</div>
+                <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#8AB0BC", lineHeight:"1.85", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"18px" }}>
+                  {b.story}
+                </div>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"8.5px", color:`${accent}55`, letterSpacing:"0.1em", marginTop:"10px" }}>— {b.storyCitation}</div>
+              </div>
+              <div style={{ borderTop:`1px solid ${accent}22`, paddingTop:"18px" }}>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"12px", opacity:0.7 }}>IN YOUR BAG</div>
+                {b.bagItems.map(itemId => {
+                  const item = BAG_ITEMS.find(bi => bi.id === itemId);
+                  if (!item) return null;
+                  return (
+                    <div key={itemId} style={{ display:"flex", alignItems:"center", gap:"12px", padding:"11px 14px", background:`${item.color}10`, border:`1px solid ${item.color}33`, borderRadius:"8px", marginBottom:"8px" }}>
+                      <span style={{ fontSize:"22px" }}>{item.icon}</span>
+                      <div>
+                        <div style={{ fontFamily:"Cinzel,serif", fontSize:"13px", fontWeight:"700", color:"#D0C8A8" }}>{item.name}</div>
+                        <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:`${item.color}99`, letterSpacing:"0.06em", marginTop:"2px" }}>{item.hawaiian}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#5A7080", lineHeight:"1.65", fontStyle:"italic" }}>{b.bagNote}</div>
+              </div>
+            </div>
+            {returnVis && (
+              <div style={{ padding:"20px 28px", borderTop:`1px solid ${accent}22`, display:"flex", flexDirection:"column", gap:"12px", background:"rgba(4,8,12,0.5)" }}>
+                <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:accent, lineHeight:"1.7", fontStyle:"italic" }}>
+                  "{b.bridgeLine}"
+                </div>
+                <button onClick={onReturn} style={{ padding:"13px", borderRadius:"6px", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.14em", cursor:"pointer", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>
+                  RETURN TO THE OCEAN →
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
 function BridgeScreen({ moduleNum, name, onReturn }) {
   const b      = BRIDGE_CONTENT[moduleNum];
   const m      = MODULE_CONTENT[moduleNum];
@@ -4057,7 +4208,7 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
       onBack={onBack} />
   );
   if (phase === "bridge") return (
-    <BridgeScreen moduleNum={3} name={name} unlocked={unlocked} onReturn={onBridge || onBack} />
+    <MarquesasArrivalScreen onReturn={onBridge || onBack} />
   );
   if (phase === "learn") {
     const concepts = MODULE_CONTENT[3].learn.concepts;
