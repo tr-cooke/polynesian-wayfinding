@@ -874,6 +874,7 @@ function TahitiArrivalScreen({ onReturn }) {
 ══════════════════════════════════════════════════════════════ */
 
 function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
+  void name;
   const [phase, setPhase] = useState("palu");
   const [lineIdx, setLineIdx] = useState(0);
   const [tikHov, setTikHov] = useState(false);
@@ -1107,7 +1108,7 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
           <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,14,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px 20px", display:"flex", flexDirection:"column", gap:"16px" }}>
             <div style={{ display:"flex", gap:"24px", alignItems:"flex-start", flexWrap:"wrap" }}>
               <div style={{ flex:"1 1 280px", minWidth:0 }}>
-                <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"8px", opacity:0.7 }}>NAVIGATOR&apos;S KNOWLEDGE</div>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"8px", opacity:0.7 }}>{`NAVIGATOR'S KNOWLEDGE`}</div>
                 <div style={{ fontFamily:"Cinzel,serif", fontSize:"15px", fontWeight:"700", color:"#E8D8A8", marginBottom:"10px" }}>{b.storyTitle}</div>
                 <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#7AACBE", lineHeight:"1.8", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"14px" }}>{b.story}</div>
                 <div style={{ fontFamily:"Cinzel,serif", fontSize:"8.5px", color:`${accent}55`, letterSpacing:"0.1em", marginTop:"8px" }}>— {b.storyCitation}</div>
