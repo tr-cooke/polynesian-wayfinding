@@ -5103,14 +5103,94 @@ function BirdModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
   const [sightingIdx, setSightingIdx]= useState(0);    // current sighting
   const [answers,     setAnswers]    = useState({});   // sightingIdx → chosen action
   const [confirming,  setConfirming] = useState(false);
+  const [learnStep,   setLearnStep]  = useState(0);
 
   // For Module 5: intro → field guide (learn phase) → sightings (activity)
   // The field guide IS the learn phase, so "learn" maps to step 1, "activity" to step 2
   if (phase === "intro") return (
     <ModuleIntroScreen moduleNum={5} name={name}
-      onBegin={() => setPhase("activity")}
+      onBegin={() => setPhase("learn")}
       onBack={onBack} />
   );
+  if (phase === "learn") {
+    const concepts = MODULE_CONTENT[5].learn.concepts;
+    const concept  = concepts[learnStep];
+    const isLast   = learnStep === concepts.length - 1;
+    const accent   = "#00C896";
+    const dep      = MODULE_CONTENT[5].departure;
+
+    return (
+      <div style={{ width:"100%", height:"100%", background:"#060E08", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+        <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:"rgba(6,14,8,0.96)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em", opacity:0.8 }}>HAUMĀNA · {name.toUpperCase()}</span>
+        </div>
+        <div style={{ padding:"7px 22px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,10,6,0.7)", flexShrink:0, display:"flex", alignItems:"center", gap:"14px" }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em", opacity:0.9 }}>ON SHORE · {dep.location.toUpperCase()}</span>
+          <span style={{ fontFamily:"Georgia,serif", fontSize:"9px", color:`${accent}66`, fontStyle:"italic" }}>{dep.note}</span>
+        </div>
+        <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
+          <div style={{ width:"320px", flexShrink:0, borderRight:`1px solid ${accent}18`, overflowY:"auto", background:"rgba(4,10,6,0.85)", display:"flex", flexDirection:"column" }}>
+            <div style={{ padding:"22px 20px", display:"flex", flexDirection:"column", gap:"16px", flex:1 }}>
+              <div style={{ display:"flex", gap:"8px" }}>
+                <button type="button" onClick={onBack} style={{ flex:1, background:"none", border:`1px solid ${accent}22`, borderRadius:"4px", color:"#2A3A28", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
+                <button type="button" onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":accent+"22"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#2A3A28", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>
+                  {unlocked.length>0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
+                </button>
+              </div>
+              <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
+                {concepts.map((_,i) => (
+                  <div key={i} onClick={() => i < learnStep && setLearnStep(i)} style={{ width:i===learnStep?"18px":"7px", height:"7px", borderRadius:"4px", background:i===learnStep?accent:i<learnStep?"#2A8860":"#1A2820", cursor:i<learnStep?"pointer":"default", transition:"all 0.25s" }}/>
+                ))}
+                <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A3A28", marginLeft:"4px" }}>{learnStep+1}/{concepts.length}</span>
+              </div>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"19px", fontWeight:"700", color:accent, lineHeight:"1.3" }}>{concept.heading}</div>
+              <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#7AACBE", lineHeight:"1.82", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"16px" }}>{concept.body}</div>
+              <div style={{ display:"flex", gap:"8px", marginTop:"auto" }}>
+                {learnStep > 0 && (
+                  <button type="button" onClick={() => setLearnStep(i=>i-1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}33`, background:"none", color:`${accent}88` }}>← PREV</button>
+                )}
+                {!isLast ? (
+                  <button type="button" onClick={() => setLearnStep(i=>i+1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>NEXT →</button>
+                ) : (
+                  <button type="button" onClick={() => setPhase("activity")} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`linear-gradient(135deg,${accent}22,${accent}0A)`, color:accent }}>WATCH THE BIRDS →</button>
+                )}
+              </div>
+            </div>
+          </div>
+          {/* Right — bird illustration */}
+          <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px", background:"rgba(4,10,5,0.4)" }}>
+            {/* Simple bird range diagram — SVG */}
+            <svg viewBox="0 0 480 280" style={{ width:"100%", maxWidth:"480px", borderRadius:"8px", background:"#030A10" }}>
+              <rect width="480" height="280" fill="#030A10"/>
+              {/* Ocean */}
+              <rect x="0" y="160" width="480" height="120" fill="#040E18"/>
+              <line x1="0" y1="160" x2="480" y2="160" stroke="#0A3040" strokeWidth="1"/>
+              {/* Island */}
+              <ellipse cx="80" cy="158" rx="40" ry="12" fill="#1A3020"/>
+              <path d="M55,158 Q80,130 105,158" fill="#1A4028"/>
+              <text x="80" y="178" textAnchor="middle" fill="#2A5030" fontSize="10" fontFamily="Cinzel,serif">LAND</text>
+              {/* White tern range arc — 200km */}
+              <path d="M80,148 Q280,60 400,148" fill="none" stroke="#00C896" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.7"/>
+              <text x="400" y="140" fill="#00C896" fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">Manu-o-kū</text>
+              <text x="400" y="155" fill="#00C896" fontSize="9" fontFamily="Cinzel,serif" opacity="0.7">200 km</text>
+              {/* Black noddy range arc — 65km */}
+              <path d="M80,150 Q160,100 200,150" fill="none" stroke="#7AACBE" strokeWidth="1.5" strokeDasharray="4,4" opacity="0.7"/>
+              <text x="205" y="145" fill="#7AACBE" fontSize="10" fontFamily="Cinzel,serif">Noio · 65 km</text>
+              {/* Frigatebird — open ocean, no arc */}
+              <circle cx="380" cy="80" r="5" fill="#FF6644" opacity="0.8"/>
+              <text x="395" y="76" fill="#FF6644" fontSize="10" fontFamily="Cinzel,serif">ʻIwa</text>
+              <text x="395" y="89" fill="#FF6644" fontSize="9" fontFamily="Cinzel,serif" opacity="0.7">open ocean — ignore</text>
+              {/* Birds flying */}
+              {[[180,120],[220,108],[260,100]].map(([x,y],i)=>(
+                <path key={i} d={`M${x-6},${y} Q${x},${y-4} ${x+6},${y}`} fill="none" stroke="#00C896" strokeWidth="1.5" opacity={0.5+i*0.15}/>
+              ))}
+            </svg>
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (phase === "bridge") return (
     <BridgeScreen moduleNum={5} name={name} unlocked={unlocked} onReturn={onBridge || onBack} />
   );
