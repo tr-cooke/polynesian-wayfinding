@@ -252,7 +252,7 @@ export const SWELL_SCENARIOS = [
     swellPeriod: 14,         // seconds (long-period = ocean swell)
     windFromDeg: 115,        // wind FROM ESE — SE trades curving slightly east here
     heading: 25,             // canoe heading NNE toward Marquesas
-    hullAngle: 110,          // swell hits port beam/quarter for NNE heading
+    hullAngle: 110,          // swell hits starboard beam/quarter for NNE heading
     dirOptions: ["Northeast", "Southeast", "Southwest", "Northwest"],
     correctDir: "Southeast",
     headingOptions: [5, 25, 45, 70],
@@ -522,7 +522,7 @@ export const BRIDGE_CONTENT = {
     storyCitation: "Māui cycle, Polynesian oral tradition",
     bagItems: ["sun_arc"],
     bagNote: "The sun arc joins your bag — a mental instrument. No sextant, no quadrant. Just the angle of your arm and the memory of what Palu showed you.",
-    bridgeLine: "Two nights here. Then we sail northeast — to the Marquesas. The swells up there will feel different from anything you have felt before. I will teach you to read them.",
+    bridgeLine: "Two nights here. Then we sail north-northeast — to the Marquesas. The swells up there will feel different from anything you have felt before. I will teach you to read them.",
   },
   3: {
     destination: "Marquesas",
@@ -648,7 +648,7 @@ export const MODULE_CONTENT = {
     destination: "Marquesas",
     departure: { location: "Papeete, Tahiti", note: "The shore before dawn. Palu sketches a cross-section in the wet sand with a stick." },
     intro: {
-      quote: "You are learning fast — faster than I expected, and I expected a lot. The wayfinders of Tahiti have shared their knowledge freely with us. Now we sail northeast. The Marquesas. Some of the most remote islands on earth, and perhaps the most important launching point in all of Polynesian history.",
+      quote: "You are learning fast — faster than I expected, and I expected a lot. The wayfinders of Tahiti have shared their knowledge freely with us. Now we sail north-northeast. The Marquesas. Some of the most remote islands on earth, and perhaps the most important launching point in all of Polynesian history.",
       attribution: "Palu Hemi, Tahiti",
       facts: [
         "The Marquesas Islands lie NNE of Tahiti — about 1,500 km across open ocean, in the direction of the Nāleo-Koʻolau house on the star compass.",

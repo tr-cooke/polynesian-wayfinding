@@ -3868,11 +3868,11 @@ function SwellCanvas({ scenario, canoeHeading, showIsland, animOffset }) {
           const spread = 55 + t * 60;          // arcs spread further out from island centre
           return [-1, 1].map(side => {
             // start point: on approach side of island, spread outward
-            const startAngle = backRad + side * (0.5 + t * 0.9);
+            const startAngle = backRad + side * (0.6 + t * 1.1);
             const sx = islX + spread * Math.cos(startAngle);
             const sy = islY + spread * Math.sin(startAngle);
             // control point: pulls arc around the island flank
-            const ctrlAngle = backRad + side * (Math.PI * 0.45);
+            const ctrlAngle = backRad + side * (Math.PI * 0.55);
             const ctrlR = 28 + spread * 0.55;
             const ctrlX = islX + ctrlR * Math.cos(ctrlAngle);
             const ctrlY = islY + ctrlR * Math.sin(ctrlAngle);
@@ -4319,13 +4319,13 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
   const palus = {
     1: {
       title: `E ${name}. Close your eyes.`,
-      body: "Feel the motion beneath you — not the chop on the surface, but the long slow roll underneath it. That roll is the swell. It travels thousands of kilometres without changing direction. We are leaving Tahiti, heading northeast to the Marquesas. Watch the water. Which direction is the swell travelling from?",
+      body: "Feel the motion beneath you — not the chop on the surface, but the long slow roll underneath it. That roll is the swell. It travels thousands of kilometres without changing direction. We are leaving Tahiti, heading north-northeast to the Marquesas. Watch the water. Which direction is the swell travelling from?",
       hint: "Observe the long parallel lines — those are swell crests. The shorter, choppier lines are wind-waves. Identify which direction the swell is coming from, then choose.",
     },
     2: {
-      title: "Northeast. That is the trade swell.",
-      body: "It rolls in from the southeast, steady as breathing. Now use it. Our heading is northeast — Koʻolau. Rotate the waka until the swell strikes your port beam. Hold that angle and you hold your heading even when the stars are hidden.",
-      hint: "Drag the slider to rotate the canoe. Aim the bow (gold dot) toward 25° — north-northeast. The swell will then hit the left side of the hull.",
+      title: "North-northeast. That is the trade swell.",
+      body: "It rolls in from the southeast, steady as breathing. The Samoan wayfinders placed the Marquesas in the Nāleo-Koʻolau house — north-northeast, about 22.5° from north. That is our heading. Now use the swell: rotate the waka until it strikes your starboard beam. Hold that angle and you hold your heading even when the stars are hidden.",
+      hint: "Drag the slider to rotate the canoe. Aim the bow (gold dot) toward 25° — north-northeast. The swell will then hit the right side of the hull — your starboard beam.",
     },
     3: {
       title: "Now we approach land.",
