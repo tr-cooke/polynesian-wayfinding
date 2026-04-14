@@ -4053,7 +4053,7 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
 
   if (phase === "intro") return (
     <ModuleIntroScreen moduleNum={3} name={name}
-      onBegin={() => setPhase("learn")}
+      onBegin={() => { setLearnStep(0); setPhase("learn"); }}
       onBack={onBack} />
   );
   if (phase === "bridge") return (
@@ -4196,25 +4196,8 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
               </div>
               {/* Step dots */}
               <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
-                {concepts.map((_,i)=>(
-                  <button
-                    key={i}
-                    type="button"
-                    aria-label={`Go to step ${i + 1}`}
-                    aria-current={i === learnStep ? "step" : undefined}
-                    onClick={() => setLearnStep(i)}
-                    style={{
-                      width:i===learnStep?"18px":"7px",
-                      height:"7px",
-                      borderRadius:4,
-                      background:i===learnStep?accent:i<learnStep?"#2A8860":"#1A2820",
-                      cursor:"pointer",
-                      transition:"all 0.25s",
-                      border:"none",
-                      padding:0,
-                      margin:0,
-                    }}
-                  />
+                {concepts.map((_,i) => (
+                  <div key={i} onClick={() => i < learnStep && setLearnStep(i)} style={{ width:i===learnStep?"18px":"7px", height:"7px", borderRadius:"4px", background:i===learnStep?accent:i<learnStep?"#2A8860":"#1A2820", cursor:i<learnStep?"pointer":"default", transition:"all 0.25s" }}/>
                 ))}
                 <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A3A28", marginLeft:"4px" }}>{learnStep+1}/{concepts.length}</span>
               </div>
@@ -4228,13 +4211,11 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
               </div>
               {/* Prev / Next / Activity */}
               <div style={{ display:"flex", gap:"8px", marginTop:"auto" }}>
-                {learnStep > 0 && (
-                  <button onClick={() => setLearnStep(i=>i-1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}33`, background:"none", color:`${accent}88` }}>← PREV</button>
-                )}
+                <button type="button" disabled={learnStep === 0} onClick={() => learnStep > 0 && setLearnStep(i => i - 1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:learnStep === 0 ? "default" : "pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}33`, background:"none", color:`${accent}88`, opacity:learnStep === 0 ? 0.35 : 1 }}>← PREV</button>
                 {!isLast ? (
-                  <button onClick={() => setLearnStep(i=>i+1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>NEXT →</button>
+                  <button type="button" onClick={() => setLearnStep(i=>i+1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>NEXT →</button>
                 ) : (
-                  <button onClick={() => setPhase("activity")} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`linear-gradient(135deg,${accent}22,${accent}0A)`, color:accent }}>FEEL THE SWELL →</button>
+                  <button type="button" onClick={() => setPhase("activity")} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`linear-gradient(135deg,${accent}22,${accent}0A)`, color:accent }}>FEEL THE SWELL →</button>
                 )}
               </div>
             </div>
@@ -4699,30 +4680,91 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
   const [selElNino,   setSelElNino]  = useState(null);
   const [confirming,  setConfirming] = useState(false);
   const [niceWork,    setNiceWork]   = useState(null);
+  const [learnStep,   setLearnStep]  = useState(0);
 
   // Auto-switch map to El Niño when step 3 starts — must be before any early return
   useEffect(() => { if (step === 3) setMode("elnino"); }, [step]);
 
   if (phase === "intro") return (
     <ModuleIntroScreen moduleNum={4} name={name}
-      onBegin={() => setPhase("learn")}
+      onBegin={() => { setLearnStep(0); setPhase("learn"); }}
       onBack={onBack} />
   );
   if (phase === "bridge") return (
     <BridgeScreen moduleNum={4} name={name} unlocked={unlocked} onReturn={onBridge || onBack} />
   );
-  if (phase === "learn") return (
-    <ModuleLearnScreen moduleNum={4} name={name}
-      onReady={() => setPhase("activity")}
-      onBack={onBack} onOpenBag={onOpenBag} unlocked={unlocked}>
-      <div style={{ width:"min(100%,560px)", display:"flex", flexDirection:"column", gap:"16px" }}>
-        <WindMapSVG mode="normal" step={1} selBearing={null} selElNino={null} confirming={false} onBearingSelect={()=>{}} onElNinoSelect={()=>{}} />
-        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A4070", textAlign:"center", letterSpacing:"0.1em" }}>
-          PACIFIC WIND BELTS · NE TRADES · ITCZ DOLDRUMS · SE TRADES
+  if (phase === "learn") {
+    const concepts = MODULE_CONTENT[4].learn.concepts;
+    const concept  = concepts[learnStep];
+    const isLast   = learnStep === concepts.length - 1;
+    const accent   = "#4A70C0";
+    const dep      = MODULE_CONTENT[4].departure;
+
+    return (
+      <div style={{ width:"100%", height:"100%", background:"#060E08", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+        {/* Header */}
+        <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:"rgba(6,14,8,0.96)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em", opacity:0.8 }}>HAUMĀNA · {name.toUpperCase()}</span>
+        </div>
+        {/* Location bar */}
+        <div style={{ padding:"7px 22px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,10,6,0.7)", flexShrink:0, display:"flex", alignItems:"center", gap:"14px" }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em", opacity:0.9 }}>ON SHORE · {dep.location.toUpperCase()}</span>
+          <span style={{ fontFamily:"Georgia,serif", fontSize:"9px", color:`${accent}66`, fontStyle:"italic" }}>{dep.note}</span>
+        </div>
+        {/* Body */}
+        <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
+          {/* Left panel */}
+          <div style={{ width:"320px", flexShrink:0, borderRight:`1px solid ${accent}18`, overflowY:"auto", background:"rgba(4,10,6,0.85)", display:"flex", flexDirection:"column" }}>
+            <div style={{ padding:"22px 20px", display:"flex", flexDirection:"column", gap:"16px", flex:1 }}>
+              {/* Nav */}
+              <div style={{ display:"flex", gap:"8px" }}>
+                <button type="button" onClick={onBack} style={{ flex:1, background:"none", border:`1px solid ${accent}22`, borderRadius:"4px", color:"#2A3A28", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
+                <button type="button" onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":accent+"22"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#2A3A28", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>
+                  {unlocked.length>0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
+                </button>
+              </div>
+              {/* Step dots */}
+              <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
+                {concepts.map((_,i) => (
+                  <div key={i} onClick={() => i < learnStep && setLearnStep(i)} style={{ width:i===learnStep?"18px":"7px", height:"7px", borderRadius:"4px", background:i===learnStep?accent:i<learnStep?"#2A8860":"#1A2820", cursor:i<learnStep?"pointer":"default", transition:"all 0.25s" }}/>
+                ))}
+                <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A3A28", marginLeft:"4px" }}>{learnStep+1}/{concepts.length}</span>
+              </div>
+              {/* Heading */}
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"19px", fontWeight:"700", color:accent, lineHeight:"1.3" }}>
+                {concept.heading}
+              </div>
+              {/* Body */}
+              <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#7AACBE", lineHeight:"1.82", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"16px" }}>
+                {concept.body}
+              </div>
+              {/* Prev / Next / Activity */}
+              <div style={{ display:"flex", gap:"8px", marginTop:"auto" }}>
+                {learnStep > 0 && (
+                  <button type="button" onClick={() => setLearnStep(i=>i-1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}33`, background:"none", color:`${accent}88` }}>← PREV</button>
+                )}
+                {!isLast ? (
+                  <button type="button" onClick={() => setLearnStep(i=>i+1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>NEXT →</button>
+                ) : (
+                  <button type="button" onClick={() => setPhase("activity")} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`linear-gradient(135deg,${accent}22,${accent}0A)`, color:accent }}>FEEL THE WIND →</button>
+                )}
+              </div>
+            </div>
+          </div>
+          {/* Right — concept illustration placeholder */}
+          <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px", background:"rgba(4,10,5,0.4)" }}>
+            <div style={{ width:"min(100%,560px)", display:"flex", flexDirection:"column", gap:"16px" }}>
+              <WindMapSVG mode="normal" step={1} selBearing={null} selElNino={null} confirming={false} onBearingSelect={()=>{}} onElNinoSelect={()=>{}} />
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A4070", textAlign:"center", letterSpacing:"0.1em" }}>
+                PACIFIC WIND BELTS · NE TRADES · ITCZ DOLDRUMS · SE TRADES
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </ModuleLearnScreen>
-  );
+    );
+  }
 
   const sc = WIND_SCENARIO;
 
@@ -5648,6 +5690,7 @@ function CloudsModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
   const [answers,    setAnswers]   = useState({});
   const [confirming, setConfirming]= useState(false);
   const [animOffset, setAnimOffset]= useState(0);
+  const [learnStep,  setLearnStep] = useState(0);
 
   // Animate clouds — must be before any early return (Rules of Hooks)
   useEffect(() => {
@@ -5659,7 +5702,7 @@ function CloudsModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
 
   if (phase === "intro") return (
     <ModuleIntroScreen moduleNum={6} name={name}
-      onBegin={() => setPhase("learn")}
+      onBegin={() => { setLearnStep(0); setPhase("learn"); }}
       onBack={onBack} />
   );
   if (phase === "bridge") return (
@@ -5683,49 +5726,109 @@ function CloudsModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
       </div>
     </div>
   );
-  if (phase === "learn") return (
-    <ModuleLearnScreen moduleNum={6} name={name}
-      onReady={() => setPhase("activity")}
-      onBack={onBack} onOpenBag={onOpenBag} unlocked={unlocked}>
-      <div style={{ width:"min(100%,500px)", display:"flex", flexDirection:"column", gap:"16px" }}>
-        <svg viewBox="0 0 500 280" style={{ width:"100%", borderRadius:"8px", background:"#04080E" }}>
-          <defs>
-            <linearGradient id="cloudLearnSky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#04080E"/><stop offset="100%" stopColor="#071424"/>
-            </linearGradient>
-          </defs>
-          <rect width="500" height="280" fill="url(#cloudLearnSky)"/>
-          {/* Moving clouds */}
-          {[{x:60,y:60,w:90,h:26},{x:300,y:45,w:110,h:30},{x:170,y:80,w:70,h:20}].map((c,i)=>(
-            <ellipse key={i} cx={c.x} cy={c.y} rx={c.w/2} ry={c.h/2} fill="#182838" opacity="0.7"/>
-          ))}
-          {/* Arrow showing clouds moving */}
-          <text x="420" y="75" fill="#1A3040" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.1em">→ moving</text>
-          {/* Tu Kapua — stationary cloud */}
-          <ellipse cx="250" cy="70" rx="80" ry="28" fill="#2A3E50" opacity="0.92"/>
-          <ellipse cx="220" cy="80" rx="50" ry="20" fill="#223040" opacity="0.85"/>
-          <ellipse cx="284" cy="78" rx="58" ry="22" fill="#223040" opacity="0.85"/>
-          {/* Glow on Tu Kapua */}
-          <ellipse cx="250" cy="96" rx="65" ry="10" fill="rgba(122,158,200,0.15)"/>
-          <text x="250" y="55" textAnchor="middle" fill="#7A9EC8" fontSize="10" fontFamily="Cinzel,serif" letterSpacing="0.1em">TU KAPUA — STATIONARY</text>
-          {/* Dashed line down */}
-          <line x1="250" y1="100" x2="250" y2="215" stroke="#7A9EC8" strokeWidth="1" strokeDasharray="5,5" opacity="0.4"/>
-          {/* Ocean */}
-          <rect x="0" y="215" width="500" height="65" fill="#030C10"/>
-          <line x1="0" y1="215" x2="500" y2="215" stroke="#0A3028" strokeWidth="1"/>
-          {/* Island */}
-          <ellipse cx="250" cy="220" rx="42" ry="12" fill="#0A2018" stroke="#2A5040" strokeWidth="1.5"/>
-          <text x="250" y="223" textAnchor="middle" fill="#3A7050" fontSize="9" fontFamily="Cinzel,serif">ISLAND BELOW</text>
-          {/* Lagoon glow */}
-          <ellipse cx="250" cy="240" rx="90" ry="20" fill="rgba(0,200,150,0.07)"/>
-          <text x="250" y="265" textAnchor="middle" fill="#008060" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.1em">lagoon glow · turquoise tint</text>
-        </svg>
-        <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A4060", textAlign:"center", letterSpacing:"0.1em" }}>
-          TU KAPUA VISIBLE 50+ KM · LAGOON GLOW VISIBLE BEFORE ATOLL CRESTS HORIZON
+  if (phase === "learn") {
+    const concepts = MODULE_CONTENT[6].learn.concepts;
+    const concept  = concepts[learnStep];
+    const isLast   = learnStep === concepts.length - 1;
+    const accent   = "#7A9EC8";
+    const dep      = MODULE_CONTENT[6].departure;
+
+    return (
+      <div style={{ width:"100%", height:"100%", background:"#060E08", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+        {/* Header */}
+        <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:"rgba(6,14,8,0.96)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"10.5px", color:accent, letterSpacing:"0.09em", opacity:0.8 }}>HAUMĀNA · {name.toUpperCase()}</span>
+        </div>
+        {/* Location bar */}
+        <div style={{ padding:"7px 22px", borderBottom:`1px solid ${accent}22`, background:"rgba(4,10,6,0.7)", flexShrink:0, display:"flex", alignItems:"center", gap:"14px" }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"9.5px", color:accent, letterSpacing:"0.16em", opacity:0.9 }}>ON SHORE · {dep.location.toUpperCase()}</span>
+          <span style={{ fontFamily:"Georgia,serif", fontSize:"9px", color:`${accent}66`, fontStyle:"italic" }}>{dep.note}</span>
+        </div>
+        {/* Body */}
+        <div style={{ flex:1, display:"flex", overflow:"hidden", minHeight:0 }}>
+          {/* Left panel */}
+          <div style={{ width:"320px", flexShrink:0, borderRight:`1px solid ${accent}18`, overflowY:"auto", background:"rgba(4,10,6,0.85)", display:"flex", flexDirection:"column" }}>
+            <div style={{ padding:"22px 20px", display:"flex", flexDirection:"column", gap:"16px", flex:1 }}>
+              {/* Nav */}
+              <div style={{ display:"flex", gap:"8px" }}>
+                <button type="button" onClick={onBack} style={{ flex:1, background:"none", border:`1px solid ${accent}22`, borderRadius:"4px", color:"#2A3A28", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>← MAP</button>
+                <button type="button" onClick={onOpenBag} style={{ flex:1, background:unlocked.length>0?"rgba(200,148,26,0.10)":"none", border:`1px solid ${unlocked.length>0?"#C8941A55":accent+"22"}`, borderRadius:"4px", color:unlocked.length>0?"#C8941A":"#2A3A28", fontSize:"9.5px", fontFamily:"Cinzel,serif", letterSpacing:"0.1em", padding:"8px", cursor:"pointer" }}>
+                  {unlocked.length>0 ? `✦ BAG (${unlocked.length})` : "✦ BAG"}
+                </button>
+              </div>
+              {/* Step dots */}
+              <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
+                {concepts.map((_,i) => (
+                  <div key={i} onClick={() => i < learnStep && setLearnStep(i)} style={{ width:i===learnStep?"18px":"7px", height:"7px", borderRadius:"4px", background:i===learnStep?accent:i<learnStep?"#2A8860":"#1A2820", cursor:i<learnStep?"pointer":"default", transition:"all 0.25s" }}/>
+                ))}
+                <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A3A28", marginLeft:"4px" }}>{learnStep+1}/{concepts.length}</span>
+              </div>
+              {/* Heading */}
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"19px", fontWeight:"700", color:accent, lineHeight:"1.3" }}>
+                {concept.heading}
+              </div>
+              {/* Body */}
+              <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#7AACBE", lineHeight:"1.82", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"16px" }}>
+                {concept.body}
+              </div>
+              {/* Prev / Next / Activity */}
+              <div style={{ display:"flex", gap:"8px", marginTop:"auto" }}>
+                {learnStep > 0 && (
+                  <button type="button" onClick={() => setLearnStep(i=>i-1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}33`, background:"none", color:`${accent}88` }}>← PREV</button>
+                )}
+                {!isLast ? (
+                  <button type="button" onClick={() => setLearnStep(i=>i+1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>NEXT →</button>
+                ) : (
+                  <button type="button" onClick={() => setPhase("activity")} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`linear-gradient(135deg,${accent}22,${accent}0A)`, color:accent }}>READ THE SKY →</button>
+                )}
+              </div>
+            </div>
+          </div>
+          {/* Right — concept illustration placeholder */}
+          <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px", background:"rgba(4,10,5,0.4)" }}>
+            <div style={{ width:"min(100%,500px)", display:"flex", flexDirection:"column", gap:"16px" }}>
+              <svg viewBox="0 0 500 280" style={{ width:"100%", borderRadius:"8px", background:"#04080E" }}>
+                <defs>
+                  <linearGradient id="cloudLearnSky" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#04080E"/><stop offset="100%" stopColor="#071424"/>
+                  </linearGradient>
+                </defs>
+                <rect width="500" height="280" fill="url(#cloudLearnSky)"/>
+                {/* Moving clouds */}
+                {[{x:60,y:60,w:90,h:26},{x:300,y:45,w:110,h:30},{x:170,y:80,w:70,h:20}].map((c,i)=>(
+                  <ellipse key={i} cx={c.x} cy={c.y} rx={c.w/2} ry={c.h/2} fill="#182838" opacity="0.7"/>
+                ))}
+                {/* Arrow showing clouds moving */}
+                <text x="420" y="75" fill="#1A3040" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.1em">→ moving</text>
+                {/* Tu Kapua — stationary cloud */}
+                <ellipse cx="250" cy="70" rx="80" ry="28" fill="#2A3E50" opacity="0.92"/>
+                <ellipse cx="220" cy="80" rx="50" ry="20" fill="#223040" opacity="0.85"/>
+                <ellipse cx="284" cy="78" rx="58" ry="22" fill="#223040" opacity="0.85"/>
+                {/* Glow on Tu Kapua */}
+                <ellipse cx="250" cy="96" rx="65" ry="10" fill="rgba(122,158,200,0.15)"/>
+                <text x="250" y="55" textAnchor="middle" fill="#7A9EC8" fontSize="10" fontFamily="Cinzel,serif" letterSpacing="0.1em">TU KAPUA — STATIONARY</text>
+                {/* Dashed line down */}
+                <line x1="250" y1="100" x2="250" y2="215" stroke="#7A9EC8" strokeWidth="1" strokeDasharray="5,5" opacity="0.4"/>
+                {/* Ocean */}
+                <rect x="0" y="215" width="500" height="65" fill="#030C10"/>
+                <line x1="0" y1="215" x2="500" y2="215" stroke="#0A3028" strokeWidth="1"/>
+                {/* Island */}
+                <ellipse cx="250" cy="220" rx="42" ry="12" fill="#0A2018" stroke="#2A5040" strokeWidth="1.5"/>
+                <text x="250" y="223" textAnchor="middle" fill="#3A7050" fontSize="9" fontFamily="Cinzel,serif">ISLAND BELOW</text>
+                {/* Lagoon glow */}
+                <ellipse cx="250" cy="240" rx="90" ry="20" fill="rgba(0,200,150,0.07)"/>
+                <text x="250" y="265" textAnchor="middle" fill="#008060" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.1em">lagoon glow · turquoise tint</text>
+              </svg>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A4060", textAlign:"center", letterSpacing:"0.1em" }}>
+                TU KAPUA VISIBLE 50+ KM · LAGOON GLOW VISIBLE BEFORE ATOLL CRESTS HORIZON
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </ModuleLearnScreen>
-  );
+    );
+  }
 
   const signIdx   = Math.min(step - 1, CLOUD_SIGNS.length - 1);
   const sign      = CLOUD_SIGNS[signIdx];
