@@ -3422,7 +3422,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
       // Screen 4: Reading the noon sun — photo + overlay labels
       if (learnStep === 3) {
         return (
-          <svg viewBox="0 0 560 840" style={{ width:"100%", maxHeight:"100%", borderRadius:"8px", display:"block" }}>
+          <svg viewBox="0 0 560 840" style={{ height:"100%", width:"auto", maxWidth:"100%", borderRadius:"8px", display:"block" }}>
             <image href="/images/navigator-hand-measurement.jpg"
               x="0" y="0" width="560" height="840"
               preserveAspectRatio="xMidYMid meet"/>
@@ -3525,7 +3525,10 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
             </div>
           </div>
           {/* Right — diagram */}
-          <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"16px", background:"rgba(4,10,5,0.4)", overflow:"hidden", minHeight:0 }}>
+          <div style={learnStep === 3
+            ? { height:"100%", width:"100%", display:"flex", alignItems:"center", justifyContent:"center", flex:1, padding:"16px", background:"rgba(4,10,5,0.4)", overflow:"hidden", minHeight:0 }
+            : { flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"16px", background:"rgba(4,10,5,0.4)", overflow:"hidden", minHeight:0 }
+          }>
             {renderDiagram()}
           </div>
         </div>
