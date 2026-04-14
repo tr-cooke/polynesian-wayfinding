@@ -4068,24 +4068,75 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
     // SVG diagram for each concept
     const renderSwellDiagram = () => {
       if (learnStep === 0) {
-        // Swells vs waves — cross-section showing long vs short wavelength
+        // Compute animated paths using animOffset (already in scope)
+        // animOffset increments ~33 units/second (0.55 per frame at 60fps)
+
+        // SWELL: slow, long wavelength (240px), full cycle ~10 seconds
+        const swellPts = Array.from({ length: 97 }, (_, i) => {
+          const x = i * 5;
+          const y = 105 - 25 * Math.sin(2 * Math.PI * x / 240 + animOffset * 0.018);
+          return `${i === 0 ? "M" : "L"}${x.toFixed(0)},${y.toFixed(1)}`;
+        }).join(" ");
+
+        // COMBINED SURFACE: swell + chop (fast, short wavelength 28px, ~5x faster)
+        const surfPts = Array.from({ length: 97 }, (_, i) => {
+          const x = i * 5;
+          const sy = 105 - 25 * Math.sin(2 * Math.PI * x / 240 + animOffset * 0.018);
+          const cy = sy - 6 * Math.sin(2 * Math.PI * x / 28 + animOffset * 0.09);
+          return `${i === 0 ? "M" : "L"}${x.toFixed(0)},${cy.toFixed(1)}`;
+        }).join(" ");
+
+        // WAKA: follows swell only (not chop), tilts with swell slope
+        const wakaPhase = 2 * Math.PI * 240 / 240 + animOffset * 0.018;
+        const wakaY = 105 - 25 * Math.sin(wakaPhase);
+        const wakaSlope = -25 * Math.cos(wakaPhase) * (2 * Math.PI / 240);
+        const wakaTilt = Math.atan(wakaSlope) * 180 / Math.PI;
+
         return (
-          <svg viewBox="0 0 480 200" style={{ width:"100%", borderRadius:"8px", background:"#030A16" }}>
-            <rect width="480" height="200" fill="#030A16"/>
-            <rect x="0" y="90" width="480" height="110" fill="#040E1A"/>
-            <line x1="0" y1="90" x2="480" y2="90" stroke="#0A3040" strokeWidth="1"/>
-            {/* Long ocean swells */}
-            {Array.from({length:4},(_,i)=>(
-              <path key={i} d={`M${i*120},90 Q${i*120+60},${90-32} ${i*120+120},90`} fill="none" stroke="#2A90A8" strokeWidth="2.5" opacity="0.85"/>
-            ))}
-            <text x="240" y="74" textAnchor="middle" fill="#2A90A8" fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">ocean swell — 120m wavelength · 14s period</text>
-            <text x="240" y="87" textAnchor="middle" fill="#2A90A8" fontSize="9" fontFamily="Cinzel,serif" opacity="0.6">travels thousands of km · reliable compass</text>
-            {/* Wind chop on top */}
-            {Array.from({length:14},(_,i)=>(
-              <path key={i} d={`M${i*34},90 Q${i*34+17},${90-8} ${i*34+34},90`} fill="none" stroke="#3A5868" strokeWidth="1" opacity="0.5"/>
-            ))}
-            <text x="240" y="130" textAnchor="middle" fill="#3A5868" fontSize="10" fontFamily="Cinzel,serif">wind chop — 20m wavelength · 3–5s period</text>
-            <text x="240" y="145" textAnchor="middle" fill="#2A4050" fontSize="9" fontFamily="Cinzel,serif" opacity="0.7">local and chaotic · ignore it</text>
+          <svg viewBox="0 0 480 240" style={{ width:"100%", borderRadius:"8px", background:"#030A16" }}>
+            {/* Sky */}
+            <rect width="480" height="240" fill="#030A16"/>
+            {/* Water body */}
+            <rect x="0" y="105" width="480" height="135" fill="#040E1A"/>
+
+            {/* SWELL LINE — smooth, blue, thick, dotted to show it's "underneath" */}
+            <path d={swellPts} fill="none" stroke="#2A90A8" strokeWidth="2.5" opacity="0.5" strokeDasharray="10,6"/>
+
+            {/* COMBINED SURFACE — swell + chop, solid, teal */}
+            <path d={surfPts} fill="none" stroke="#4AB8C8" strokeWidth="1.8" opacity="0.9"/>
+
+            {/* Water fill beneath surface */}
+            <path d={surfPts + ` L480,240 L0,240 Z`} fill="#040E1A" opacity="0.8"/>
+
+            {/* WAKA — tilts and bobs on the swell */}
+            <g transform={`translate(240,${wakaY.toFixed(1)}) rotate(${wakaTilt.toFixed(1)})`}>
+              {/* Hull */}
+              <path d="M-52,4 Q0,-9 52,4 L46,13 Q0,7 -46,13Z" fill="#0A1818" stroke="#1A3828" strokeWidth="1.5"/>
+              {/* Mast */}
+              <line x1="0" y1="4" x2="0" y2="-30" stroke="#1A3020" strokeWidth="2"/>
+              {/* Sail */}
+              <path d="M0,-28 Q18,-16 16,-2 L0,-2Z" fill="#1A2E20" stroke="#2A4030" strokeWidth="1" opacity="0.7"/>
+              {/* Outrigger */}
+              <line x1="-46" y1="9" x2="-60" y2="15" stroke="#1A3020" strokeWidth="1.5"/>
+              <path d="M-68,14 Q-60,11 -52,14 L-53,18 Q-61,15 -69,18Z" fill="#0A1818" stroke="#1A3020" strokeWidth="1"/>
+            </g>
+
+            {/* LABELS — sky area */}
+            {/* Swell label */}
+            <circle cx="18" cy="20" r="5" fill="#2A90A8" opacity="0.9"/>
+            <text x="30" y="17" fill="#2A90A8" fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">SWELL</text>
+            <text x="30" y="30" fill="#2A90A8" fontSize="9" fontFamily="Cinzel,serif" opacity="0.65">slow · deep · 14 second period</text>
+
+            {/* Chop label */}
+            <circle cx="260" cy="20" r="4" fill="#4AB8C8" opacity="0.7"/>
+            <text x="272" y="17" fill="#4AB8C8" fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">CHOP</text>
+            <text x="272" y="30" fill="#4AB8C8" fontSize="9" fontFamily="Cinzel,serif" opacity="0.65">fast · surface · 3–5 second period</text>
+
+            {/* Bottom instruction */}
+            <rect x="0" y="210" width="480" height="30" fill="#020810" opacity="0.7"/>
+            <text x="240" y="229" textAnchor="middle" fill="#4A7890" fontSize="10" fontFamily="Georgia,serif" fontStyle="italic">
+              The hull rises on the swell — not on the chop. Feel the slow roll.
+            </text>
           </svg>
         );
       }
