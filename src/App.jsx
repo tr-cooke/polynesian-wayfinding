@@ -930,8 +930,6 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
   const canClickGreeter = phase === "greeter";
   const waveItem = BAG_ITEMS.find(i => i.id === "wave_reader");
   const taroItem = BAG_ITEMS.find(i => i.id === "taro_plant");
-  const hasWave = unlocked?.includes("wave_reader");
-  const hasTaro = unlocked?.includes("taro_plant");
 
   return (
     <div style={{ width:"100%", height:"100%", background:"#060A0C", display:"flex", flexDirection:"column", overflow:"hidden" }}>
@@ -1090,7 +1088,7 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
               "You came from Tahiti by reading the swell. Hina-i-te-aparangi told us to expect you. The SE swell on your starboard beam — you held it for three days. That is how it is done."
             </div>
             <button type="button" onClick={handleExchange} style={{ alignSelf:"flex-start", padding:"13px 20px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.08em", border:`1px solid ${accent}`, background:`${accent}14`, color:accent }}>
-              Share what we&apos;ve learned on this voyage →
+              Share what we've learned on this voyage →
             </button>
           </div>
         )}
@@ -1100,7 +1098,7 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
             <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8B8BC", lineHeight:"1.7", fontStyle:"italic" }}>&quot;Patience, little one. Not yet.&quot;</div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:`${accent}cc`, lineHeight:"1.65", fontStyle:"italic" }}>— PALU HEMI</div>
             <button type="button" onClick={handleRestHere} style={{ alignSelf:"flex-start", padding:"12px 18px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}`, background:`${accent}12`, color:accent }}>
-              Let&apos;s rest here →
+              Let's rest here →
             </button>
           </div>
         )}
@@ -1122,7 +1120,7 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
                     <div>
                       <div style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#D0C8A8" }}>{waveItem.name}</div>
                       <div style={{ fontFamily:"Cinzel,serif", fontSize:"8px", color:`${waveItem.color}99`, marginTop:"2px" }}>{waveItem.hawaiian}</div>
-                      <div style={{ fontFamily:"Georgia,serif", fontSize:"10px", color:"#6A8088", marginTop:"4px", fontStyle:"italic" }}>{hasWave ? "Earned at sea" : "Earned at sea"}</div>
+                      <div style={{ fontFamily:"Georgia,serif", fontSize:"10px", color:"#6A8088", marginTop:"4px", fontStyle:"italic" }}>Earned at sea</div>
                     </div>
                   </div>
                 )}
