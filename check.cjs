@@ -26,6 +26,17 @@ console.log("\n── 1. Hooks after early returns ─────────�
 let funcStart = -1, funcName = "";
 let firstEarlyReturn = -1;
 let hooksAfter = [];
+let braceDepth = 0;
+
+function stripStringsAndComments(line) {
+  // Heuristic: remove string contents and line comments to avoid counting braces in JSX/text.
+  // This is not a full parser, but it's enough to distinguish top-level returns from nested callbacks.
+  return line
+    .replace(/\/\/.*$/g, "")
+    .replace(/'([^'\\]|\\.)*'/g, "''")
+    .replace(/"([^"\\]|\\.)*"/g, '""')
+    .replace(/`([^`\\]|\\.|\\\n)*`/g, "``");
+}
 
 for (let i = 0; i < lines.length; i++) {
   const l = lines[i].trim();
@@ -38,12 +49,22 @@ for (let i = 0; i < lines.length; i++) {
     funcName = l.match(/^function (\w+)/)[1];
     firstEarlyReturn = -1;
     hooksAfter = [];
+    braceDepth = 0;
     continue;
   }
 
   if (funcStart < 0) continue;
 
-  if (firstEarlyReturn < 0 && /^\s*if \(/.test(lines[i])) {
+  // Track approximate nesting depth within the current function body.
+  // We only treat "early returns" as those that occur at the top level of the component body,
+  // not inside nested callbacks (e.g. inside useEffect).
+  const stripped = stripStringsAndComments(lines[i]);
+  for (const ch of stripped) {
+    if (ch === "{") braceDepth++;
+    else if (ch === "}") braceDepth = Math.max(0, braceDepth - 1);
+  }
+
+  if (firstEarlyReturn < 0 && braceDepth === 1 && /^\s*if \(/.test(lines[i])) {
     for (let j = i; j < Math.min(i + 5, lines.length); j++) {
       if (/return \(|return </.test(lines[j])) {
         firstEarlyReturn = i;
@@ -52,7 +73,7 @@ for (let i = 0; i < lines.length; i++) {
     }
   }
 
-  if (firstEarlyReturn >= 0 && /use(Effect|State|Ref|Callback|Memo)\(/.test(l)) {
+  if (firstEarlyReturn >= 0 && braceDepth === 1 && /use(Effect|State|Ref|Callback|Memo)\(/.test(l)) {
     hooksAfter.push(i);
   }
 }

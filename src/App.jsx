@@ -3686,15 +3686,25 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
   const [handY,      setHandY]     = useState(null);
   const [isDragging, setIsDragging]= useState(false);
   const [niceWork,   setNiceWork]  = useState(null);
+  const [showContinue, setShowContinue] = useState(false);
   const [confirmed,  setConfirmed] = useState(false);
   const [sunTime,    setSunTime]   = useState(0); // for noon-finding animation
 
   // Sun animation for step 1 — must be at top level before any early returns
   useEffect(() => {
-    if (phase !== "activity" || actStep !== 1 || noonFound) return;
-    const id = setInterval(() => setSunTime(t => (t + 0.4) % 100), 40);
-    return () => clearInterval(id);
+    if (phase === "activity" && actStep === 1 && !noonFound) {
+      const id = setInterval(() => setSunTime(t => (t + 0.4) % 100), 40);
+      return () => clearInterval(id);
+    }
   }, [phase, actStep, noonFound]);
+
+  useEffect(() => {
+    if (niceWork === "done") {
+      setShowContinue(false);
+      const t = setTimeout(() => setShowContinue(true), 1500);
+      return () => clearTimeout(t);
+    }
+  }, [niceWork]);
 
   const accent = "#D06030";
   const TAHITI_HAND = 0.81; // target hand height (73° out of 90° = ~0.81)
@@ -4108,18 +4118,20 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
               {niceWork === "done" && (
                 <div style={{ position:"absolute", inset:0, background:"rgba(4,8,18,0.96)", borderRadius:"7px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"18px", padding:"24px" }}>
                   <div style={{ fontSize:"32px" }}>☀</div>
-                  <div style={{ fontFamily:"Cinzel,serif", fontSize:"16px", fontWeight:"700", color:accent, textAlign:"center" }}>
-                    Three hand-widths. Tahiti's latitude found.
+                  <div style={{ fontFamily:"Cinzel,serif", fontSize:"22px", fontWeight:"800", color:"#D0A838", textAlign:"center", letterSpacing:"0.02em" }}>
+                    Three hand-widths.
                   </div>
-                  <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#7AACBE", fontStyle:"italic", textAlign:"center", lineHeight:"1.7" }}>
-                    Three hand-widths below the zenith. The Samoan wayfinders knew it. Now the sun has confirmed it. We are at 17° south — Tahiti's latitude.
+                  <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#2BB5A0", fontStyle:"italic", textAlign:"center", lineHeight:"1.75" }}>
+                    The sun just told you something ʻAʻā would have told you tonight. Two different observations. The same latitude. The same truth.
                   </div>
-                  <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#A8C8A0", fontStyle:"italic", textAlign:"center", lineHeight:"1.7" }}>
-                    The stars and the sun are two clocks telling the same time. Turn east. Tahiti will find us.
+                  <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"rgba(122,172,190,0.7)", fontStyle:"italic", textAlign:"center", lineHeight:"1.75" }}>
+                    This is what Polynesian navigation is — not one instrument, but many conversations with the same ocean. Tama-nui-te-rā has spoken for ʻAʻā. Turn east. Tahiti will find us.
                   </div>
-                  <button onClick={() => setPhase("bridge")} style={{ padding:"13px 28px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`rgba(208,96,48,0.14)`, color:accent, marginTop:"6px" }}>
-                    CONTINUE →
-                  </button>
+                  {showContinue && (
+                    <button onClick={() => setPhase("bridge")} style={{ padding:"13px 28px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`rgba(208,96,48,0.14)`, color:accent, marginTop:"6px" }}>
+                      CONTINUE →
+                    </button>
+                  )}
                 </div>
               )}
             </div>

@@ -121,6 +121,7 @@ export const BAG_ITEMS = [
   {
     id: "sweet_potato_seeds", name: "Sweet Potato Seeds", hawaiian: "ʻUala",
     unlockedBy: "home", icon: "🍠", color: "#C8741A",
+    paluNote: "We carry these as a gift — and as a reminder that this voyage has a purpose beyond the sailing.",
     content: [
       { label: "The king's gift",  body: "A drought-resistant variety cultivated by the king of Tonga. Hardy, plentiful, and able to grow in poor soil. Your mission: share these seeds across the ocean." },
       { label: "Why it matters",   body: "In years when the rains fail, a resilient crop may be the difference between hunger and survival. These seeds carry the hope of communities yet to receive them." },
@@ -129,6 +130,7 @@ export const BAG_ITEMS = [
   {
     id: "star_compass", name: "Star Compass", hawaiian: "Ka Pā Hōkū",
     unlockedBy: "module1", icon: "✦", color: "#C8941A",
+    paluNote: "I check the compass houses at every horizon glance. It takes less than a second once it lives in your mind.",
     content: [
       { label: "32 Houses",        body: "The horizon is divided into 32 houses, each 11.25° apart. Four quadrants: Koʻolau (NE), Malanai (SE), Kona (SW), Hoʻolua (NW)." },
       { label: "Mānaiakalani",     body: "Vega. Rises in Nāleo-Koʻolau (NNE). From Tonga, your guide star for Sāmoa — keep it on your starboard bow through the night." },
@@ -140,14 +142,25 @@ export const BAG_ITEMS = [
   {
     id: "samoan_star_map", name: "Samoan Star Map", hawaiian: "Faʻailoga Fetu",
     unlockedBy: "module1gift", icon: "⭐", color: "#7AACBE",
+    paluNote: "The Samoans mark seasonal rising points I do not have in my own training. I have learned from this map.",
     content: [
       { label: "A gift from Sāmoa", body: "The Samoan wayfinders were impressed by your navigation. They have shared a star map marking the seasonal positions of key stars as seen from the central Pacific — a guide for future voyages." },
       { label: "Matagi fetu",        body: "The Samoan tradition of reading the wind alongside the stars — Matagi (wind) and Fetu (star) together tell the full story of any crossing." },
     ],
   },
   {
+    id: "wayfarers_notebook", name: "Wayfarer's Notebook", hawaiian: "Buke Huli Moana",
+    unlockedBy: "home", icon: "📓", color: "#8A6A5A",
+    paluNote: "Write everything down. Your memory is worse than you think, and the ocean does not repeat itself.",
+    content: [
+      { label: "Record the crossing", body: "A navigator keeps a record: swell direction, wind shifts, birds seen at dawn and dusk, cloud forms, currents, and the days between islands. Memory fails first when you are tired." },
+      { label: "Why it matters", body: "Patterns reveal themselves only after you write them. The notebook becomes a second mind — and a way to teach the next apprentice." },
+    ],
+  },
+  {
     id: "sun_arc", name: "Sun Arc", hawaiian: "Tama-nui-te-rā",
     unlockedBy: "module2", icon: "☀", color: "#D06030",
+    paluNote: "I use this at midday when the stars are not visible and I need to confirm my latitude. Never for direction — only for position.",
     content: [
       { label: "Latitude Rule", body: "At local noon: latitude = 90° minus sun altitude, adjusted for season (±23.5° at solstices)." },
       { label: "Equinox",       body: "March 20 / Sep 23: sun rises due east, sets due west. Noon altitude = 90° minus latitude exactly." },
@@ -157,6 +170,7 @@ export const BAG_ITEMS = [
   {
     id: "wave_reader", name: "Wave Reader", hawaiian: "Te Moana",
     unlockedBy: "module3", icon: "〰", color: "#2070B0",
+    paluNote: "I check the swell period before I check the wind. The swell has been travelling for days. The wind is younger and less reliable.",
     content: [
       { label: "Swells vs Waves", body: "Swells are long-period, deep-source, travel straight for days. Wind-waves are local and unreliable." },
       { label: "Island Signs",    body: "Islands block (calm behind), refract (curves around sides), reflect (cross-chop in front). Range ~30-40 km for high islands." },
@@ -166,6 +180,7 @@ export const BAG_ITEMS = [
   {
     id: "taro_plant", name: "Taro Plant", hawaiian: "Talo",
     unlockedBy: "module3gift", icon: "🌿", color: "#2A8050",
+    paluNote: "Water it each day. It is more valuable than the star compass in a year when the rains fail.",
     content: [
       { label: "A gift from Marquesas", body: "The new wayfarer of the Marquesas gifted you a rare variety of taro — able to weather stormy springs and dry summers where other crops fail." },
       { label: "Why taro matters",      body: "Taro has sustained Pacific peoples for thousands of years. This hardy variety, grown correctly, may prove as valuable as the sweet potato seeds you carry." },
@@ -174,6 +189,7 @@ export const BAG_ITEMS = [
   {
     id: "wind_reader", name: "Wind Reader", hawaiian: "Hau me Matagi",
     unlockedBy: "module4", icon: "≋", color: "#4A70C0",
+    paluNote: "When the wind changes character — not just direction but texture — I pay attention. The ocean is saying something.",
     content: [
       { label: "Trade winds",   body: "NE trades blow 5°–30°N; SE trades blow 5°–30°S. Both reliable and steady — the backbone of Polynesian voyaging." },
       { label: "ITCZ",          body: "The doldrums belt near the equator. Calms, squalls, unpredictable. Cross it fast, don't linger." },
@@ -184,6 +200,7 @@ export const BAG_ITEMS = [
   {
     id: "bird_guide", name: "Bird Guide", hawaiian: "Ngā Manu",
     unlockedBy: "module5", icon: "🐦", color: "#2A9A70",
+    paluNote: "At dawn, note what species are flying and which direction. At dusk, note again. Between those two observations is a picture of every island within 200 km.",
     content: [
       { label: "Manu-o-kū",        body: "White tern. Land-based. Flies up to 200 km from shore. Morning: follow toward land. Evening: follow home." },
       { label: "Noio",              body: "Noddy tern. Land-based. Up to 65 km. Closer signal than white tern." },
@@ -194,6 +211,7 @@ export const BAG_ITEMS = [
   {
     id: "cloud_reader", name: "Cloud & Sea Reader", hawaiian: "Kapua me te Moana",
     unlockedBy: "module6", icon: "☁", color: "#7A9EC8",
+    paluNote: "Standing cloud, lagoon glow, water colour, debris drift. I run through all four whenever I am uncertain. At least one is usually speaking.",
     content: [
       { label: "Tu Kapua",       body: "A stationary cloud sitting still while others move is standing over land. Low atolls invisible to the eye can still be read from 50+ km." },
       { label: "Lagoon glow",    body: "A green or turquoise tint in the underside of clouds — light reflecting off a coral lagoon below. A sign of shallow water and an atoll near." },
@@ -545,7 +563,7 @@ export const BRIDGE_CONTENT = {
     paluLines: [
       "The doldrums gave us two hard days — calms, then squalls, then confused wind from every direction. But you held your nerve. We are through.",
       "There. The first island. Hawaiʻi. The NE trades brought us in exactly where we planned.",
-      "Tonight we rest ashore. Tomorrow we share the last of the sweet potato cuttings with the chiefs here. Then sleep — real sleep.",
+      "I have been on this ocean for forty years. I am not sure it has ever tired me the way this crossing has. Rest. You earned it.",
     ],
     storyTitle: "The Wind Has Names",
     story: "In Pacific tradition, naming the wind is not poetry — it is navigation. Hau, Matagi, Tokelau, Rēhia — each name carries information about season, bearing, and what the wind means for a voyage. A navigator who knows the names knows what each wind will do next and where it has come from. Unnamed wind is dangerous wind. When Palu tells you to learn the wind's names, he is telling you to study its patterns until they have the solidity of facts.",
@@ -559,8 +577,8 @@ export const BRIDGE_CONTENT = {
     arrivalScene: "🐦",
     paluLines: [
       "The frigatebirds led us straight in — just as I said they would. Fiji.",
-      "The people here are old friends of Tonga. We share deep roots. Tonight there will be a feast — and I suspect Matala will be very interested in some of the birds we saw on the approach.",
-      "I noticed her watching a pair of lories in the trees above the reef. She pretended not to notice me noticing.",
+      "The people here are old friends of Tonga. We share deep roots. Tonight there will be a feast.",
+      "I noticed Matala watching a pair of lories in the trees above the reef. She pretended not to notice me noticing. I am going to pretend I did not notice either.",
     ],
     storyTitle: "The Bird Roads",
     story: "Ancient navigators did not simply watch birds — they maintained mental maps of bird territories, migration routes, and daily patterns across the whole ocean. Some voyages were deliberately timed to follow bird migrations: a voyage from Tahiti to Aotearoa might follow the long-tailed cuckoo south, just as a voyage to Hawaiʻi followed the Pacific golden plover north. The birds were not just signs of land — they were guides, calendars, and companions.",
@@ -574,7 +592,7 @@ export const BRIDGE_CONTENT = {
     arrivalScene: "⚓",
     paluLines: [
       "Tonga. Home. Can you smell the land? There is nothing like it after weeks at sea.",
-      "You have done something remarkable on this voyage. I have been teaching for thirty years — not every student learns as fast as you have.",
+      "You have done something I have not seen in thirty years of teaching. I am going to rest for a very long time after this.",
       "Come. Let us bring the taro ashore before we celebrate. It has had a long journey too.",
     ],
     storyTitle: "Kupe's Instructions",
@@ -595,6 +613,7 @@ export const MODULE_CONTENT = {
     accent: "#C8941A",
     hawaiian: "Ka Pā Hōkū",
     destination: "Sāmoa",
+    navigatorFact: "Sirius — the brightest star in the sky — passes directly overhead at Tahiti's latitude. Polynesian navigators called it ʻAʻā and assigned it to Tahiti centuries before Western astronomy named it.",
     departure: { location: "Tongatapu, Tonga", note: "The beach at dusk. Shells laid in a circle in the sand." },
     intro: {
       quote: "First, apprentice — let us travel together to Sāmoa. It is a shorter crossing, a good place to begin your training. The stars will guide us.",
@@ -622,6 +641,7 @@ export const MODULE_CONTENT = {
     accent: "#D06030",
     hawaiian: "Tama-nui-te-rā",
     destination: "Tahiti",
+    navigatorFact: "At the equinox, the noon sun stands directly overhead at the equator. Every degree south you sail, it falls one degree further from overhead. Your latitude is written in the sky every day at noon — no instruments required.",
     departure: { location: "Apia, Sāmoa", note: "The harbour before sunrise. The stars are fading. Palu stands at the water's edge and traces the sun's coming arc across the sky with his hand." },
     intro: {
       quote: "Great work on our first voyage. The Samoan wayfinders were impressed — they shared their star maps with us, and a story about how their ancestors first found Tahiti. Now for a new challenge: the stars are not always visible. We need to learn the sky by day as well as by night. Our next destination is Tahiti, and the sun will help us find it.",
@@ -646,6 +666,7 @@ export const MODULE_CONTENT = {
     accent: "#2A90A8",
     hawaiian: "Te Moana",
     destination: "Marquesas",
+    navigatorFact: "Mau Piailug could separate two different swell trains simultaneously — feeling each as a distinct rhythm through the hull of the canoe. He learned this as a child, sleeping on the outrigger platform of his father's canoe.",
     departure: { location: "Papeete, Tahiti", note: "The shore before dawn. Palu sketches a cross-section in the wet sand with a stick." },
     intro: {
       quote: "You are learning fast — faster than I expected, and I expected a lot. The wayfinders of Tahiti have shared their knowledge freely with us. Now we sail north-northeast. The Marquesas. Some of the most remote islands on earth, and perhaps the most important launching point in all of Polynesian history.",
@@ -672,6 +693,7 @@ export const MODULE_CONTENT = {
     accent: "#4A70C0",
     hawaiian: "Hau me Matagi",
     destination: "Hawaiʻi",
+    navigatorFact: "The Inter-Tropical Convergence Zone has no reliable wind. Ancient navigators crossed it as fast as possible — sometimes paddling. Lingering in the doldrums was considered one of the most dangerous situations a canoe could face.",
     departure: { location: "Atuona, Marquesas", note: "The valley floor at evening. A fire, a map drawn in ash." },
     intro: {
       quote: "Now for the longest crossing of our journey — northwest to Hawaiʻi. Last night around the fire, one of the Marquesan elders shared the story of Makanikeoe, a trickster wind spirit who disguised himself as a fellow traveller, then slowly shifted direction until the navigator was completely lost. A story. But a useful one. Wind alone will not get us there — you must understand it, not just follow it.",
@@ -695,6 +717,7 @@ export const MODULE_CONTENT = {
     accent: "#00C896",
     hawaiian: "Ngā Manu",
     destination: "Fiji",
+    navigatorFact: "The white tern (Manu-o-kū) flies up to 200 km from land to feed, then returns home at dusk. A navigator who spots white terns in the morning knows land lies in the direction they came from. In the evening, follow where they fly.",
     departure: { location: "Hilo, Hawaiʻi", note: "The reef's edge at low tide. Matala perched nearby." },
     intro: {
       quote: "Hawaiʻi. We have been here before — in the old stories, in the names of the stars. Now we have seen it with our own eyes. The mission is nearly complete. One stop before we head home: Fiji. Southwest, familiar water, and the birds will help us find it.",
@@ -719,6 +742,7 @@ export const MODULE_CONTENT = {
     accent: "#7A9EC8",
     hawaiian: "Kapua me te Moana",
     destination: "Tonga",
+    navigatorFact: "A stationary cloud above the horizon is not natural — clouds move with the wind. If one cloud does not move, it is standing on a mountain or high island below. This sign alone has guided navigators to land from 50 km away.",
     departure: { location: "Suva, Fiji", note: "The headland above the harbour. The sky and ocean spread before you." },
     intro: {
       quote: "Fiji has been good to us. And I think Matala has found what she was looking for — though she will not admit it yet. Now: southeast, home. The clouds and the sea will guide us in. I will teach you the last of what I know on this crossing.",
