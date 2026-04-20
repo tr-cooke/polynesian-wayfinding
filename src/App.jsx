@@ -2691,6 +2691,7 @@ function ShoreIntroPopup({ onDismiss }) {
 
 function CompassLearnScreen({ name, onReady, onBack, onOpenBag, unlocked }) {
   const [conceptIdx, setConceptIdx] = useState(0);
+  const [noticeAnswer, setNoticeAnswer] = useState(null); // null | "moves" | "fixed"
   const total   = COMPASS_LEARN_STEPS.length;
   const concept = COMPASS_LEARN_STEPS[conceptIdx];
   const accent  = "#C8941A";
@@ -2700,6 +2701,10 @@ function CompassLearnScreen({ name, onReady, onBack, onOpenBag, unlocked }) {
   const shoreBg    = "#060E08";
   const shoreMid   = "rgba(6,14,8,0.96)";
   const shorePanel = "rgba(4,10,6,0.85)";
+
+  useEffect(() => {
+    if (conceptIdx !== 0) setNoticeAnswer(null);
+  }, [conceptIdx]);
 
   return (
     <div style={{ width:"100%", height:"100%", background:shoreBg, display:"flex", flexDirection:"column", overflow:"hidden" }}>
@@ -2771,13 +2776,68 @@ function CompassLearnScreen({ name, onReady, onBack, onOpenBag, unlocked }) {
               {concept.body}
             </div>
 
+            {/* Notice moment — Module 1 learn step 1 */}
+            {conceptIdx === 0 && (
+              <>
+                {noticeAnswer === null && (
+                  <div style={{ background: "rgba(200,148,26,0.06)", border: "1px solid rgba(200,148,26,0.2)", borderRadius: "8px", padding: "14px 16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div style={{ fontFamily: "Cinzel,serif", fontSize: "10px", color: "#C8941A", letterSpacing: "0.14em" }}>PALU ASKS</div>
+                    <div style={{ fontFamily: "Georgia,serif", fontSize: "14px", color: "#A8C8C0", fontStyle: "italic", lineHeight: "1.7" }}>
+                      "Look at the diagram. The star moves across the sky all night. What about that movement never changes?"
+                    </div>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button onClick={() => setNoticeAnswer("moves")}
+                        style={{ flex:1, padding:"10px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", border:"1px solid #1A3840", background:"none", color:"#4A8090" }}>
+                        Where it is in the sky
+                      </button>
+                      <button onClick={() => setNoticeAnswer("fixed")}
+                        style={{ flex:1, padding:"10px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", border:"1px solid #1A3840", background:"none", color:"#4A8090" }}>
+                        Where it rises on the horizon
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {noticeAnswer === "fixed" && (
+                  <div style={{ background: "rgba(42,184,112,0.06)", border: "1px solid rgba(42,184,112,0.22)", borderRadius: "8px", padding: "14px 16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#2AB870", lineHeight:"1.7", fontStyle:"italic" }}>
+                      ✓ Exactly. That is the whole secret. The position in the sky is useless. The rising point is everything. Let us go deeper.
+                    </div>
+                  </div>
+                )}
+
+                {noticeAnswer === "moves" && (
+                  <div style={{ background: "rgba(200,148,26,0.06)", border: "1px solid rgba(200,148,26,0.2)", borderRadius: "8px", padding: "14px 16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#A8C8C0", lineHeight:"1.7", fontStyle:"italic" }}>
+                      Most people say that. Watch the diagram again — the star moves, yes. But watch where it first appears. That point on the horizon... does it move?
+                    </div>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button onClick={() => setNoticeAnswer("moves")}
+                        style={{ flex:1, padding:"10px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", border:"1px solid #1A3840", background:"none", color:"#4A8090" }}>
+                        Where it is in the sky
+                      </button>
+                      <button onClick={() => setNoticeAnswer("fixed")}
+                        style={{ flex:1, padding:"10px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", border:"1px solid #1A3840", background:"none", color:"#4A8090" }}>
+                        Where it rises on the horizon
+                      </button>
+                    </div>
+                    <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#C8941A", letterSpacing:"0.12em", opacity:0.7 }}>
+                      SKRAWWK. The horizon point. THE HORIZON POINT.
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
             {/* Prev / Next / Set Sail */}
             <div style={{ display:"flex", gap:"8px", marginTop:"auto" }}>
               {conceptIdx > 0 && (
                 <button onClick={() => setConceptIdx(i=>i-1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}33`, background:"none", color:`${accent}88` }}>← PREV</button>
               )}
               {!isLast ? (
-                <button onClick={() => setConceptIdx(i=>i+1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>NEXT →</button>
+                (conceptIdx !== 0 || noticeAnswer === "fixed") ? (
+                  <button onClick={() => setConceptIdx(i=>i+1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>NEXT →</button>
+                ) : null
               ) : (
                 <button onClick={onReady} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`linear-gradient(135deg,${accent}22,${accent}0A)`, color:accent }}>SET SAIL →</button>
               )}
@@ -4622,6 +4682,7 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
   const [niceWork,      setNiceWork]     = useState(null);
   const [shorePopupSeen, setShorePopupSeen] = useState(false);
   const [learnStep,     setLearnStep]    = useState(0);
+  const [swellNotice,   setSwellNotice]  = useState(null);
 
   // Animate swells — must be before any early return (Rules of Hooks)
   useEffect(() => {
@@ -4633,6 +4694,10 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
   }, []);
+
+  useEffect(() => {
+    if (learnStep !== 0) setSwellNotice(null);
+  }, [learnStep]);
 
   if (phase === "intro") return (
     <ModuleIntroScreen moduleNum={3} name={name}
@@ -4843,11 +4908,66 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
               <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#7AACBE", lineHeight:"1.82", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"16px" }}>
                 {concept.body}
               </div>
+
+              {/* Notice moment — Module 3 learn step 1 */}
+              {learnStep === 0 && (
+                <>
+                  {swellNotice === null && (
+                    <div style={{ background: "rgba(42,144,168,0.06)", border: "1px solid rgba(42,144,168,0.2)", borderRadius: "8px", padding: "14px 16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                      <div style={{ fontFamily: "Cinzel,serif", fontSize: "10px", color: "#2A90A8", letterSpacing: "0.14em" }}>PALU ASKS</div>
+                      <div style={{ fontFamily: "Georgia,serif", fontSize: "14px", color: "#A8C8C0", fontStyle: "italic", lineHeight: "1.7" }}>
+                        "Watch the animation. The waka is rocking. Which movement would you use to navigate — the slow roll, or the quick jitter?"
+                      </div>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button onClick={() => setSwellNotice("swell")}
+                          style={{ flex:1, padding:"10px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", border:"1px solid #0A2A3A", background:"none", color:"#2A6070" }}>
+                          The slow roll
+                        </button>
+                        <button onClick={() => setSwellNotice("chop")}
+                          style={{ flex:1, padding:"10px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", border:"1px solid #0A2A3A", background:"none", color:"#2A6070" }}>
+                          The quick jitter
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {swellNotice === "swell" && (
+                    <div style={{ background: "rgba(42,184,112,0.06)", border: "1px solid rgba(42,184,112,0.22)", borderRadius: "8px", padding: "14px 16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                      <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#2AB870", lineHeight:"1.7", fontStyle:"italic" }}>
+                        ✓ Yes. The slow roll does not change with local weather. It has been travelling for days. That is your compass.
+                      </div>
+                    </div>
+                  )}
+
+                  {swellNotice === "chop" && (
+                    <div style={{ background: "rgba(42,144,168,0.06)", border: "1px solid rgba(42,144,168,0.2)", borderRadius: "8px", padding: "14px 16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                      <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:"#A8C8C0", lineHeight:"1.7", fontStyle:"italic" }}>
+                        That one will make you seasick and lost. The chop changes every hour. The swell beneath it has been travelling for a thousand kilometres. Feel deeper.
+                      </div>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button onClick={() => setSwellNotice("swell")}
+                          style={{ flex:1, padding:"10px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", border:"1px solid #0A2A3A", background:"none", color:"#2A6070" }}>
+                          The slow roll
+                        </button>
+                        <button onClick={() => setSwellNotice("chop")}
+                          style={{ flex:1, padding:"10px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", border:"1px solid #0A2A3A", background:"none", color:"#2A6070" }}>
+                          The quick jitter
+                        </button>
+                      </div>
+                      <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#2A90A8", letterSpacing:"0.12em", opacity:0.75 }}>
+                        SKRAWWK. THE SLOW ONE. OBVIOUSLY. SKRAWWK.
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
               {/* Prev / Next / Activity */}
               <div style={{ display:"flex", gap:"8px", marginTop:"auto" }}>
                 <button type="button" disabled={learnStep === 0} onClick={() => learnStep > 0 && setLearnStep(i => i - 1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:learnStep === 0 ? "default" : "pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}33`, background:"none", color:`${accent}88`, opacity:learnStep === 0 ? 0.35 : 1 }}>← PREV</button>
                 {!isLast ? (
-                  <button type="button" onClick={() => setLearnStep(i=>i+1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>NEXT →</button>
+                  (learnStep !== 0 || swellNotice === "swell") ? (
+                    <button type="button" onClick={() => setLearnStep(i=>i+1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`${accent}18`, color:accent }}>NEXT →</button>
+                  ) : null
                 ) : (
                   <button type="button" onClick={() => setPhase("activity")} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`linear-gradient(135deg,${accent}22,${accent}0A)`, color:accent }}>FEEL THE SWELL →</button>
                 )}
