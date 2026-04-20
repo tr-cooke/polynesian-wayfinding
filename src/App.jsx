@@ -3685,6 +3685,8 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
   const [noonFound,  setNoonFound] = useState(false);
   const [handY,      setHandY]     = useState(null);
   const [isDragging, setIsDragging]= useState(false);
+  const [matalaScolded, setMatalaScolded] = useState(false);
+  const [matalaScoldVisible, setMatalaScoldVisible] = useState(false);
   const [niceWork,   setNiceWork]  = useState(null);
   const [showContinue, setShowContinue] = useState(false);
   const [confirmed,  setConfirmed] = useState(false);
@@ -4005,6 +4007,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
 
   const handleSkyPointerDown = (e) => {
     if (actStep !== 2 || confirmed || niceWork) return;
+    setMatalaScoldVisible(false);
     setIsDragging(true);
     const rect = e.currentTarget.getBoundingClientRect();
     const rawY = (e.clientY - rect.top) / rect.height;
@@ -4022,6 +4025,12 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
     if (!isDragging) return;
     setIsDragging(false);
     // No auto-confirm on release — user must click the CONFIRM button
+    const offTarget =
+      handY !== null && Math.abs(handY - TAHITI_HAND) > 0.15;
+    if (offTarget && !matalaScolded) {
+      setMatalaScolded(true);
+      setMatalaScoldVisible(true);
+    }
   };
 
   let paluTitle = "", paluBody = "", showNoonContinue = false;
@@ -4096,6 +4105,30 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
                 <div style={{ fontSize:"11px", color:"#365060", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div>
                 <span style={{ fontSize:"16px", opacity:0.75 }}>🦜</span>
               </div>
+              {matalaScoldVisible && matalaScolded && (paluTitle === "A little lower." || paluTitle === "A little higher.") && (
+                <>
+                  <div style={{
+                    background: "rgba(42,150,80,0.08)",
+                    border: "1px solid rgba(42,150,80,0.3)",
+                    borderRadius: "6px",
+                    padding: "10px 14px",
+                    display: "flex",
+                    gap: "10px",
+                    alignItems: "flex-start",
+                  }}>
+                    <span style={{ fontSize: "20px", flexShrink: 0 }}>🦜</span>
+                    <div>
+                      <div style={{ fontFamily: "Cinzel,serif", fontSize: "10px", color: "#2A9A70", letterSpacing: "0.1em", marginBottom: "4px" }}>MATALA</div>
+                      <div style={{ fontFamily: "Georgia,serif", fontSize: "13px", color: "#6AD898", fontStyle: "italic", lineHeight: "1.6" }}>
+                        {"SKRAWWK. Too high! Too low! The sun is RIGHT THERE. SKRAWWK."}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ fontFamily: "Georgia,serif", fontSize: "11px", color: "#5A8090", fontStyle: "italic", paddingLeft: "14px", borderLeft: "1px solid #1A3040" }}>
+                    — Palu: "Matala. Be kind." [pause] "...But she is not wrong."
+                  </div>
+                </>
+              )}
               <div style={{ fontSize:"19px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{paluTitle}</div>
               <div style={{ fontSize:"15px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.75" }}>{paluBody}</div>
               {actStep === 1 && !noonFound && (
@@ -4580,6 +4613,8 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
   const [phase,         setPhase]        = useState("intro");
   const [step,          setStep]         = useState(1);
   const [selDir,        setSelDir]       = useState(null);
+  const [matalaScolded, setMatalaScolded] = useState(false);
+  const [matalaScoldDir, setMatalaScoldDir] = useState(null);
   const [canoeHeading,  setCanoeHeading] = useState(90);
   const [headingLocked, setHeadingLocked]= useState(false);
   const [animOffset,    setAnimOffset]   = useState(0);
@@ -4833,6 +4868,10 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
   const handleDirSelect = dir => {
     if (confirming) return;
     setSelDir(dir);
+    if (dir !== sc.correctDir && !matalaScolded) {
+      setMatalaScolded(true);
+      setMatalaScoldDir(dir);
+    }
     if (dir === sc.correctDir) {
       setConfirming(true);
       setTimeout(() => { setConfirming(false); setNiceWork("step2"); }, 600);
@@ -4951,6 +4990,30 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
             {/* Palu speech */}
             <div style={{ background:"rgba(4,10,20,0.7)", border:"1px solid #0E1E2E", borderRadius:"7px", padding:"16px", display:"flex", flexDirection:"column", gap:"10px", position:"relative" }}>
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}><div style={{ fontSize:"11px", color:"#1A4050", fontFamily:"Cinzel,serif", letterSpacing:"0.14em" }}>THE PALU SPEAKS</div><span style={{ fontSize:"16px", opacity:0.75 }}>🦜</span></div>
+              {selDir && selDir !== sc.correctDir && matalaScolded && matalaScoldDir === selDir && (
+                <>
+                  <div style={{
+                    background: "rgba(42,150,80,0.08)",
+                    border: "1px solid rgba(42,150,80,0.3)",
+                    borderRadius: "6px",
+                    padding: "10px 14px",
+                    display: "flex",
+                    gap: "10px",
+                    alignItems: "flex-start",
+                  }}>
+                    <span style={{ fontSize: "20px", flexShrink: 0 }}>🦜</span>
+                    <div>
+                      <div style={{ fontFamily: "Cinzel,serif", fontSize: "10px", color: "#2A9A70", letterSpacing: "0.1em", marginBottom: "4px" }}>MATALA</div>
+                      <div style={{ fontFamily: "Georgia,serif", fontSize: "13px", color: "#6AD898", fontStyle: "italic", lineHeight: "1.6" }}>
+                        {"SKRAWWK. I have been on this canoe for three days and I KNOW which way the swell is coming from. SKRAWWK."}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ fontFamily: "Georgia,serif", fontSize: "11px", color: "#5A8090", fontStyle: "italic", paddingLeft: "14px", borderLeft: "1px solid #1A3040" }}>
+                    — Palu: "She knows. Listen to her."
+                  </div>
+                </>
+              )}
               <div style={{ fontSize:"20px", color:"#D0A838", fontFamily:"Cinzel,serif", fontWeight:"700", lineHeight:"1.4" }}>{palu.title}</div>
               <div style={{ fontSize:"15px", color:"#7AACBE", fontFamily:"Georgia,serif", fontStyle:"italic", lineHeight:"1.75" }}>{palu.body}</div>
               {palu.hint && !niceWork && (
@@ -6995,6 +7058,8 @@ function App() {
   const [selStar,  setSelStar]  = useState(null);
   const [hovHouse, setHovHouse] = useState(null);
   const [hovStar,  setHovStar]  = useState(null);
+  const [matalaScolded, setMatalaScolded] = useState(false);
+  const [matalaScoldStarId, setMatalaScoldStarId] = useState(null);
   const [bagOpen,  setBagOpen]  = useState(false);
   const [unlocked, setUnlocked] = useState([]);
   const [bagIntroSeen, setBagIntroSeen] = useState(true);
@@ -7075,6 +7140,10 @@ function App() {
   const handleStarClick = s => {
     if (step !== 1 || keepGoing) return;
     setSelStar(s);
+    if (!s.correct && !matalaScolded) {
+      setMatalaScolded(true);
+      setMatalaScoldStarId(s.id);
+    }
     if (s.correct) {
       unlock("star_compass");
       setKeepGoing(true);
@@ -7283,6 +7352,30 @@ function App() {
                   )}
                   {step === 1 && selStar && !selStar.correct && (
                     <>
+                      {matalaScolded && matalaScoldStarId === selStar.id && (
+                        <>
+                          <div style={{
+                            background: "rgba(42,150,80,0.08)",
+                            border: "1px solid rgba(42,150,80,0.3)",
+                            borderRadius: "6px",
+                            padding: "10px 14px",
+                            display: "flex",
+                            gap: "10px",
+                            alignItems: "flex-start",
+                          }}>
+                            <span style={{ fontSize: "20px", flexShrink: 0 }}>🦜</span>
+                            <div>
+                              <div style={{ fontFamily: "Cinzel,serif", fontSize: "10px", color: "#2A9A70", letterSpacing: "0.1em", marginBottom: "4px" }}>MATALA</div>
+                              <div style={{ fontFamily: "Georgia,serif", fontSize: "13px", color: "#6AD898", fontStyle: "italic", lineHeight: "1.6" }}>
+                                {"SKRAWWK. That is not the right house. SKRAWWK."}
+                              </div>
+                            </div>
+                          </div>
+                          <div style={{ fontFamily: "Georgia,serif", fontSize: "11px", color: "#5A8090", fontStyle: "italic", paddingLeft: "14px", borderLeft: "1px solid #1A3040" }}>
+                            — Palu: "She is not wrong. Take another look."
+                          </div>
+                        </>
+                      )}
                       <div style={{ fontSize:"17px",color:"#D0A838",fontFamily:"Cinzel,serif",fontWeight:"700",lineHeight:"1.4" }}>{selStar.name}.</div>
                       <div style={{ fontSize:"14px",color:"#7AACBE",fontFamily:"Georgia,serif",fontStyle:"italic",lineHeight:"1.7" }}>{selStar.desc} We need the one that rises in Nāleo-Koʻolau.</div>
                     </>
