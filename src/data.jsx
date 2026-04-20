@@ -805,8 +805,7 @@ export const STORY_PAGES = (name) => [
     location: "Tongatapu, Tonga · beach at sunset",
     text: [
       `Hello, ${name}. My parrot Matala told me you volunteered as a navigation apprentice — she has an eye for promising young people, and recommended we speak.`,
-      `I heard you once made the crossing from Vava'u in a canoe. That was a passenger's voyage. From here on, I am going to teach you something different — the skills of a Wayfinder.`,
-      `I have been navigating these waters for fifty years. My knees are telling me it is time to pass that knowledge on. You have arrived at exactly the right moment.`,
+      `I have been navigating these waters for fifty years. My knees are filing formal complaints — so it is time I pass this knowledge on. The life of a Wayfinder is not easy, and neither am I… but stay close, do as I say, and you will rise to the challenge.`,
       `What I teach you comes from generations of Pacific navigators — Mau Piailug of Satawal, Nainoa Thompson of Hawaiʻi, and many before them whose names the ocean still carries. We honour that tradition by learning it with care.`,
     ],
   },
