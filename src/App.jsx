@@ -874,7 +874,6 @@ function TahitiArrivalScreen({ onReturn }) {
 ══════════════════════════════════════════════════════════════ */
 
 function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
-  void name;
   const [phase, setPhase] = useState("palu");
   const [lineIdx, setLineIdx] = useState(0);
   const [tikHov, setTikHov] = useState(false);
@@ -933,7 +932,7 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
   const taroItem = BAG_ITEMS.find(i => i.id === "taro_plant");
 
   return (
-    <div style={{ width:"100%", height:"100%", background:"#060A0C", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+    <div role="region" aria-label={`Marquesas arrival, ${name}, bag ${(unlocked || []).length} items`} style={{ width:"100%", height:"100%", background:"#060A0C", display:"flex", flexDirection:"column", overflow:"hidden" }}>
       <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:"rgba(6,10,12,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0 }}>
         <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
         <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
@@ -1147,6 +1146,255 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
             <div style={{ maxWidth:"480px", width:"90%", display:"flex", flexDirection:"column", gap:"20px", textAlign:"center" }}>
               <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:accent, letterSpacing:"0.2em", opacity:0.7 }}>PALU HEMI</div>
               <div style={{ fontFamily:"Georgia,serif", fontSize:"17px", color:"#A8C8C8", lineHeight:"1.8", fontStyle:"italic" }}>&quot;{b.bridgeLine}&quot;</div>
+              <button type="button" onClick={onReturn} style={{ padding:"14px 32px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", letterSpacing:"0.14em", border:`1px solid ${accent}`, background:`${accent}14`, color:accent, alignSelf:"center" }}>RETURN TO THE OCEAN →</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   FIJI BIRD MATE SCREEN (Module 5 bridge)
+══════════════════════════════════════════════════════════════ */
+
+function FijiBirdMateScreen({ name, unlocked, onReturn }) {
+  const [phase, setPhase] = useState("palu");
+  const [lineIdx, setLineIdx] = useState(0);
+  const [treeHov, setTreeHov] = useState(false);
+  const [greeterHov, setGreeterHov] = useState(false);
+  const [treeClicked, setTreeClicked] = useState(false);
+  const [storyVis, setStoryVis] = useState(false);
+  const [showFarewell, setShowFarewell] = useState(false);
+
+  const accent = "#00C896";
+  const b = BRIDGE_CONTENT[5];
+  const W = 760, H = 400;
+  const treeFocusX = 560, treeFocusY = 175;
+  const greeterX = 200, greeterY = 300;
+
+  const paluLinesFiji = [
+    "Fiji. The reef birds led us straight in — just as I said they would.",
+    "These people share deep roots with Tonga. Tonight there will be a feast.",
+    "And I think Matala has already noticed something in those trees.",
+  ];
+
+  const handlePaluClick = () => {
+    if (phase !== "palu") return;
+    if (lineIdx < paluLinesFiji.length - 1) setLineIdx(i => i + 1);
+    else setPhase("tree");
+  };
+
+  const handleTreeClick = () => {
+    if (phase !== "tree") return;
+    setTreeClicked(true);
+    setTimeout(() => setPhase("greeter"), 1400);
+  };
+
+  const handleGreeterClick = () => {
+    if (phase !== "greeter") return;
+    setPhase("exchange");
+  };
+
+  const handleLearnBirds = () => {
+    setPhase("matala");
+  };
+
+  const handleMatalaOk = () => {
+    setPhase("story");
+    setTimeout(() => setStoryVis(true), 200);
+  };
+
+  const handleOkAfterStory = () => {
+    setShowFarewell(true);
+  };
+
+  const canClickTree = phase === "tree";
+  const canClickGreeter = phase === "greeter";
+  const birdItem = BAG_ITEMS.find(i => i.id === "bird_guide");
+
+  return (
+    <div role="region" aria-label={`Fiji arrival, ${name}, ${unlocked?.length ?? 0} bag items`} style={{ width:"100%", height:"100%", background:"#060E08", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+      <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:"rgba(6,14,8,0.97)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", flexShrink:0 }}>
+        <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+        <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+          <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:`${accent}99`, letterSpacing:"0.18em" }}>ARRIVED · FIJI</div>
+          <button type="button" onClick={() => { analyticsEvents.feedbackOpened(); window.open(FEEDBACK_URL, "_blank", "noopener,noreferrer"); }} style={{ background:"none", border:"1px solid #0A2A3A", borderRadius:"5px", padding:"5px 10px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"9px", color:"#1A6070", letterSpacing:"0.08em" }}>✦ FEEDBACK</button>
+        </div>
+      </div>
+
+      <div style={{ flex:1, position:"relative", overflow:"hidden" }}>
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" style={{ width:"100%", height:"100%", display:"block" }}>
+          <defs>
+            <linearGradient id="fijiSky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#080C06"/>
+              <stop offset="70%" stopColor="#0C140A"/>
+              <stop offset="100%" stopColor="#0C1808"/>
+            </linearGradient>
+            <linearGradient id="fijiWater" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#0A2820"/><stop offset="100%" stopColor="#061810"/>
+            </linearGradient>
+          </defs>
+          <rect width={W} height={H} fill="url(#fijiSky)"/>
+          {[[88,32,1.1],[160,22,0.75],[240,38,0.9],[320,18,1],[400,28,0.85],[500,20,1.05],[620,36,0.7],[680,26,0.95]].map(([x,y,r],i)=>(
+            <circle key={i} cx={x} cy={y} r={r} fill="#D8E8C8" opacity="0.35"/>
+          ))}
+          <circle cx="620" cy="42" r="6" fill="#FFE8A0" opacity="0.95"/>
+          <text x="632" y="46" fill="#FFE8A0" fontSize="9" fontFamily="Cinzel,serif" opacity="0.85">Kōpō</text>
+
+          <path d="M320,120 Q420,60 560,95 Q650,75 780,110 L780,260 L320,260Z" fill="#0A1408" opacity="0.92"/>
+          <path d="M380,140 Q480,100 560,125 Q640,108 760,135 L760,280 L380,280Z" fill="#0C180A" opacity="0.88"/>
+          <ellipse cx="560" cy="200" rx="120" ry="70" fill="#081008" opacity="0.5"/>
+          <path d="M480,175 Q540,150 600,165 Q660,155 700,175" fill="none" stroke="#1A3018" strokeWidth="8" strokeLinecap="round"/>
+          <circle cx="572" cy="158" r="8" fill="#C83020"/>
+          <path d="M568,158 L578,152 L582,162Z" fill="#1A6020"/>
+          <circle cx="598" cy="162" r="7" fill="#C83020"/>
+          <path d="M594,162 L604,156 L608,166Z" fill="#1A6020"/>
+
+          {phase === "matala" && (
+            <g>
+              <ellipse cx="585" cy="162" rx="16" ry="11" fill="#2AB870"/>
+              <path d="M568,168 Q580,152 598,156 Q612,162 610,176 L602,180 Q588,176 572,178Z" fill="#2AB870" stroke="#1A6040" strokeWidth="1"/>
+              <text x="592" y="168" textAnchor="middle" fill="#C8941A" fontSize="10" fontFamily="serif">✦</text>
+            </g>
+          )}
+
+          <rect y="310" width={W} height="90" fill="url(#fijiWater)"/>
+          <path d="M0,310 Q190,295 380,305 Q570,315 760,302 L760,400 L0,400Z" fill="#0A2018" opacity="0.4"/>
+          <circle cx="120" cy="240" r="70" fill="#C8681A" opacity="0.07"/>
+
+          {(phase === "greeter" || phase === "exchange" || phase === "matala" || phase === "story") && (
+            <g>
+              <ellipse cx={greeterX} cy={greeterY+6} rx="28" ry="32" fill="#6A5038"/>
+              <path d={`M${greeterX-32},${greeterY-4} Q${greeterX},${greeterY-18} ${greeterX+32},${greeterY-4}`} fill="#4A3818" opacity="0.95"/>
+              <path d={`M${greeterX-32},${greeterY-2} Q${greeterX},${greeterY+8} ${greeterX+32},${greeterY-2}`} fill="#3A2810" opacity="0.6"/>
+              <circle cx={greeterX} cy={greeterY-34} r="22" fill="#7A6048"/>
+              <path d={`M${greeterX-24},${greeterY-52} Q${greeterX},${greeterY-62} ${greeterX+24},${greeterY-52}`} fill="#2A1810"/>
+              <ellipse cx={greeterX-8} cy={greeterY-36} rx="3" ry="3" fill="#1A0E06"/>
+              <ellipse cx={greeterX+8} cy={greeterY-36} rx="3" ry="3" fill="#1A0E06"/>
+              <path d={`M${greeterX-10},${greeterY-24} Q${greeterX},${greeterY-18} ${greeterX+10},${greeterY-24}`} stroke="#5A3010" strokeWidth="2" fill="none"/>
+              <path d={`M${greeterX-8},${greeterY-20} Q${greeterX},${greeterY-14} ${greeterX+8},${greeterY-20}`} stroke="#C8941A" strokeWidth="2.5" fill="none" opacity="0.85"/>
+              <path d={`M${greeterX-36},${greeterY+4} Q${greeterX-52},${greeterY-12} ${greeterX-44},${greeterY-28}`} stroke="#6A5038" strokeWidth="9" strokeLinecap="round"/>
+              <path d={`M${greeterX+36},${greeterY+4} Q${greeterX+52},${greeterY-12} ${greeterX+44},${greeterY-28}`} stroke="#6A5038" strokeWidth="9" strokeLinecap="round"/>
+              <path d={`M${greeterX-26},${greeterY-8} Q${greeterX-40},${greeterY-22} ${greeterX-34},${greeterY-32}`} stroke="#1A0A08" strokeWidth="1.5" opacity="0.65" fill="none"/>
+              <path d={`M${greeterX+26},${greeterY-8} Q${greeterX+40},${greeterY-22} ${greeterX+34},${greeterY-32}`} stroke="#1A0A08" strokeWidth="1.5" opacity="0.65" fill="none"/>
+              <rect x={greeterX-12} y={greeterY+34} width="10" height="22" rx="4" fill="#6A5038"/>
+              <rect x={greeterX+2} y={greeterY+34} width="10" height="22" rx="4" fill="#6A5038"/>
+              {canClickGreeter && (
+                <circle cx={greeterX} cy={greeterY-18} r={greeterHov?54:42} fill="none" stroke="#C8941A" strokeWidth="2" opacity={greeterHov?0.7:0.35}/>
+              )}
+            </g>
+          )}
+          {canClickGreeter && (
+            <rect x={greeterX-55} y={greeterY-62} width="110" height="130" fill="transparent" style={{ cursor:"pointer" }}
+              onMouseEnter={()=>setGreeterHov(true)} onMouseLeave={()=>setGreeterHov(false)} onClick={handleGreeterClick}/>
+          )}
+          {canClickGreeter && greeterHov && (
+            <g>
+              <rect x={greeterX-70} y={greeterY-88} width="140" height="20" rx="4" fill="#050A08" stroke={`${accent}44`}/>
+              <text x={greeterX} y={greeterY-74} textAnchor="middle" fill={accent} fontSize="9" fontFamily="Cinzel,serif">Ratu Seru</text>
+            </g>
+          )}
+
+          {canClickTree && (
+            <circle cx={treeFocusX} cy={treeFocusY} r={treeHov?68:52} fill="none" stroke="#C8941A" strokeWidth="2" opacity={treeHov?0.65:0.32} style={{ transition:"all 0.25s" }}/>
+          )}
+          {canClickTree && (
+            <rect x="460" y="95" width="200" height="160" fill="transparent" style={{ cursor:"pointer" }}
+              onMouseEnter={()=>setTreeHov(true)} onMouseLeave={()=>setTreeHov(false)} onClick={handleTreeClick}/>
+          )}
+          {canClickTree && treeHov && (
+            <g>
+              <rect x={treeFocusX-54} y={treeFocusY-108} width="108" height="18" rx="4" fill="#050A08" stroke={`${accent}44`}/>
+              <text x={treeFocusX} y={treeFocusY-94} textAnchor="middle" fill={accent} fontSize="9" fontFamily="Cinzel,serif">colorful birds</text>
+            </g>
+          )}
+
+          {treeClicked && (
+            <g>
+              <rect x={treeFocusX-120} y={treeFocusY-150} width="240" height="52" rx="8" fill="#050A08" stroke={`${accent}55`}/>
+              <path d={`M${treeFocusX-14},${treeFocusY-98} L${treeFocusX-4},${treeFocusY-86} L${treeFocusX+8},${treeFocusY-98}`} fill="#050A08" stroke={`${accent}55`}/>
+              <text x={treeFocusX} y={treeFocusY-128} textAnchor="middle" fill="#A8C8B8" fontSize="10.5" fontFamily="Georgia,serif" fontStyle="italic">Two collared lories. They nest on these reef islands.</text>
+              <text x={treeFocusX} y={treeFocusY-112} textAnchor="middle" fill="#A8C8B8" fontSize="10.5" fontFamily="Georgia,serif" fontStyle="italic">Beautiful birds — and very loud, apparently.</text>
+              <text x={treeFocusX} y={treeFocusY-96} textAnchor="middle" fill={accent} fontSize="8" fontFamily="Cinzel,serif">— PALU HEMI</text>
+            </g>
+          )}
+        </svg>
+
+        {phase === "palu" && (
+          <div onClick={handlePaluClick} style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,10,6,0.9)", borderTop:`1px solid ${accent}33`, padding:"18px 28px 14px", cursor:"pointer", userSelect:"none" }}>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8D0C0", lineHeight:"1.75", fontStyle:"italic", marginBottom:"8px" }}>{`"${paluLinesFiji[lineIdx]}"`}</div>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+              <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.08em" }}>— PALU HEMI</span>
+              <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+                <div style={{ display:"flex", gap:"6px" }}>
+                  {paluLinesFiji.map((_,i) => (
+                    <div key={i} style={{ width:i===lineIdx?14:7, height:7, borderRadius:4, background:i<=lineIdx?accent:"#0A2018", transition:"all 0.25s" }}/>
+                  ))}
+                </div>
+                <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, opacity:0.55, letterSpacing:"0.06em" }}>
+                  {lineIdx < paluLinesFiji.length - 1 ? "click to continue →" : "click the birds in the tree →"}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {phase === "exchange" && (
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,8,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"14px" }}>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.16em", opacity:0.75 }}>RATU SERU · FIJIAN NAVIGATOR</div>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8B0", lineHeight:"1.7", fontStyle:"italic" }}>
+              "The birds brought you here, as they have brought navigators for a thousand years. We have been watching your approach since dawn — the way you tracked the tern flight pattern. Let me share what we know of the bird roads south toward Tonga."
+            </div>
+            <button type="button" onClick={handleLearnBirds} style={{ alignSelf:"flex-start", padding:"13px 20px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.08em", border:`1px solid ${accent}`, background:`${accent}14`, color:accent }}>
+              Learn the bird roads →
+            </button>
+          </div>
+        )}
+
+        {phase === "matala" && (
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,8,0.94)", borderTop:`1px solid ${accent}33`, padding:"18px 28px 16px", display:"flex", flexDirection:"column", gap:"12px" }}>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8B0", lineHeight:"1.7", fontStyle:"italic" }}>&quot;She has been waiting a long time for this.&quot;</div>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#8AB0A0", lineHeight:"1.7", fontStyle:"italic" }}>&quot;I think we can say the mission is complete.&quot;</div>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.08em" }}>— PALU HEMI</div>
+            <button type="button" onClick={handleMatalaOk} style={{ alignSelf:"flex-start", padding:"12px 18px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}`, background:`${accent}12`, color:accent }}>OK →</button>
+          </div>
+        )}
+
+        {storyVis && phase === "story" && (
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,8,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px 20px", display:"flex", flexDirection:"column", gap:"16px" }}>
+            <div style={{ display:"flex", gap:"24px", alignItems:"flex-start", flexWrap:"wrap" }}>
+              <div style={{ flex:"1 1 280px", minWidth:0 }}>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"8px", opacity:0.7 }}>{`NAVIGATOR'S KNOWLEDGE`}</div>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"15px", fontWeight:"700", color:"#E8D8A8", marginBottom:"10px" }}>{b.storyTitle}</div>
+                <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#7AACBE", lineHeight:"1.8", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"14px" }}>{b.story}</div>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"8.5px", color:`${accent}55`, letterSpacing:"0.1em", marginTop:"8px" }}>— {b.storyCitation}</div>
+              </div>
+              <div style={{ width:"240px", flexShrink:0, display:"flex", flexDirection:"column", gap:"10px" }}>
+                <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", opacity:0.7 }}>IN YOUR BAG</div>
+                {birdItem && (
+                  <div style={{ display:"flex", alignItems:"flex-start", gap:"10px", padding:"11px 12px", background:`${birdItem.color}10`, border:`1px solid ${birdItem.color}33`, borderRadius:"8px" }}>
+                    <span style={{ fontSize:"22px" }}>{birdItem.icon}</span>
+                    <div>
+                      <div style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#D0C8A8" }}>{birdItem.name}</div>
+                      <div style={{ fontFamily:"Cinzel,serif", fontSize:"8px", color:`${birdItem.color}99`, marginTop:"2px" }}>{birdItem.hawaiian}</div>
+                    </div>
+                  </div>
+                )}
+                <div style={{ fontFamily:"Georgia,serif", fontSize:"12px", color:"#5A7080", lineHeight:"1.6", fontStyle:"italic" }}>{b.bagNote}</div>
+                <button type="button" onClick={handleOkAfterStory} style={{ padding:"11px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:`1px solid ${accent}`, background:`${accent}14`, color:accent }}>OK →</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showFarewell && (
+          <div style={{ position:"absolute", inset:0, background:"rgba(4,10,8,0.88)", backdropFilter:"blur(2px)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+            <div style={{ maxWidth:"480px", width:"90%", display:"flex", flexDirection:"column", gap:"20px", textAlign:"center" }}>
+              <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:accent, letterSpacing:"0.2em", opacity:0.7 }}>PALU HEMI</div>
+              <div style={{ fontFamily:"Georgia,serif", fontSize:"17px", color:"#A8C8B0", lineHeight:"1.8", fontStyle:"italic" }}>&quot;{b.bridgeLine}&quot;</div>
               <button type="button" onClick={onReturn} style={{ padding:"14px 32px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", letterSpacing:"0.14em", border:`1px solid ${accent}`, background:`${accent}14`, color:accent, alignSelf:"center" }}>RETURN TO THE OCEAN →</button>
             </div>
           </div>
