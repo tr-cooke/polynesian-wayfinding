@@ -1648,6 +1648,7 @@ function MapNavPopup({ onDismiss }) {
 
 function NavigatorsBag({ open, onClose, unlocked }) {
   const [activeItem, setActiveItem] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
   if (!open) return null;
   const item = activeItem ? BAG_ITEMS.find(b => b.id === activeItem) : null;
   const unlockedItems = BAG_ITEMS.filter(it => unlocked.includes(it.id));
@@ -1702,24 +1703,75 @@ function NavigatorsBag({ open, onClose, unlocked }) {
                   {unlockedItems.length} ITEM{unlockedItems.length !== 1 ? "S" : ""} COLLECTED
                 </div>
                 {unlockedItems.map(it => (
-                  <button key={it.id} type="button" aria-label={`Open ${it.name}`} onClick={() => setActiveItem(it.id)} style={{
-                    padding: "13px 15px", borderRadius: "7px",
-                    border: `1px solid ${it.color}44`,
-                    background: `${it.color}0C`,
-                    cursor: "pointer",
-                    display: "flex", alignItems: "center", gap: "13px",
-                    width: "100%",
-                    textAlign: "left",
-                  }}>
+                  <div
+                    key={it.id}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Toggle note for ${it.name}`}
+                    onClick={() => setExpandedId(prev => prev === it.id ? null : it.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") setExpandedId(prev => prev === it.id ? null : it.id);
+                    }}
+                    style={{
+                      padding: "13px 15px",
+                      borderRadius: "7px",
+                      border: `1px solid ${it.color}44`,
+                      background: `${it.color}0C`,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "13px",
+                      width: "100%",
+                      textAlign: "left",
+                      position: "relative",
+                      outline: "none",
+                      userSelect: "none",
+                    }}
+                  >
+                    <div style={{ position:"absolute", top:"9px", right:"10px", fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A4860", opacity:0.75, pointerEvents:"none" }}>
+                      {expandedId === it.id ? "↑" : "↓"}
+                    </div>
                     <div style={{ fontSize: "22px", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: `${it.color}18`, borderRadius: "6px", flexShrink: 0, filter: `drop-shadow(0 0 8px ${it.color}66)` }}>
                       {it.icon}
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontFamily: "Cinzel,serif", fontSize: "12px", fontWeight: "700", color: "#D0C8A8" }}>{it.name}</div>
                       <div style={{ fontFamily: "Cinzel,serif", fontSize: "9px", color: it.color, letterSpacing: "0.06em", marginTop: "2px" }}>{it.hawaiian}</div>
+                      {expandedId === it.id && it.paluNote && (
+                        <div style={{
+                          marginTop: "8px",
+                          paddingTop: "8px",
+                          borderTop: "1px solid rgba(255,255,255,0.06)",
+                          fontFamily: "Georgia,serif",
+                          fontSize: "12px",
+                          color: "#5A8090",
+                          fontStyle: "italic",
+                          lineHeight: "1.65",
+                        }}>
+                          "{it.paluNote}"
+                          <div style={{ fontFamily:"Cinzel,serif", fontSize:"8px", color:"#2A4050", letterSpacing:"0.08em", marginTop:"6px" }}>— PALU HEMI</div>
+                        </div>
+                      )}
                     </div>
-                    <div style={{ color: "#2A4860", fontSize: "14px" }}>›</div>
-                  </button>
+                    <button
+                      type="button"
+                      aria-label={`Open ${it.name}`}
+                      onClick={(e) => { e.stopPropagation(); setActiveItem(it.id); }}
+                      style={{
+                        background: "none",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        borderRadius: "6px",
+                        color: "#2A4860",
+                        fontSize: "14px",
+                        cursor: "pointer",
+                        padding: "4px 10px",
+                        marginLeft: "6px",
+                        flexShrink: 0,
+                      }}
+                    >
+                      ›
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
@@ -4148,6 +4200,24 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
               <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#7AACBE", lineHeight:"1.82", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"16px" }}>
                 {concept.body}
               </div>
+              {learnStep === 3 && MODULE_CONTENT[2].navigatorFact && (
+                <div style={{
+                  background: "rgba(200,148,26,0.06)",
+                  border: "1px solid rgba(200,148,26,0.18)",
+                  borderRadius: "7px",
+                  padding: "14px 16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}>
+                  <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#C8941A", letterSpacing:"0.16em", opacity:0.8 }}>
+                    NAVIGATOR'S FACT
+                  </div>
+                  <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#A8C8B0", fontStyle:"italic", lineHeight:"1.7" }}>
+                    {MODULE_CONTENT[2].navigatorFact}
+                  </div>
+                </div>
+              )}
               {/* Prev / Next / Set Sail */}
               <div style={{ display:"flex", gap:"8px", marginTop:"auto" }}>
                 {learnStep > 0 && (
@@ -5086,6 +5156,25 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
                   )}
                 </>
               )}
+
+              {learnStep === concepts.length - 1 && MODULE_CONTENT[3].navigatorFact && (
+                <div style={{
+                  background: "rgba(200,148,26,0.06)",
+                  border: "1px solid rgba(200,148,26,0.18)",
+                  borderRadius: "7px",
+                  padding: "14px 16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}>
+                  <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#C8941A", letterSpacing:"0.16em", opacity:0.8 }}>
+                    NAVIGATOR'S FACT
+                  </div>
+                  <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#A8C8B0", fontStyle:"italic", lineHeight:"1.7" }}>
+                    {MODULE_CONTENT[3].navigatorFact}
+                  </div>
+                </div>
+              )}
               {/* Prev / Next / Activity */}
               <div style={{ display:"flex", gap:"8px", marginTop:"auto" }}>
                 <button type="button" disabled={learnStep === 0} onClick={() => learnStep > 0 && setLearnStep(i => i - 1)} style={{ flex:1, padding:"11px", borderRadius:"6px", cursor:learnStep === 0 ? "default" : "pointer", fontFamily:"Cinzel,serif", fontSize:"10px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}33`, background:"none", color:`${accent}88`, opacity:learnStep === 0 ? 0.35 : 1 }}>← PREV</button>
@@ -5646,6 +5735,24 @@ function WindModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge })
               <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#7AACBE", lineHeight:"1.82", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"16px" }}>
                 {concept.body}
               </div>
+              {learnStep === concepts.length - 1 && MODULE_CONTENT[4].navigatorFact && (
+                <div style={{
+                  background: "rgba(200,148,26,0.06)",
+                  border: "1px solid rgba(200,148,26,0.18)",
+                  borderRadius: "7px",
+                  padding: "14px 16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}>
+                  <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#C8941A", letterSpacing:"0.16em", opacity:0.8 }}>
+                    NAVIGATOR'S FACT
+                  </div>
+                  <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#A8C8B0", fontStyle:"italic", lineHeight:"1.7" }}>
+                    {MODULE_CONTENT[4].navigatorFact}
+                  </div>
+                </div>
+              )}
               {/* Prev / Next / Activity */}
               <div style={{ display:"flex", gap:"8px", marginTop:"auto" }}>
                 {learnStep > 0 && (
@@ -6759,6 +6866,24 @@ function CloudsModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
               <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#7AACBE", lineHeight:"1.82", fontStyle:"italic", borderLeft:`2px solid ${accent}44`, paddingLeft:"16px" }}>
                 {concept.body}
               </div>
+              {learnStep === concepts.length - 1 && MODULE_CONTENT[6].navigatorFact && (
+                <div style={{
+                  background: "rgba(200,148,26,0.06)",
+                  border: "1px solid rgba(200,148,26,0.18)",
+                  borderRadius: "7px",
+                  padding: "14px 16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}>
+                  <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:"#C8941A", letterSpacing:"0.16em", opacity:0.8 }}>
+                    NAVIGATOR'S FACT
+                  </div>
+                  <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#A8C8B0", fontStyle:"italic", lineHeight:"1.7" }}>
+                    {MODULE_CONTENT[6].navigatorFact}
+                  </div>
+                </div>
+              )}
               {/* Prev / Next / Activity */}
               <div style={{ display:"flex", gap:"8px", marginTop:"auto" }}>
                 {learnStep > 0 && (
