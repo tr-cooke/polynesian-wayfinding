@@ -2997,10 +2997,27 @@ function VoyageMap7({ nodeIdx, wakaPos }) {
 
 function FinalVoyageModule({ name, onBack, onOpenBag, unlocked }) {
   const [nodeIdx,    setNodeIdx]   = useState(0);   // which node we're on (0-5)
-  const [phase,      setPhase]     = useState("sailing"); // sailing | question | hint | landfall | certificate
+  const [phase,      setPhase]     = useState("sailing"); // sailing | question | hint | landfall | replay | certificate | credits
   const [selAnswer,  setSelAnswer] = useState(null);
   const [wakaPos,    setWakaPos]   = useState(VOYAGE_WAYPOINTS[0]);
   const [animating,  setAnimating] = useState(false);
+  const [litCount, setLitCount] = useState(0);
+  const [showCertBtn, setShowCertBtn] = useState(false);
+
+  useEffect(() => {
+    if (phase !== "replay") return;
+    setLitCount(0);
+    setShowCertBtn(false);
+    const islands = ["tonga","samoa","tahiti","marquesas","hawaii","fiji","tonga-return","aotearoa"];
+    const timers = islands.map((_, i) =>
+      setTimeout(() => setLitCount(i + 1), 600 + i * 900)
+    );
+    const certTimer = setTimeout(
+      () => setShowCertBtn(true),
+      600 + islands.length * 900 + 800
+    );
+    return () => { timers.forEach(clearTimeout); clearTimeout(certTimer); };
+  }, [phase]);
 
   const node = VOYAGE_NODES[nodeIdx];
   const completedAll = nodeIdx >= VOYAGE_NODES.length;
@@ -3081,7 +3098,7 @@ function FinalVoyageModule({ name, onBack, onOpenBag, unlocked }) {
               </div>
             ))}
           </div>
-          <button onClick={() => setPhase("certificate")} style={{
+          <button onClick={() => setPhase("replay")} style={{
             alignSelf:"flex-start", padding:"13px 32px", borderRadius:"6px", cursor:"pointer",
             fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.14em",
             border:"1px solid #2AB870", background:"rgba(42,184,112,0.12)", color:"#2AB870",
@@ -3092,6 +3109,114 @@ function FinalVoyageModule({ name, onBack, onOpenBag, unlocked }) {
       </div>
     </div>
   );
+
+  if (phase === "replay") {
+    // Island sequence in voyage order with coordinates (matching VoyageMap roughly)
+    const replayIslands = [
+      { id:"tonga",     label:"Tonga",     x:210, y:310, color:"#C8941A" },
+      { id:"samoa",     label:"Sāmoa",     x:245, y:200, color:"#C8941A" },
+      { id:"tahiti",    label:"Tahiti",    x:450, y:310, color:"#D06030" },
+      { id:"marquesas", label:"Marquesas", x:530, y:175, color:"#2A90A8" },
+      { id:"hawaii",    label:"Hawaiʻi",   x:380, y:55,  color:"#4A70C0" },
+      { id:"fiji",      label:"Fiji",      x:130, y:248, color:"#00C896" },
+      { id:"tonga2",    label:"Tonga",     x:210, y:310, color:"#7A9EC8" },
+      { id:"aotearoa",  label:"Aotearoa",  x:300, y:470, color:"#2AB870" },
+    ];
+    // Roads in order
+    const replayRoads = [
+      {from:0,to:1},{from:1,to:2},{from:2,to:3},{from:3,to:4},{from:4,to:5},{from:5,to:6},{from:6,to:7}
+    ];
+
+    return (
+      <div style={{ width:"100%", height:"100%", background:"#04080E", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+        <div style={{ height:"44px", borderBottom:"1px solid #C8941A22", background:"rgba(4,8,18,0.97)", display:"flex", alignItems:"center", padding:"0 28px", flexShrink:0 }}>
+          <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
+        </div>
+        <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"24px", padding:"32px" }}>
+
+          {/* Title */}
+          <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:"#C8941A", letterSpacing:"0.3em", opacity:0.7 }}>THE VOYAGE</div>
+
+          {/* Animated map */}
+          <svg viewBox="0 0 680 530" style={{ width:"min(100%,560px)", flex:1, maxHeight:"360px" }}>
+            {/* Ocean background */}
+            <rect width="680" height="530" fill="#030810" rx="8"/>
+
+            {/* Roads — light up when both endpoints are lit */}
+            {replayRoads.map((r, i) => {
+              const from = replayIslands[r.from];
+              const to   = replayIslands[r.to];
+              const isLit = litCount > r.to; // road lights up when destination island lights
+              return (
+                <line key={i}
+                  x1={from.x} y1={from.y} x2={to.x} y2={to.y}
+                  stroke={isLit ? "#C8941A" : "#0A1828"}
+                  strokeWidth={isLit ? 1.5 : 0.5}
+                  strokeDasharray={isLit ? "none" : "4,8"}
+                  opacity={isLit ? 0.7 : 0.3}
+                  style={{ transition:"all 0.8s ease" }}
+                />
+              );
+            })}
+
+            {/* Island dots */}
+            {replayIslands.map((isl, i) => {
+              const isLit = litCount > i;
+              const isPulse = litCount === i + 1; // currently lighting
+              return (
+                <g key={isl.id}>
+                  {isPulse && <circle cx={isl.x} cy={isl.y} r="22" fill={isl.color} opacity="0.15"/>}
+                  <circle cx={isl.x} cy={isl.y} r={isLit ? 8 : 4}
+                    fill={isLit ? isl.color : "#0A1828"}
+                    stroke={isLit ? isl.color : "#1A2840"}
+                    strokeWidth="1.5"
+                    style={{ transition:"all 0.5s ease" }}
+                  />
+                  {isLit && (
+                    <text x={isl.x} y={isl.y - 14} textAnchor="middle"
+                      fill={isl.color} fontSize="10" fontFamily="Cinzel,serif"
+                      opacity={0.9}>
+                      {isl.label}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Skill tags appearing as each island lights */}
+          <div style={{ display:"flex", gap:"8px", flexWrap:"wrap", justifyContent:"center" }}>
+            {[
+              { skill:"✦ Star Compass",  mod:1 },
+              { skill:"☀ Zenith Stars",  mod:2 },
+              { skill:"〰 Ocean Swells", mod:3 },
+              { skill:"≋ Wind",          mod:4 },
+              { skill:"🐦 Birds",        mod:5 },
+              { skill:"☁ Clouds",        mod:6 },
+            ].map((s, i) => (
+              <div key={s.skill} style={{
+                padding:"4px 12px", borderRadius:"20px",
+                fontFamily:"Cinzel,serif", fontSize:"9px", letterSpacing:"0.08em",
+                border:`1px solid ${litCount > i + 1 ? "#C8941A55" : "#0A1828"}`,
+                color: litCount > i + 1 ? "#C8941A" : "#1A2840",
+                background: litCount > i + 1 ? "rgba(200,148,26,0.08)" : "none",
+                transition:"all 0.6s ease",
+              }}>{s.skill}</div>
+            ))}
+          </div>
+
+          {/* Certificate button — appears after all islands lit */}
+          {showCertBtn && (
+            <button onClick={() => setPhase("certificate")}
+              style={{ padding:"14px 36px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", letterSpacing:"0.14em", border:"1px solid #C8941A", background:"rgba(200,148,26,0.14)", color:"#C8941A" }}>
+              RECEIVE YOUR CERTIFICATE →
+            </button>
+          )}
+
+        </div>
+      </div>
+    );
+  }
 
   // Certificate screen
   if (phase === "certificate") {
