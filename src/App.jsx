@@ -299,6 +299,16 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
   const [storyVis,    setStoryVis]   = useState(false);
   const [showFarewell,setShowFarewell]=useState(false);
 
+  const SPEAKER = {
+    palu:      "palu",
+    palm:      "palu",
+    greeter:   null,
+    dialogue:  "tautai",
+    shared:    "tautai",
+    declined:  null,
+    farewell:  "palu",
+  };
+
   const accent = "#C8941A";
   const b = BRIDGE_CONTENT[1];
   const samoanStarMap = BAG_ITEMS.find(i => i.id === "samoan_star_map");
@@ -693,6 +703,13 @@ function TahitiArrivalScreen({ onReturn }) {
   const [lineIdx,   setLineIdx]   = useState(0);
   const [storyVis,  setStoryVis]  = useState(false);
   const [returnVis, setReturnVis] = useState(false);
+
+  const SPEAKER = {
+    canoe:     "palu",
+    beach:     "palu",
+    dialogue:  "hina_i_te_aparangi",
+    farewell:  "palu",
+  };
 
   const accent = "#D06030";
   const b = BRIDGE_CONTENT[2];

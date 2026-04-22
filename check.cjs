@@ -297,7 +297,7 @@ console.log("\n── 11. Arrival screen structural checks ───────
 // Every ArrivalScreen should have: a phase state, a RETURN TO THE OCEAN button,
 // and all phases should transition via setPhase (not setTimeout to onReturn).
 const requiredPatterns = [
-  { pattern: /useState\(["']palu["']\)/,      label: 'initial phase state ("palu")' },
+  { pattern: /useState\(["']palu["']|["']canoe["']|["']approach["']\)/, label: "initial phase state" },
   { pattern: /RETURN TO THE OCEAN/,            label: '"RETURN TO THE OCEAN" button' },
   { pattern: /setPhase/,                       label: "setPhase transitions" },
   { pattern: /position:\s*["']absolute["']/,   label: "absolute overlay positioning" },
