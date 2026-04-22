@@ -217,7 +217,100 @@ const ESBUILD = "./node_modules/.bin/esbuild";
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Summary
+// 8. Long SVG text elements
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("\n── 8. Long SVG text elements ─────────────────────────────────");
+
+// SVG <text> doesn't wrap — anything over ~30 chars will truncate or overflow.
+// These should be foreignObject or moved to HTML overlays.
+const svgTextMatches = [...APP.matchAll(/<text\b[^>]*>([^<]{31,})<\/text>/g)];
+const longSvgTexts = svgTextMatches.filter(m => {
+  const content = m[1].trim();
+  // Allow template expressions and short dynamic values
+  return !content.startsWith("{") && content.length > 30;
+});
+if (longSvgTexts.length > 0) {
+  longSvgTexts.forEach(m => {
+    const preview = m[1].trim().slice(0, 60);
+    warn(`SVG <text> longer than 30 chars (will truncate): "${preview}..."`);
+  });
+} else {
+  ok("No overlong SVG text elements found");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 9. Arrival screens missing SPEAKER pattern
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("\n── 9. Arrival screen SPEAKER pattern ─────────────────────────");
+
+// Every *ArrivalScreen component should define a SPEAKER map to enforce
+// one-speaker-at-a-time. Warn if a new arrival screen is missing it.
+const arrivalScreens = [...APP.matchAll(/function (\w*ArrivalScreen)\b/g)].map(m => m[1]);
+arrivalScreens.forEach(name => {
+  const fnStart = APP.indexOf(`function ${name}`);
+  const fnEnd   = APP.indexOf("\nfunction ", fnStart + 100);
+  const block   = APP.slice(fnStart, fnEnd > 0 ? fnEnd : fnStart + 8000);
+  if (!block.includes("SPEAKER")) {
+    warn(`${name} has no SPEAKER constant — multiple speakers may show at once`);
+  } else {
+    ok(`${name} has SPEAKER pattern`);
+  }
+});
+if (arrivalScreens.length === 0) ok("No ArrivalScreen components found to check");
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 10. Overlapping z-index in arrival screens
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("\n── 10. Z-index layering in arrival screens ────────────────────");
+
+// Overlays in arrival screens must follow the z-index contract:
+// bottom bar=10, dialogue=20, story=30, farewell=40
+// Warn on any position:absolute inside an ArrivalScreen that has no zIndex.
+const absPositions = [...APP.matchAll(/position:\s*["']absolute["'][^}]{0,300}/g)];
+let missingZ = 0;
+absPositions.forEach(m => {
+  const snippet = m[0];
+  // Only flag if it looks like a panel overlay (has bottom:0 or inset:0)
+  const isOverlay = /bottom:\s*["']?0|inset:\s*["']?0/.test(snippet);
+  const hasZ      = /zIndex/.test(snippet);
+  if (isOverlay && !hasZ) {
+    missingZ++;
+    const preview = snippet.slice(0, 80).replace(/\n/g, " ");
+    warn(`position:absolute overlay missing zIndex — ${preview}...`);
+  }
+});
+if (missingZ === 0) ok("All absolute overlays have zIndex set");
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 11. Arrival screen FijiBirdMateScreen pattern check
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("\n── 11. Arrival screen structural checks ───────────────────────");
+
+// Every ArrivalScreen should have: a phase state, a RETURN TO THE OCEAN button,
+// and all phases should transition via setPhase (not setTimeout to onReturn).
+const requiredPatterns = [
+  { pattern: /useState\(["']palu["']\)/,      label: 'initial phase state ("palu")' },
+  { pattern: /RETURN TO THE OCEAN/,            label: '"RETURN TO THE OCEAN" button' },
+  { pattern: /setPhase/,                       label: "setPhase transitions" },
+  { pattern: /position:\s*["']absolute["']/,   label: "absolute overlay positioning" },
+];
+
+arrivalScreens.forEach(name => {
+  const fnStart = APP.indexOf(`function ${name}`);
+  const fnEnd   = APP.indexOf("\nfunction ", fnStart + 100);
+  const block   = APP.slice(fnStart, fnEnd > 0 ? fnEnd : fnStart + 12000);
+  requiredPatterns.forEach(({ pattern, label }) => {
+    if (!pattern.test(block)) {
+      warn(`${name} missing ${label}`);
+    }
+  });
+  ok(`${name} checked`);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Summary — checks: hooks, BRIDGE_CONTENT, MODULE_CONTENT, BridgeScreen refs,
+//   BAG_ITEMS ids, toUpperCase safety, JSX parse, SVG text length,
+//   SPEAKER pattern, z-index layering, arrival screen structure
 // ─────────────────────────────────────────────────────────────────────────────
 console.log("\n══════════════════════════════════════════════════════════════");
 if (errors === 0 && warnings === 0) {
