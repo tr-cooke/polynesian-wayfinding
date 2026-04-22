@@ -607,7 +607,7 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
 
         {/* ── DIALOGUE PANEL — greeter clicked ── */}
         {phase === "dialogue" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,6,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"16px", zIndex: 20 }}>
+          <div style={{ position:"absolute", zIndex: 20, bottom:0, left:0, right:0, background:"rgba(4,12,6,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"16px" }}>
             <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.18em", opacity:0.7 }}>TAUTAI FALEOLO · SAMOAN WAYFINDER</div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#A8C8A0", lineHeight:"1.7", fontStyle:"italic" }}>
               "Visitors from Tonga! We heard the stories of your crossing — three nights on the open ocean. You carry the star compass in your mind now. What have you brought us from the islands?"
@@ -628,7 +628,7 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
 
         {/* ── STORY PANEL — after exchange ── */}
         {storyVis && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,6,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px 20px", display:"flex", flexDirection:"column", gap:"16px", zIndex: 30 }}>
+          <div style={{ position:"absolute", zIndex: 30, bottom:0, left:0, right:0, background:"rgba(4,12,6,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px 20px", display:"flex", flexDirection:"column", gap:"16px" }}>
             <div style={{ display:"flex", gap:"28px", alignItems:"flex-start" }}>
               {/* Story */}
               <div style={{ flex:1 }}>
@@ -671,7 +671,7 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
 
         {/* ── DECLINED OK BUTTON ── */}
         {phase === "declined" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,6,0.97)", borderTop:`1px solid ${accent}22`, padding:"20px 28px", display:"flex", justifyContent:"flex-end", zIndex: 20 }}>
+          <div style={{ position:"absolute", zIndex: 20, bottom:0, left:0, right:0, background:"rgba(4,12,6,0.97)", borderTop:`1px solid ${accent}22`, padding:"20px 28px", display:"flex", justifyContent:"flex-end" }}>
             <button onClick={handleDeclinedOk} style={{ padding:"12px 24px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #2A4830", background:"none", color:"#5A8060" }}>
               OK →
             </button>
@@ -830,7 +830,7 @@ function TahitiArrivalScreen({ onReturn }) {
 
         {/* Dialogue panel */}
         {phase === "dialogue" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(8,4,2,0.96)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"16px", zIndex: 20 }}>
+          <div style={{ position:"absolute", zIndex: 20, bottom:0, left:0, right:0, background:"rgba(8,4,2,0.96)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"16px" }}>
             <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.18em", opacity:0.7 }}>HINA-I-TE-APARANGI · TAHITIAN WAYFINDER</div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#C8A888", lineHeight:"1.78", fontStyle:"italic" }}>
               "You sailed by the sun and found our latitude. Tū-te-rangi-ātea would have been pleased. He always said the sun and the stars speak the same language — we need only learn to listen to both."
@@ -1175,7 +1175,7 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
         )}
 
         {storyVis && phase === "story" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,14,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px 20px", display:"flex", flexDirection:"column", gap:"16px", zIndex: 30 }}>
+          <div style={{ position:"absolute", zIndex: 30, bottom:0, left:0, right:0, background:"rgba(4,12,14,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px 20px", display:"flex", flexDirection:"column", gap:"16px" }}>
             <div style={{ display:"flex", gap:"24px", alignItems:"flex-start", flexWrap:"wrap" }}>
               <div style={{ flex:"1 1 280px", minWidth:0 }}>
                 <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"8px", opacity:0.7 }}>{`NAVIGATOR'S KNOWLEDGE`}</div>
@@ -1421,7 +1421,7 @@ function FijiBirdMateScreen({ name, unlocked, onReturn }) {
         )}
 
         {phase === "exchange" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,8,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"14px", zIndex: 20 }}>
+          <div style={{ position:"absolute", zIndex: 20, bottom:0, left:0, right:0, background:"rgba(4,12,8,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"14px" }}>
             <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.16em", opacity:0.75 }}>RATU SERU · FIJIAN NAVIGATOR</div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8B0", lineHeight:"1.7", fontStyle:"italic" }}>
               "The birds brought you here, as they have brought navigators for a thousand years. We have been watching your approach since dawn — the way you tracked the tern flight pattern. Let me share what we know of the bird roads south toward Tonga."
@@ -1442,7 +1442,7 @@ function FijiBirdMateScreen({ name, unlocked, onReturn }) {
         )}
 
         {storyVis && phase === "story" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,8,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px 20px", display:"flex", flexDirection:"column", gap:"16px", zIndex: 30 }}>
+          <div style={{ position:"absolute", zIndex: 30, bottom:0, left:0, right:0, background:"rgba(4,12,8,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px 20px", display:"flex", flexDirection:"column", gap:"16px" }}>
             <div style={{ display:"flex", gap:"24px", alignItems:"flex-start", flexWrap:"wrap" }}>
               <div style={{ flex:"1 1 280px", minWidth:0 }}>
                 <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"8px", opacity:0.7 }}>{`NAVIGATOR'S KNOWLEDGE`}</div>
