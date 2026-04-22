@@ -271,7 +271,15 @@ let missingZ = 0;
 absPositions.forEach(m => {
   const snippet = m[0];
   // Only flag if it looks like a panel overlay (has bottom:0 or inset:0)
-  const isOverlay = /bottom:\s*["']?0|inset:\s*["']?0/.test(snippet);
+  const isOverlay = (
+    /bottom:\s*["']?0|inset:\s*["']?0/.test(snippet) &&
+    !/pointerEvents:\s*["']none["']/.test(snippet) &&
+    (
+      /cursor:\s*["']pointer["']/.test(snippet) ||
+      /background:\s*"rgba\([^)]+\.(9[5-9]|[1-9][0-9][0-9])\)/.test(snippet) ||
+      /backdropFilter/.test(snippet)
+    )
+  );
   const hasZ      = /zIndex/.test(snippet);
   if (isOverlay && !hasZ) {
     missingZ++;
