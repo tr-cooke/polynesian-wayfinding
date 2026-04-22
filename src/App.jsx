@@ -309,7 +309,7 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
     farewell:  "palu",
   };
 
-  const accent = "#C8941A";
+  const accent = "#2AB870";
   const b = BRIDGE_CONTENT[1];
   const samoanStarMap = BAG_ITEMS.find(i => i.id === "samoan_star_map");
 
@@ -550,7 +550,6 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
                 fill="#05100A" stroke="#C8941A77" strokeWidth="1.5"/>
               <path d={`M${greeterX-10},${greeterY-62} L${greeterX},${greeterY-50} L${greeterX+10},${greeterY-62}`}
                 fill="#05100A" stroke="#C8941A77" strokeWidth="1.5"/>
-              <text x={greeterX} y={greeterY-128} textAnchor="middle" fill="#C8941A" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.1em">TAUTAI FALEOLO</text>
               <foreignObject x={greeterX - 132} y={greeterY - 168} width={264} height={100}>
                 <div xmlns="http://www.w3.org/1999/xhtml" style={{
                   fontFamily:"Georgia,serif", fontSize:"11px", color:"#A8C8A0",
@@ -574,7 +573,6 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
                 fill="#05100A" stroke="#C8941A33" strokeWidth="1.2"/>
               <text x={greeterX} y={greeterY-108} textAnchor="middle" fill="#A8C8A0" fontSize="11" fontFamily="Georgia,serif" fontStyle="italic">"Come back when you are ready.</text>
               <text x={greeterX} y={greeterY-92} textAnchor="middle" fill="#A8C8A0" fontSize="11" fontFamily="Georgia,serif" fontStyle="italic">We will be here."</text>
-              <text x={greeterX} y={greeterY-72} textAnchor="middle" fill="#C8941A" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.06em">TAUTAI FALEOLO</text>
             </g>
           )}
 
@@ -608,9 +606,11 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
         {/* ── DIALOGUE PANEL — greeter clicked ── */}
         {phase === "dialogue" && (
           <div style={{ position:"absolute", zIndex: 20, bottom:0, left:0, right:0, background:"rgba(4,12,6,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"16px" }}>
-            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.18em", opacity:0.7 }}>TAUTAI FALEOLO · SAMOAN WAYFINDER</div>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:accent, letterSpacing:"0.2em", borderLeft:`3px solid ${accent}`, paddingLeft:"10px", fontWeight:"700" }}>
+              TAUTAI FALEOLO · SAMOAN WAYFINDER
+            </div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#A8C8A0", lineHeight:"1.7", fontStyle:"italic" }}>
-              "Visitors from Tonga! We heard the stories of your crossing — three nights on the open ocean. You carry the star compass in your mind now. What have you brought us from the islands?"
+              "Visitors from Tonga! What have you brought us from the islands?"
             </div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#8AA898", lineHeight:"1.65", fontStyle:"italic", borderLeft:`2px solid ${accent}33`, paddingLeft:"12px" }}>
               Palu leans toward you quietly: "If they offer anything — a star map, a word of advice — write it down. The spoken knowledge is worth more than the map itself."
