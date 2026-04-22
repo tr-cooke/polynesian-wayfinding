@@ -1646,6 +1646,128 @@ function MapNavPopup({ onDismiss }) {
 }
 
 
+function ItemCard({ itemId, onConfirm }) {
+  const item = BAG_ITEMS.find(i => i.id === itemId);
+  if (!item) return null;
+
+  // Context line — explains why this item is appearing now
+  const context = {
+    sweet_potato_seeds: "The king of Tonga has entrusted you with these seeds. They are your mission.",
+    star_compass:       "You found the star. You held the heading. The compass now lives in your mind.",
+    samoan_star_map:    "Tautai Faleolo presses the star map into your hands.",
+    wayfarers_notebook: "A notebook to carry what you learn. The ocean does not repeat itself.",
+    sun_arc:            "The sun has spoken. You know Tahiti's latitude without a single instrument.",
+    wave_reader:        "Three days on the open ocean. You read the swell — Palu barely had to say a word.",
+    taro_plant:         "Hina of Nuku Hiva places the cutting carefully in your hands. Water it each day.",
+    wind_reader:        "The doldrums tried to stop you. The wind could not hide from you.",
+    bird_guide:         "Ratu Seru shares the bird roads freely. This knowledge has guided navigators for a thousand years.",
+    cloud_reader:       "Sky, sea, cloud, debris. You have learned every sign the ocean gives.",
+  }[itemId] || "A new item joins your bag.";
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 300,
+      background: "rgba(2,4,10,0.88)",
+      backdropFilter: "blur(4px)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "24px",
+    }}>
+      <div style={{
+        maxWidth: "420px", width: "100%",
+        background: "rgba(6,12,22,0.98)",
+        border: `1px solid ${item.color}55`,
+        borderRadius: "14px",
+        padding: "36px 32px",
+        display: "flex", flexDirection: "column", alignItems: "center",
+        gap: "20px", textAlign: "center",
+        boxShadow: `0 0 80px ${item.color}18`,
+      }}>
+
+        {/* Glow ring + icon */}
+        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{
+            width: "80px", height: "80px", borderRadius: "50%",
+            background: `${item.color}12`,
+            border: `1px solid ${item.color}33`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "36px",
+          }}>
+            {item.icon}
+          </div>
+        </div>
+
+        {/* Tag */}
+        <div style={{ fontFamily: "Cinzel,serif", fontSize: "9px", color: item.color, letterSpacing: "0.28em", opacity: 0.7 }}>
+          ADDED TO YOUR BAG
+        </div>
+
+        {/* Item name */}
+        <div style={{ fontFamily: "Cinzel,serif", fontSize: "26px", fontWeight: "900", color: "#E8D8A8", lineHeight: "1.1" }}>
+          {item.name}
+        </div>
+
+        {/* Hawaiian name */}
+        <div style={{ fontFamily: "Cinzel,serif", fontSize: "11px", color: `${item.color}99`, letterSpacing: "0.1em" }}>
+          {item.hawaiian}
+        </div>
+
+        {/* Divider */}
+        <div style={{ width: "40px", height: "1px", background: `linear-gradient(to right, transparent, ${item.color}66, transparent)` }}/>
+
+        {/* Context — Palu's voice */}
+        <div style={{ fontFamily: "Georgia,serif", fontSize: "15px", color: "#8ABCB0", fontStyle: "italic", lineHeight: "1.75" }}>
+          "{context}"
+        </div>
+
+        {/* First content entry as a small note */}
+        {item.content && item.content[0] && (
+          <div style={{
+            background: `${item.color}08`,
+            border: `1px solid ${item.color}22`,
+            borderRadius: "8px",
+            padding: "12px 16px",
+            display: "flex", flexDirection: "column", gap: "4px",
+          }}>
+            <div style={{ fontFamily: "Cinzel,serif", fontSize: "9px", color: item.color, letterSpacing: "0.12em", opacity: 0.8 }}>
+              {item.content[0].label.toUpperCase()}
+            </div>
+            <div style={{ fontFamily: "Georgia,serif", fontSize: "13px", color: "#6A9898", fontStyle: "italic", lineHeight: "1.65" }}>
+              {item.content[0].body}
+            </div>
+          </div>
+        )}
+
+        {/* Palu note (if paluNote field exists) */}
+        {item.paluNote && (
+          <div style={{ fontFamily: "Georgia,serif", fontSize: "12px", color: "#3A6050", fontStyle: "italic", lineHeight: "1.6" }}>
+            Palu's note: "{item.paluNote}"
+          </div>
+        )}
+
+        {/* Confirm button */}
+        <button onClick={onConfirm} style={{
+          width: "100%",
+          padding: "14px",
+          borderRadius: "8px",
+          cursor: "pointer",
+          fontFamily: "Cinzel,serif",
+          fontSize: "12px",
+          fontWeight: "700",
+          letterSpacing: "0.14em",
+          border: `1px solid ${item.color}`,
+          background: `${item.color}18`,
+          color: item.color,
+          marginTop: "4px",
+        }}>
+          ADD TO MY BAG →
+        </button>
+
+      </div>
+    </div>
+  );
+}
+
+
 function NavigatorsBag({ open, onClose, unlocked }) {
   const [activeItem, setActiveItem] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
@@ -7214,7 +7336,7 @@ function PaluPortrait() {
   );
 }
 
-function StoryCard({ name, onComplete }) {
+function StoryCard({ name, onComplete, onUnlockItem = () => {} }) {
   const [pageIdx,  setPageIdx]  = useState(0);
   const [revealed, setRevealed] = useState(0);
   const [choice,   setChoice]   = useState(null);
@@ -7235,6 +7357,7 @@ function StoryCard({ name, onComplete }) {
   const handleNext = () => {
     if (!allRevealed) { setRevealed(page.text.length); return; }
     if (isLast) return;
+    if (pageIdx === 1 && onUnlockItem) onUnlockItem("sweet_potato_seeds");
     setRevealed(0);
     setPageIdx(p => p + 1);
     setChoice(null);
@@ -7432,6 +7555,7 @@ function App() {
   const [matalaScoldStarId, setMatalaScoldStarId] = useState(null);
   const [bagOpen,  setBagOpen]  = useState(false);
   const [unlocked, setUnlocked] = useState([]);
+  const [pendingItem, setPendingItem] = useState(null); // itemId string | null
   const [bagIntroSeen, setBagIntroSeen] = useState(true);
   const [mapNavSeen,   setMapNavSeen]   = useState(true);
 
@@ -7447,12 +7571,39 @@ function App() {
     else setScreen("welcome");
   }, []);
 
-  const unlock = itemId => {
+  const addToBag = itemId => {
     setUnlocked(prev => {
       if (prev.includes(itemId)) return prev;
       const next = [...prev, itemId];
       localStorage.setItem("pvs_bag", JSON.stringify(next));
       // Fire module_completed when the primary tool for each module is unlocked
+      const moduleCompletionMap = {
+        star_compass: 1, sun_arc: 2, wave_reader: 3,
+        wind_reader: 4, bird_guide: 5, cloud_reader: 6,
+      };
+      if (moduleCompletionMap[itemId]) {
+        analyticsEvents.moduleCompleted(moduleCompletionMap[itemId]);
+      }
+      return next;
+    });
+  };
+
+  const unlock = itemId => {
+    setUnlocked(prev => {
+      if (prev.includes(itemId)) return prev; // already owned, no card
+      setPendingItem(itemId);
+      return prev; // don't add to bag yet
+    });
+  };
+
+  const confirmItem = () => {
+    if (!pendingItem) return;
+    const itemId = pendingItem;
+    setPendingItem(null);
+    setUnlocked(prev => {
+      if (prev.includes(itemId)) return prev;
+      const next = [...prev, itemId];
+      localStorage.setItem("pvs_bag", JSON.stringify(next));
       const moduleCompletionMap = {
         star_compass: 1, sun_arc: 2, wave_reader: 3,
         wind_reader: 4, bird_guide: 5, cloud_reader: 6,
@@ -7471,8 +7622,6 @@ function App() {
     localStorage.setItem("pvs_haumana", n);
     setName(n);
     analyticsEvents.voyageStarted(n);
-    const savedBag = JSON.parse(localStorage.getItem("pvs_bag") || "[]");
-    if (!savedBag.includes("sweet_potato_seeds")) unlock("sweet_potato_seeds");
     setScreen("story");
   };
 
@@ -7560,7 +7709,15 @@ function App() {
     <CreditsScreen onBack={() => setScreen("map")} />
     </>
   );
-  if (screen === "story") return <><style>{css}</style><StoryCard name={name} onComplete={() => setScreen("map")} /></>;
+  if (screen === "story") return (
+    <>
+      <style>{css}</style>
+      <StoryCard name={name} onComplete={() => setScreen("map")} onUnlockItem={unlock} />
+      {pendingItem && (
+        <ItemCard itemId={pendingItem} onConfirm={confirmItem} />
+      )}
+    </>
+  );
 
   const bgStars = Array.from({ length: 55 }, (_, i) => ({ x:((i*113+37)%97)/97*100, y:((i*79+23)%89)/89*100, r:i%5===0?1.1:0.55, op:0.10+(i%5)*0.06 }));
 
@@ -8040,6 +8197,9 @@ function App() {
           onOpenBag={() => setBagOpen(true)}
           unlocked={unlocked}
         />
+      )}
+      {pendingItem && (
+        <ItemCard itemId={pendingItem} onConfirm={confirmItem} />
       )}
     </>
   );
