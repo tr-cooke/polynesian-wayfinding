@@ -551,10 +551,16 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
               <path d={`M${greeterX-10},${greeterY-62} L${greeterX},${greeterY-50} L${greeterX+10},${greeterY-62}`}
                 fill="#05100A" stroke="#C8941A77" strokeWidth="1.5"/>
               <text x={greeterX} y={greeterY-128} textAnchor="middle" fill="#C8941A" fontSize="9" fontFamily="Cinzel,serif" letterSpacing="0.1em">TAUTAI FALEOLO</text>
-              <text x={greeterX} y={greeterY-138} textAnchor="middle" fill="#A8C8A0" fontSize="11" fontFamily="Georgia,serif" fontStyle="italic">"These seeds will feed many families.</text>
-              <text x={greeterX} y={greeterY-122} textAnchor="middle" fill="#A8C8A0" fontSize="11" fontFamily="Georgia,serif" fontStyle="italic">Take our star map." She leans closer.</text>
-              <text x={greeterX} y={greeterY-106} textAnchor="middle" fill="#C8941A" fontSize="11" fontFamily="Georgia,serif" fontStyle="italic">"And write this down: Tahiti —</text>
-              <text x={greeterX} y={greeterY-90} textAnchor="middle" fill="#C8941A" fontSize="11" fontFamily="Georgia,serif" fontStyle="italic">three hand-widths below the zenith."</text>
+              <foreignObject x={greeterX - 132} y={greeterY - 168} width={264} height={100}>
+                <div xmlns="http://www.w3.org/1999/xhtml" style={{
+                  fontFamily:"Georgia,serif", fontSize:"11px", color:"#A8C8A0",
+                  fontStyle:"italic", lineHeight:"1.55", padding:"4px 8px",
+                }}>
+                  "These seeds will feed many families. Take our star map." She leans closer.
+                  <span style={{ color:"#C8941A" }}> "And write this down: Tahiti —
+                  three hand-widths below the zenith."</span>
+                </div>
+              </foreignObject>
               <text x={greeterX} y={greeterY-68} textAnchor="middle" fill="#2AB870" fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">✦ Star Map + Notebook received</text>
             </g>
           )}
@@ -1381,8 +1387,15 @@ function FijiBirdMateScreen({ name, unlocked, onReturn }) {
             <g>
               <rect x={treeFocusX-120} y={treeFocusY-150} width="240" height="52" rx="8" fill="#050A08" stroke={`${accent}55`}/>
               <path d={`M${treeFocusX-14},${treeFocusY-98} L${treeFocusX-4},${treeFocusY-86} L${treeFocusX+8},${treeFocusY-98}`} fill="#050A08" stroke={`${accent}55`}/>
-              <text x={treeFocusX} y={treeFocusY-128} textAnchor="middle" fill="#A8C8B8" fontSize="10.5" fontFamily="Georgia,serif" fontStyle="italic">Two collared lories. They nest on these reef islands.</text>
-              <text x={treeFocusX} y={treeFocusY-112} textAnchor="middle" fill="#A8C8B8" fontSize="10.5" fontFamily="Georgia,serif" fontStyle="italic">Beautiful birds — and very loud, apparently.</text>
+              <foreignObject x={treeFocusX - 110} y={treeFocusY - 115} width={220} height={70}>
+                <div xmlns="http://www.w3.org/1999/xhtml" style={{
+                  fontFamily:"Georgia,serif", fontSize:"11px", color:"#A8C8A0",
+                  fontStyle:"italic", lineHeight:"1.55", padding:"4px 8px",
+                }}>
+                  "Two collared lories. They nest on these reef islands. Beautiful birds —
+                  and very loud, apparently."
+                </div>
+              </foreignObject>
               <text x={treeFocusX} y={treeFocusY-96} textAnchor="middle" fill={accent} fontSize="8" fontFamily="Cinzel,serif">— PALU HEMI</text>
             </g>
           )}
