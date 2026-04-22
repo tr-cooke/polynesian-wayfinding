@@ -584,7 +584,7 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
         {phase === "palu" && (
           <div
             onClick={handlePaluClick}
-            style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(3,10,6,0.88)", borderTop:`1px solid ${accent}22`, padding:"18px 28px 14px", cursor:"pointer", userSelect:"none" }}
+            style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(3,10,6,0.88)", borderTop:`1px solid ${accent}22`, padding:"18px 28px 14px", cursor:"pointer", userSelect:"none", zIndex: 10 }}
           >
             <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#A8C8A0", lineHeight:"1.75", fontStyle:"italic", marginBottom:"8px" }}>
               {`"${b.paluLines[lineIdx]}"`}
@@ -607,7 +607,7 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
 
         {/* ── DIALOGUE PANEL — greeter clicked ── */}
         {phase === "dialogue" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,6,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"16px" }}>
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,6,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"16px", zIndex: 20 }}>
             <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.18em", opacity:0.7 }}>TAUTAI FALEOLO · SAMOAN WAYFINDER</div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#A8C8A0", lineHeight:"1.7", fontStyle:"italic" }}>
               "Visitors from Tonga! We heard the stories of your crossing — three nights on the open ocean. You carry the star compass in your mind now. What have you brought us from the islands?"
@@ -628,7 +628,7 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
 
         {/* ── STORY PANEL — after exchange ── */}
         {storyVis && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,6,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px 20px", display:"flex", flexDirection:"column", gap:"16px" }}>
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,6,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px 20px", display:"flex", flexDirection:"column", gap:"16px", zIndex: 30 }}>
             <div style={{ display:"flex", gap:"28px", alignItems:"flex-start" }}>
               {/* Story */}
               <div style={{ flex:1 }}>
@@ -671,7 +671,7 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
 
         {/* ── DECLINED OK BUTTON ── */}
         {phase === "declined" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,6,0.97)", borderTop:`1px solid ${accent}22`, padding:"20px 28px", display:"flex", justifyContent:"flex-end" }}>
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,6,0.97)", borderTop:`1px solid ${accent}22`, padding:"20px 28px", display:"flex", justifyContent:"flex-end", zIndex: 20 }}>
             <button onClick={handleDeclinedOk} style={{ padding:"12px 24px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.12em", border:"1px solid #2A4830", background:"none", color:"#5A8060" }}>
               OK →
             </button>
@@ -680,7 +680,7 @@ function SamoaArrivalScreen({ onReturn, onUnlock }) {
 
         {/* ── FAREWELL OVERLAY — after OK clicked ── */}
         {showFarewell && (
-          <div style={{ position:"absolute", inset:0, background:"rgba(4,12,6,0.88)", backdropFilter:"blur(2px)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <div style={{ position:"absolute", inset:0, background:"rgba(4,12,6,0.88)", backdropFilter:"blur(2px)", display:"flex", alignItems:"center", justifyContent:"center", zIndex: 40 }}>
             <div style={{ maxWidth:"480px", width:"90%", display:"flex", flexDirection:"column", gap:"20px", textAlign:"center" }}>
               <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:accent, letterSpacing:"0.2em", opacity:0.7 }}>PALU HEMI</div>
               <div style={{ fontFamily:"Georgia,serif", fontSize:"17px", color:"#A8C8A0", lineHeight:"1.8", fontStyle:"italic" }}>
@@ -807,7 +807,7 @@ function TahitiArrivalScreen({ onReturn }) {
         {isPaluPhase && (
           <div
             onClick={isCanoe ? handleCanoeClick : handleBeachClick}
-            style={{ position:"absolute", bottom:0, left:0, right:0, padding:"20px 28px 16px", cursor:"pointer", userSelect:"none" }}
+            style={{ position:"absolute", bottom:0, left:0, right:0, padding:"20px 28px 16px", cursor:"pointer", userSelect:"none", zIndex: 10 }}
           >
             <div style={{ fontFamily:"Georgia,serif", fontSize:"17px", color:"#E0C8A0", lineHeight:"1.8", fontStyle:"italic", marginBottom:"10px", textShadow:"0 2px 12px rgba(0,0,0,0.9)" }}>
               "{curLine}"
@@ -830,7 +830,7 @@ function TahitiArrivalScreen({ onReturn }) {
 
         {/* Dialogue panel */}
         {phase === "dialogue" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(8,4,2,0.96)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"16px" }}>
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(8,4,2,0.96)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"16px", zIndex: 20 }}>
             <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.18em", opacity:0.7 }}>HINA-I-TE-APARANGI · TAHITIAN WAYFINDER</div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#C8A888", lineHeight:"1.78", fontStyle:"italic" }}>
               "You sailed by the sun and found our latitude. Tū-te-rangi-ātea would have been pleased. He always said the sun and the stars speak the same language — we need only learn to listen to both."
@@ -846,7 +846,7 @@ function TahitiArrivalScreen({ onReturn }) {
 
         {/* Story + farewell overlay */}
         {storyVis && (
-          <div style={{ position:"absolute", inset:0, background:"rgba(8,4,2,0.93)", backdropFilter:"blur(2px)", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+          <div style={{ position:"absolute", inset:0, background:"rgba(8,4,2,0.93)", backdropFilter:"blur(2px)", display:"flex", flexDirection:"column", overflow:"hidden", zIndex: 30 }}>
             <div style={{ flex:1, overflowY:"auto", padding:"28px 32px 20px", display:"flex", flexDirection:"column", gap:"20px" }}>
               <div>
                 <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"10px", opacity:0.7 }}>NAVIGATOR'S KNOWLEDGE</div>
@@ -1402,7 +1402,7 @@ function FijiBirdMateScreen({ name, unlocked, onReturn }) {
         </svg>
 
         {phase === "palu" && (
-          <div onClick={handlePaluClick} style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,10,6,0.9)", borderTop:`1px solid ${accent}33`, padding:"18px 28px 14px", cursor:"pointer", userSelect:"none" }}>
+          <div onClick={handlePaluClick} style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,10,6,0.9)", borderTop:`1px solid ${accent}33`, padding:"18px 28px 14px", cursor:"pointer", userSelect:"none", zIndex: 10 }}>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8D0C0", lineHeight:"1.75", fontStyle:"italic", marginBottom:"8px" }}>{`"${paluLinesFiji[lineIdx]}"`}</div>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
               <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.08em" }}>— PALU HEMI</span>
@@ -1421,7 +1421,7 @@ function FijiBirdMateScreen({ name, unlocked, onReturn }) {
         )}
 
         {phase === "exchange" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,8,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"14px" }}>
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,8,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"14px", zIndex: 20 }}>
             <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.16em", opacity:0.75 }}>RATU SERU · FIJIAN NAVIGATOR</div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8B0", lineHeight:"1.7", fontStyle:"italic" }}>
               "The birds brought you here, as they have brought navigators for a thousand years. We have been watching your approach since dawn — the way you tracked the tern flight pattern. Let me share what we know of the bird roads south toward Tonga."
@@ -1433,7 +1433,7 @@ function FijiBirdMateScreen({ name, unlocked, onReturn }) {
         )}
 
         {phase === "matala" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,8,0.94)", borderTop:`1px solid ${accent}33`, padding:"18px 28px 16px", display:"flex", flexDirection:"column", gap:"12px" }}>
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,8,0.94)", borderTop:`1px solid ${accent}33`, padding:"18px 28px 16px", display:"flex", flexDirection:"column", gap:"12px", zIndex: 20 }}>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8B0", lineHeight:"1.7", fontStyle:"italic" }}>&quot;She has been waiting a long time for this.&quot;</div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#8AB0A0", lineHeight:"1.7", fontStyle:"italic" }}>&quot;I think we can say the mission is complete.&quot;</div>
             <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.08em" }}>— PALU HEMI</div>
@@ -1442,7 +1442,7 @@ function FijiBirdMateScreen({ name, unlocked, onReturn }) {
         )}
 
         {storyVis && phase === "story" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,8,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px 20px", display:"flex", flexDirection:"column", gap:"16px" }}>
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,8,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px 20px", display:"flex", flexDirection:"column", gap:"16px", zIndex: 30 }}>
             <div style={{ display:"flex", gap:"24px", alignItems:"flex-start", flexWrap:"wrap" }}>
               <div style={{ flex:"1 1 280px", minWidth:0 }}>
                 <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"8px", opacity:0.7 }}>{`NAVIGATOR'S KNOWLEDGE`}</div>
@@ -1469,7 +1469,7 @@ function FijiBirdMateScreen({ name, unlocked, onReturn }) {
         )}
 
         {showFarewell && (
-          <div style={{ position:"absolute", inset:0, background:"rgba(4,10,8,0.88)", backdropFilter:"blur(2px)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <div style={{ position:"absolute", inset:0, background:"rgba(4,10,8,0.88)", backdropFilter:"blur(2px)", display:"flex", alignItems:"center", justifyContent:"center", zIndex: 40 }}>
             <div style={{ maxWidth:"480px", width:"90%", display:"flex", flexDirection:"column", gap:"20px", textAlign:"center" }}>
               <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:accent, letterSpacing:"0.2em", opacity:0.7 }}>PALU HEMI</div>
               <div style={{ fontFamily:"Georgia,serif", fontSize:"17px", color:"#A8C8B0", lineHeight:"1.8", fontStyle:"italic" }}>&quot;{b.bridgeLine}&quot;</div>
@@ -1653,7 +1653,7 @@ function BagIntroPopup({ onDismiss, onOpenBag }) {
         aria-label="Dismiss"
         onClick={onDismiss}
         style={{
-          position:"absolute", inset:0,
+          position:"absolute", inset:0, zIndex: 90,
           background:"rgba(2,5,12,0.55)",
           backdropFilter:"blur(1px)",
           pointerEvents:"auto",
@@ -1695,7 +1695,7 @@ function MapNavPopup({ onDismiss }) {
         aria-label="Dismiss"
         onClick={onDismiss}
         style={{
-          position:"absolute", inset:0,
+          position:"absolute", inset:0, zIndex: 90,
           background:"rgba(2,5,12,0.45)",
           backdropFilter:"blur(1px)",
           pointerEvents:"auto",
@@ -1863,6 +1863,7 @@ function NavigatorsBag({ open, onClose, unlocked }) {
         style={{
           position:"absolute",
           inset:0,
+          zIndex: 100,
           background:"rgba(2,5,12,0.72)",
           backdropFilter:"blur(3px)",
           border:"none",
@@ -2898,6 +2899,7 @@ function ShoreIntroPopup({ onDismiss }) {
         style={{
           position:"absolute",
           inset:0,
+          zIndex: 95,
           background:"rgba(2,6,4,0.75)",
           backdropFilter:"blur(3px)",
           border:"none",
@@ -4604,7 +4606,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
               )}
               {/* Nice work overlay — requires explicit click to continue */}
               {niceWork === "done" && (
-                <div style={{ position:"absolute", inset:0, background:"rgba(4,8,18,0.96)", borderRadius:"7px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"18px", padding:"24px" }}>
+                <div style={{ position:"absolute", inset:0, zIndex: 5, background:"rgba(4,8,18,0.96)", borderRadius:"7px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:"18px", padding:"24px" }}>
                   <div style={{ fontSize:"32px" }}>☀</div>
                   <div style={{ fontFamily:"Cinzel,serif", fontSize:"22px", fontWeight:"800", color:"#D0A838", textAlign:"center", letterSpacing:"0.02em" }}>
                     Three hand-widths.
@@ -4888,6 +4890,18 @@ function SwellCanvas({ scenario, canoeHeading, showIsland, animOffset }) {
         ))}
       </g>
 
+      {/* Wind chop — short irregular lines on the surface */}
+      {Array.from({length: 18}, (_, i) => {
+        const x1 = (i * 27) % 480;
+        const y1 = 90 + (i % 3) * 18;
+        return (
+          <line key={i}
+            x1={x1} y1={y1} x2={x1 + 18} y2={y1 - 4}
+            stroke="#3A6878" strokeWidth="0.8"
+            strokeDasharray="3,2" opacity="0.45"/>
+        );
+      })}
+
       {/* ── ISLAND INTERFERENCE — drawn AFTER swells so it masks them ── */}
       {showIsland && (() => {
         // calm shadow: centre it further behind island, much larger so it reaches toward canoe
@@ -5036,7 +5050,7 @@ function TahitiShorePopup({ onDismiss }) {
 
   return (
     <div style={{ position:"fixed", inset:0, zIndex:95, display:"flex", alignItems:"center", justifyContent:"center", padding:"24px" }}>
-      <div style={{ position:"absolute", inset:0, background:"rgba(2,6,4,0.78)", backdropFilter:"blur(3px)" }}/>
+      <div style={{ position:"absolute", inset:0, zIndex: 0, background:"rgba(2,6,4,0.78)", backdropFilter:"blur(3px)" }}/>
       <div style={{ position:"relative", zIndex:1, background:"rgba(4,10,6,0.98)", border:"1px solid rgba(42,154,112,0.3)", borderRadius:"14px", padding:"32px 36px", maxWidth:"500px", width:"100%", display:"flex", flexDirection:"column", gap:"20px", boxShadow:"0 0 80px rgba(42,154,112,0.08)" }}>
         <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A9A70", letterSpacing:"0.2em", opacity:0.7 }}>
           PAPEETE HARBOUR · TAHITI · BEFORE DAWN
@@ -5172,6 +5186,7 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
 
             {/* Chop label */}
             <circle cx="260" cy="20" r="4" fill="#4AB8C8" opacity="0.7"/>
+            <line x1="244" y1="20" x2="258" y2="20" stroke="#4AB8C8" strokeWidth="1.5" strokeDasharray="3,4" opacity="0.7"/>
             <text x="272" y="17" fill="#4AB8C8" fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">CHOP</text>
             <text x="272" y="30" fill="#4AB8C8" fontSize="9" fontFamily="Cinzel,serif" opacity="0.65">fast · surface · 3–5 second period</text>
 
@@ -7592,7 +7607,7 @@ function StoryCard({ name, onComplete, onUnlockItem = () => {} }) {
       {/* Joke popup — beach setting */}
       {choice && page.choices?.find(c => c.id === choice)?.joke && (
         <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", zIndex:10, padding:"24px" }}>
-          <div style={{ background:"rgba(4,8,18,0.7)", position:"absolute", inset:0, backdropFilter:"blur(2px)" }}/>
+          <div style={{ position:"absolute", inset:0, zIndex: 0, background:"rgba(4,8,18,0.7)", backdropFilter:"blur(2px)" }}/>
           <div style={{ position:"relative", zIndex:1, background:"rgba(6,12,24,0.98)", border:"1px solid #C8941A55", borderRadius:"12px", padding:"28px 32px", maxWidth:"460px", width:"100%", display:"flex", flexDirection:"column", gap:"18px", boxShadow:"0 0 60px rgba(200,148,26,0.15)" }}>
             <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:"#C8941A", letterSpacing:"0.18em", opacity:0.7 }}>PALU HEMI</div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8C0", lineHeight:"1.75", fontStyle:"italic" }}>
