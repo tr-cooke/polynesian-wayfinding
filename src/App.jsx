@@ -5411,12 +5411,12 @@ function SwellModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge }
     1: {
       title: `E ${name}. Close your eyes.`,
       body: "Feel the motion beneath you — not the chop on the surface, but the long slow roll underneath it. That roll is the swell. It travels thousands of kilometres without changing direction. We are leaving Tahiti, heading north-northeast to the Marquesas. Watch the water. Which direction is the swell travelling from?",
-      hint: "Observe the long parallel lines — those are swell crests. The shorter, choppier lines are wind-waves. Identify which direction the swell is coming from, then choose.",
+      hint: "Watch the long slow lines moving across the water. They are coming from one direction — find it.",
     },
     2: {
       title: "North-northeast. That is the trade swell.",
       body: "It rolls in from the southeast, steady as breathing. The Samoan wayfinders placed the Marquesas in the Nāleo-Koʻolau house — north-northeast, about 22.5° from north. That is our heading. Now use the swell: rotate the waka until it strikes your starboard beam. Hold that angle and you hold your heading even when the stars are hidden.",
-      hint: "Drag the slider to rotate the canoe. Aim the bow (gold dot) toward 25° — north-northeast. The swell will then hit the right side of the hull — your starboard beam.",
+      hint: "Rotate the canoe until the swell feels right on the hull. Think about where the Marquesas sit on the compass.",
     },
     3: {
       title: "Now we approach land.",
