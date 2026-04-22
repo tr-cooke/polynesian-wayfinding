@@ -4121,6 +4121,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
   const [phase,      setPhase]     = useState("intro");
   const [learnStep,  setLearnStep] = useState(0);
   const [actStep,    setActStep]   = useState(1);
+  const [showShoreIntro, setShowShoreIntro] = useState(true);
   const [noonFound,  setNoonFound] = useState(false);
   const [handY,      setHandY]     = useState(null);
   const [isDragging, setIsDragging]= useState(false);
@@ -4339,7 +4340,7 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
     };
 
     return (
-      <div style={{ width:"100%", height:"100%", background:"#060E08", display:"flex", flexDirection:"column", overflow:"hidden" }}>
+      <div style={{ width:"100%", height:"100%", background:"#060E08", display:"flex", flexDirection:"column", overflow:"hidden", position:"relative" }}>
         {/* Header */}
         <div style={{ height:"44px", borderBottom:`1px solid ${accent}33`, background:"rgba(6,14,8,0.96)", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 22px", flexShrink:0 }}>
           <span style={{ fontFamily:"Cinzel,serif", fontSize:"12px", fontWeight:"700", color:"#C8941A", letterSpacing:"0.12em" }}>OCEAN ADVENTURE</span>
@@ -4441,6 +4442,40 @@ function SunArcModule({ name, onBack, onOpenBag, unlocked, onComplete, onBridge 
             {renderDiagram()}
           </div>
         </div>
+
+        {showShoreIntro && phase === "learn" && (
+          <div style={{
+            position:"absolute", inset:0, zIndex:50,
+            background:"rgba(4,10,6,0.97)",
+            display:"flex", flexDirection:"column",
+            alignItems:"center", justifyContent:"center",
+            padding:"40px 32px", gap:"24px", textAlign:"center",
+          }}>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent,
+              letterSpacing:"0.28em", opacity:0.7 }}>
+              ON SHORE · APIA, SĀMOA
+            </div>
+            <div style={{ width:"40px", height:"1px",
+              background:`linear-gradient(to right, transparent, ${accent}66, transparent)` }}/>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"16px", color:"#A8C8A0",
+              fontStyle:"italic", lineHeight:"1.85", maxWidth:"480px" }}>
+              The harbour before sunrise. The stars are fading. Palu stands at the water&apos;s edge
+              and traces the sun&apos;s coming arc across the sky with his hand.
+            </div>
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#C8941A",
+              fontStyle:"italic", lineHeight:"1.75", maxWidth:"460px" }}>
+              "The stars are not always visible. We need to learn the sky by day. The sun
+              will teach us what ʻAʻā would tell us at night. Are you ready?"
+            </div>
+            <button onClick={() => setShowShoreIntro(false)}
+              style={{ padding:"13px 32px", borderRadius:"6px", cursor:"pointer",
+                fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700",
+                letterSpacing:"0.14em", border:`1px solid ${accent}`,
+                background:`rgba(200,148,26,0.14)`, color:accent, marginTop:"8px" }}>
+              I&apos;M READY →
+            </button>
+          </div>
+        )}
       </div>
     );
   }
