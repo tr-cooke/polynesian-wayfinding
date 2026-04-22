@@ -879,15 +879,25 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
   const [tikHov, setTikHov] = useState(false);
   const [greeterHov, setGreeterHov] = useState(false);
   const [tikClicked, setTikClicked] = useState(false);
-  const [exchanged, setExchanged] = useState(false);
+  const [, setExchanged] = useState(false);
   const [storyVis, setStoryVis] = useState(false);
   const [showFarewell, setShowFarewell] = useState(false);
+
+  const SPEAKER = {
+    palu:     "palu",
+    tiki:     "palu",
+    greeter:  null,
+    exchange: "hina",
+    matala:   "palu",
+    story:    null,
+    farewell: "palu",
+  };
 
   const accent = "#2A90A8";
   const b = BRIDGE_CONTENT[3];
   const W = 760, H = 400;
   const tikX = 180, tikY = 280;
-  const greeterX = 580, greeterY = 300;
+  const greeterX = 580, greeterY = 270;
 
   const paluLinesMarq = [
     "Three days on that ocean. You read the swell — I barely had to say a word.",
@@ -910,11 +920,6 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
   const handleGreeterClick = () => {
     if (phase !== "greeter") return;
     setPhase("exchange");
-  };
-
-  const handleExchange = () => {
-    setExchanged(true);
-    setPhase("matala");
   };
 
   const handleRestHere = () => {
@@ -992,13 +997,24 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
             </g>
           )}
 
-          {tikClicked && (
+          {phase === "tiki" && tikClicked && (
             <g>
-              <rect x={tikX-8} y={tikY-200} width="220" height="56" rx="8" fill="#050A0C" stroke={`${accent}55`} strokeWidth="1.5"/>
-              <path d={`M${tikX+18},${tikY-144} L${tikX+28},${tikY-132} L${tikX+40},${tikY-144}`} fill="#050A0C" stroke={`${accent}55`}/>
-              <text x={tikX+102} y={tikY-178} textAnchor="middle" fill="#A8C8C8" fontSize="10.5" fontFamily="Georgia,serif" fontStyle="italic">This island has a long memory.</text>
-              <text x={tikX+102} y={tikY-162} textAnchor="middle" fill="#A8C8C8" fontSize="10.5" fontFamily="Georgia,serif" fontStyle="italic">Older than any of us. Treat it with respect.</text>
-              <text x={tikX+102} y={tikY-148} textAnchor="middle" fill={accent} fontSize="8" fontFamily="Cinzel,serif">— PALU HEMI</text>
+              <rect x={tikX - 8} y={tikY - 220} width={230} height={85} rx="8"
+                fill="#05100A" stroke="#C8941A55" strokeWidth="1.5"/>
+              <path d={`M${tikX+24},${tikY-135} L${tikX+36},${tikY-122} L${tikX+50},${tikY-135}`}
+                fill="#05100A" stroke="#C8941A55" strokeWidth="1.5"/>
+              <foreignObject x={tikX} y={tikY - 214} width={214} height={78}>
+                <div xmlns="http://www.w3.org/1999/xhtml" style={{
+                  fontFamily:"Georgia,serif", fontSize:"11px", color:"#A8C8A0",
+                  fontStyle:"italic", lineHeight:"1.55", padding:"4px 10px",
+                }}>
+                  "This island has a long memory. Older than any of us. Treat it with respect."
+                </div>
+                <div xmlns="http://www.w3.org/1999/xhtml" style={{
+                  fontFamily:"Cinzel,serif", fontSize:"8px", color:"#C8941A",
+                  letterSpacing:"0.06em", padding:"0 10px",
+                }}>— PALU HEMI</div>
+              </foreignObject>
             </g>
           )}
 
@@ -1041,29 +1057,44 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
               <ellipse cx="168" cy="208" rx="14" ry="10" fill="#2AB870"/>
               <path d="M154,212 Q160,198 175,200 Q188,205 192,215 L188,222 Q175,218 160,220Z" fill="#2AB870" stroke="#1A6040" strokeWidth="1"/>
               <path d="M178,202 Q188,198 196,208" fill="#C8941A" stroke="#A07020" strokeWidth="3"/>
-              <circle cx="600" cy="182" r="7" fill="#C83020"/>
-              <path d="M596,182 L604,176 L608,186Z" fill="#1A6020"/>
-              <circle cx="622" cy="188" r="6" fill="#C83020"/>
-              <path d="M618,188 L626,182 L629,191Z" fill="#1A6020"/>
-              <rect x="152" y="168" width="88" height="36" rx="6" fill="#050A0C" stroke="#2AB870" strokeWidth="1.2"/>
-              <path d="M168,204 L160,212 L152,204Z" fill="#050A0C" stroke="#2AB870"/>
-              <text x="196" y="186" textAnchor="middle" fill="#2AB870" fontSize="11" fontFamily="Cinzel,serif" fontWeight="700">SKRAWWK!</text>
-              <text x="196" y="200" textAnchor="middle" fill="#7AB890" fontSize="8" fontFamily="Georgia,serif" fontStyle="italic">feathers ruffled</text>
+
+              {/* Branch */}
+              <path d="M540,210 Q578,196 618,206" fill="none"
+                stroke="#2A3A18" strokeWidth="4" strokeLinecap="round"/>
+
+              {/* Lory 1 */}
+              <g transform="translate(570, 185)">
+                <ellipse cx="0" cy="0" rx="10" ry="8" fill="#C83020"/>
+                <ellipse cx="3" cy="3" rx="8" ry="5" fill="#1A6020" transform="rotate(-15)"/>
+                <circle cx="-6" cy="-7" r="6" fill="#C83020"/>
+                <path d="M-11,-8 L-15,-6 L-11,-4Z" fill="#E8A020"/>
+                <circle cx="-8" cy="-8" r="1.5" fill="#200808"/>
+              </g>
+
+              {/* Lory 2 — slightly behind and lower */}
+              <g transform="translate(596, 198)">
+                <ellipse cx="0" cy="0" rx="9" ry="7" fill="#C03020"/>
+                <ellipse cx="2" cy="2" rx="7" ry="4" fill="#1A5A18" transform="rotate(-15)"/>
+                <circle cx="-5" cy="-6" r="5" fill="#C03020"/>
+                <path d="M-9,-7 L-13,-5 L-9,-3Z" fill="#D89018"/>
+                <circle cx="-7" cy="-7" r="1.2" fill="#200808"/>
+              </g>
+
+              {/* Matala bubble (above-right, tail down-left) */}
+              <rect x="185" y="152" width="128" height="46" rx="8" fill="#050A0C" stroke="#2AB870" strokeWidth="1.2"/>
+              <path d="M205,198 L190,214 L210,202Z" fill="#050A0C" stroke="#2AB870"/>
+              <foreignObject x="193" y="156" width="116" height="40">
+                <div xmlns="http://www.w3.org/1999/xhtml" style={{ display:"flex", flexDirection:"column", gap:"2px", padding:"2px 8px" }}>
+                  <div style={{ fontFamily:"Cinzel,serif", fontSize:"14px", fontWeight:"700", color:"#2AB870", lineHeight:"1.1" }}>SKRAWWK!</div>
+                  <div style={{ fontFamily:"Georgia,serif", fontSize:"11px", fontStyle:"italic", color:"#6AD898", lineHeight:"1.2" }}>Not yet?!</div>
+                </div>
+              </foreignObject>
             </g>
           )}
         </svg>
 
-        {exchanged && phase === "matala" && (
-          <div style={{ position:"absolute", left:"50%", top:"12%", transform:"translateX(-50%)", maxWidth:"320px", width:"88%", background:"rgba(5,10,12,0.95)", border:`1px solid ${accent}66`, borderRadius:"10px", padding:"12px 16px", boxShadow:"0 8px 24px rgba(0,0,0,0.5)" }}>
-            <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.12em", marginBottom:"6px" }}>HINA · NUKU HIVA</div>
-            <div style={{ fontFamily:"Georgia,serif", fontSize:"13px", color:"#B8D0D8", lineHeight:"1.65", fontStyle:"italic" }}>
-              "You came from Tahiti by reading the swell. Hina-i-te-aparangi told us to expect you. The SE swell on your starboard beam — you held it for three days. That is how it is done."
-            </div>
-          </div>
-        )}
-
-        {phase === "palu" && (
-          <div onClick={handlePaluClick} style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,10,12,0.9)", borderTop:`1px solid ${accent}33`, padding:"18px 28px 14px", cursor:"pointer", userSelect:"none" }}>
+        {phase === "palu" && SPEAKER[phase] === "palu" && (
+          <div onClick={handlePaluClick} style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,10,12,0.9)", borderTop:`1px solid ${accent}33`, padding:"18px 28px 14px", cursor:"pointer", userSelect:"none", zIndex: 10 }}>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#C8D8DC", lineHeight:"1.75", fontStyle:"italic", marginBottom:"8px" }}>{`"${paluLinesMarq[lineIdx]}"`}</div>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
               <span style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.08em" }}>— PALU HEMI</span>
@@ -1082,19 +1113,36 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
         )}
 
         {phase === "exchange" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,14,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px", display:"flex", flexDirection:"column", gap:"14px" }}>
-            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:accent, letterSpacing:"0.16em", opacity:0.75 }}>HINA OF NUKU HIVA</div>
-            <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8C8", lineHeight:"1.7", fontStyle:"italic" }}>
-              "You came from Tahiti by reading the swell. Hina-i-te-aparangi told us to expect you. The SE swell on your starboard beam — you held it for three days. That is how it is done."
+          <div style={{
+            position:"absolute", bottom:0, left:0, right:0,
+            background:"rgba(4,12,6,0.97)",
+            borderTop:"1px solid rgba(42,144,168,0.44)",
+            padding:"22px 28px",
+            display:"flex", flexDirection:"column", gap:"16px",
+            zIndex: 20,
+          }}>
+            <div style={{ fontFamily:"Cinzel,serif", fontSize:"10px", color:"#2A90A8",
+              letterSpacing:"0.18em", opacity:0.7 }}>
+              HINA · NUKU HIVA
             </div>
-            <button type="button" onClick={handleExchange} style={{ alignSelf:"flex-start", padding:"13px 20px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.08em", border:`1px solid ${accent}`, background:`${accent}14`, color:accent }}>
-              Share what we've learned on this voyage →
+            <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8C8A0",
+              lineHeight:"1.78", fontStyle:"italic" }}>
+              "You came from Tahiti by reading the swell. Hina-i-te-aparangi told us to
+              expect you. The SE swell on your starboard beam — you held it for three days.
+              That is how it is done."
+            </div>
+            <button onClick={() => { setExchanged(true); setPhase("matala"); }}
+              style={{ padding:"13px", borderRadius:"6px", cursor:"pointer",
+                fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700",
+                letterSpacing:"0.12em", border:"1px solid #2A90A8",
+                background:"rgba(42,144,168,0.14)", color:"#2A90A8" }}>
+              Share what we have learned on this voyage →
             </button>
           </div>
         )}
 
-        {phase === "matala" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,10,12,0.94)", borderTop:`1px solid ${accent}33`, padding:"18px 28px 16px", display:"flex", flexDirection:"column", gap:"12px" }}>
+        {phase === "matala" && SPEAKER[phase] === "palu" && (
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,10,12,0.94)", borderTop:`1px solid ${accent}33`, padding:"18px 28px 16px", display:"flex", flexDirection:"column", gap:"12px", zIndex: 10 }}>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"15px", color:"#A8B8BC", lineHeight:"1.7", fontStyle:"italic" }}>&quot;Patience, little one. Not yet.&quot;</div>
             <div style={{ fontFamily:"Georgia,serif", fontSize:"14px", color:`${accent}cc`, lineHeight:"1.65", fontStyle:"italic" }}>— PALU HEMI</div>
             <button type="button" onClick={handleRestHere} style={{ alignSelf:"flex-start", padding:"12px 18px", borderRadius:"6px", cursor:"pointer", fontFamily:"Cinzel,serif", fontSize:"11px", fontWeight:"700", letterSpacing:"0.1em", border:`1px solid ${accent}`, background:`${accent}12`, color:accent }}>
@@ -1104,7 +1152,7 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
         )}
 
         {storyVis && phase === "story" && (
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,14,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px 20px", display:"flex", flexDirection:"column", gap:"16px" }}>
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"rgba(4,12,14,0.97)", borderTop:`1px solid ${accent}44`, padding:"22px 28px 20px", display:"flex", flexDirection:"column", gap:"16px", zIndex: 30 }}>
             <div style={{ display:"flex", gap:"24px", alignItems:"flex-start", flexWrap:"wrap" }}>
               <div style={{ flex:"1 1 280px", minWidth:0 }}>
                 <div style={{ fontFamily:"Cinzel,serif", fontSize:"9px", color:accent, letterSpacing:"0.2em", marginBottom:"8px", opacity:0.7 }}>{`NAVIGATOR'S KNOWLEDGE`}</div>
@@ -1142,7 +1190,7 @@ function MarquesasArrivalScreen({ name, unlocked, onReturn }) {
         )}
 
         {showFarewell && (
-          <div style={{ position:"absolute", inset:0, background:"rgba(4,10,12,0.88)", backdropFilter:"blur(2px)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <div style={{ position:"absolute", inset:0, background:"rgba(4,10,12,0.88)", backdropFilter:"blur(2px)", display:"flex", alignItems:"center", justifyContent:"center", zIndex: 40 }}>
             <div style={{ maxWidth:"480px", width:"90%", display:"flex", flexDirection:"column", gap:"20px", textAlign:"center" }}>
               <div style={{ fontFamily:"Cinzel,serif", fontSize:"11px", color:accent, letterSpacing:"0.2em", opacity:0.7 }}>PALU HEMI</div>
               <div style={{ fontFamily:"Georgia,serif", fontSize:"17px", color:"#A8C8C8", lineHeight:"1.8", fontStyle:"italic" }}>&quot;{b.bridgeLine}&quot;</div>
